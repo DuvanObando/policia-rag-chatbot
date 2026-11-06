@@ -1,0 +1,8 @@
+{
+  "name": "policia-rag-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Frontend pendiente (placeholder)\""
+  }
+}

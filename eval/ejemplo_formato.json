@@ -1,0 +1,8 @@
+[
+  {
+    "pregunta": "¿Cuál es el objeto del Código Nacional de Policía?",
+    "respuesta_referencia": "Establecer las condiciones para la convivencia en el territorio nacional.",
+    "articulos_esperados": ["Artículo 1"],
+    "fuera_de_dominio": false
+  }
+]

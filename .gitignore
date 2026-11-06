@@ -1,0 +1,32 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+dist/
+build/
+
+# Índices generados (se regeneran con engine/indexing)
+engine/indexing/indexes/*
+!engine/indexing/indexes/.gitkeep
+
+# Corpus crudo: descomentar si los archivos pesan mucho
+# corpus/raw/*
+# !corpus/raw/.gitkeep
+
+# SO / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

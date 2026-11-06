@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+spacy
+sentence-transformers
+faiss-cpu
+rank-bm25
+python-dotenv
+python-multipart
+numpy
+pandas
