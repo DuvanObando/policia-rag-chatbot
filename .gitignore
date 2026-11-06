@@ -30,3 +30,6 @@ engine/indexing/indexes/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Graphify (grafo local, no se versiona por ahora)
+graphify-out/
