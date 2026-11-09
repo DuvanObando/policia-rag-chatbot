@@ -72,6 +72,8 @@ python engine/generation/responder.py --demo --pausa 8                    # 5 pr
 python eval/comparar_segmentacion.py                                      # compara articulo vs fragmentos
 ```
 
+**Clasificador temático:** el motor detecta el tema de la pregunta por palabras clave y empuja el orden de la búsqueda hacia ese tema. Los temas y las palabras clave están en `engine/retrieval/temas.json`: se amplían editando ese archivo, sin tocar Python (hay que reiniciar el motor). Detalle y resultados en [docs/clasificador.md](docs/clasificador.md).
+
 **Subir documentos (`POST /upload_pdf/`)**: guarda el PDF y lo deja `pendiente_de_indexar`; **no** regenera los embeddings (RF4). Para que entre al buscador hay que reconstruir el índice a mano y reiniciar el motor:
 
 ```bash

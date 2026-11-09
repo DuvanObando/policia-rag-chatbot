@@ -4,6 +4,9 @@ Ejecuta eval/preguntas_segmentacion.json con ambas estrategias y calcula
 Acierto@1, Acierto@3 y MRR (a nivel de artículo), el número de vectores de
 cada índice y el tiempo medio de búsqueda.
 
+Mide solo la similitud semántica (clasificador=False): compara estrategias de
+segmentación, no el clasificador (ver eval/comparar_clasificador.py).
+
 Requisito: construir antes los dos índices:
     python engine/indexing/build_index.py --estrategia articulo
     python engine/indexing/build_index.py --estrategia fragmentos
@@ -48,10 +51,10 @@ def main() -> None:
     for e in ESTRATEGIAS:
         precargar(e)
         vectores[e] = _indice(e)[0].ntotal
-        buscar(preguntas[0]["pregunta"], k=k, estrategia=e)  # calentamiento: no se mide
+        buscar(preguntas[0]["pregunta"], k=k, estrategia=e, clasificador=False)  # calentamiento: no se mide
         for p in preguntas:
             t = time.perf_counter()
-            res = buscar(p["pregunta"], k=k, estrategia=e)
+            res = buscar(p["pregunta"], k=k, estrategia=e, clasificador=False)
             tiempos[e].append((time.perf_counter() - t) * 1000)
             pos[e].append(posicion(p["articulo_esperado"], res))
 

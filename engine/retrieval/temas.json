@@ -1,0 +1,209 @@
+{
+  "_ayuda": [
+    "Para ampliar el clasificador NO hace falta tocar Python: edita este archivo y reinicia el motor.",
+    "'tema' debe ser IGUAL al campo 'tema' de los fragmentos del corpus: así se sabe qué artículos reciben el empuje.",
+    "'libro' y 'titulo' dicen a qué parte del Código corresponde el tema (informativo; se devuelven al clasificar).",
+    "'palabras_clave': sin tildes ni mayúsculas da igual (se normalizan). Una palabra que termina en * coincide con cualquier terminación: 'mult*' encuentra multa, multas, multar, multado. Una frase de varias palabras pesa más (cada palabra suma 1).",
+    "Incluye formas coloquiales (trago, rumba, perro...). Evita palabras que salen en casi todas las preguntas (policia, ley, codigo): no ayudan a distinguir temas.",
+    "'configuracion.empuje': cuánto se suma al score (coseno, que va de 0 a 1) de los candidatos del tema detectado. 0 desactiva el empuje. 'umbral_relativo': un tema también recibe empuje si su puntaje es al menos esta fracción del puntaje del mejor tema."
+  ],
+  "configuracion": {
+    "empuje": 0.03,
+    "umbral_relativo": 0.5
+  },
+  "temas": [
+    {
+      "tema": "Medidas correctivas",
+      "libro": "Libro III",
+      "titulo": "Título I",
+      "palabras_clave": [
+        "medida*",
+        "correctiv*",
+        "sancion*",
+        "castigo*",
+        "amonestacion",
+        "decomis*",
+        "expulsion",
+        "demolicion",
+        "suspension"
+      ]
+    },
+    {
+      "tema": "Tipos de multa",
+      "libro": "Libro III",
+      "titulo": "Título I",
+      "palabras_clave": [
+        "multa*",
+        "multen",
+        "multe",
+        "cobran",
+        "cobrar",
+        "valor de la multa",
+        "smdlv",
+        "salario minimo",
+        "salarios minimos",
+        "descuento*",
+        "rebaja*",
+        "pronto pago",
+        "conmutar",
+        "conmutacion"
+      ]
+    },
+    {
+      "tema": "No pago de multas",
+      "libro": "Libro III",
+      "titulo": "Título I",
+      "palabras_clave": [
+        "no pago",
+        "no pagar",
+        "sin pagar",
+        "no pague",
+        "deuda*",
+        "mora",
+        "intereses",
+        "cobro coactivo",
+        "pagar la multa",
+        "multas vencidas"
+      ]
+    },
+    {
+      "tema": "Comparendo",
+      "libro": "Libro III",
+      "titulo": "Título III",
+      "palabras_clave": [
+        "comparendo*",
+        "orden de comparendo",
+        "infraccion*",
+        "infractor*",
+        "me pusieron un comparendo"
+      ]
+    },
+    {
+      "tema": "Espacio público",
+      "libro": "Libro II",
+      "titulo": "Título XIV",
+      "palabras_clave": [
+        "espacio publico",
+        "parque*",
+        "calle*",
+        "anden*",
+        "acera*",
+        "plaza*",
+        "via publica",
+        "vias publicas",
+        "camino*",
+        "rio",
+        "rios",
+        "uso comun",
+        "bienes de uso publico",
+        "vendedor* ambulante*",
+        "grafiti*",
+        "mobiliario urbano"
+      ]
+    },
+    {
+      "tema": "Consumo de sustancias en espacio público",
+      "libro": "Libro II",
+      "titulo": "Título XIV",
+      "palabras_clave": [
+        "trago*",
+        "licor*",
+        "alcohol*",
+        "cerveza*",
+        "rumba*",
+        "borracho*",
+        "embriag*",
+        "droga*",
+        "marihuana",
+        "bazuco",
+        "psicoactiv*",
+        "dosis personal",
+        "porro*",
+        "consumir",
+        "consumo",
+        "fumar"
+      ]
+    },
+    {
+      "tema": "Animales potencialmente peligrosos",
+      "libro": "Libro II",
+      "titulo": "Título XIII",
+      "palabras_clave": [
+        "perro*",
+        "gato*",
+        "mascota*",
+        "animal*",
+        "canino*",
+        "felino*",
+        "pitbull",
+        "rottweiler",
+        "bulldog",
+        "mordi*",
+        "muerde",
+        "semoviente*",
+        "bestia*",
+        "raza peligrosa",
+        "maltrato animal"
+      ]
+    },
+    {
+      "tema": "Ingreso a domicilio",
+      "libro": "Libro III",
+      "titulo": "Título I",
+      "palabras_clave": [
+        "domicilio*",
+        "casa",
+        "vivienda*",
+        "apartamento*",
+        "edificio*",
+        "inmueble*",
+        "entrar",
+        "ingresar",
+        "ingreso",
+        "allanamiento",
+        "allanar",
+        "orden escrita",
+        "sin orden",
+        "orden judicial",
+        "juez"
+      ]
+    },
+    {
+      "tema": "Autoridades de policía",
+      "libro": "Libro III",
+      "titulo": "Título II",
+      "palabras_clave": [
+        "autoridad*",
+        "alcalde*",
+        "alcaldia*",
+        "gobernador*",
+        "inspector*",
+        "comandante*",
+        "corregidor*",
+        "presidente",
+        "quien decide",
+        "quien manda",
+        "competencia*",
+        "funcionario*"
+      ]
+    },
+    {
+      "tema": "Proceso verbal inmediato",
+      "libro": "Libro III",
+      "titulo": "Título III",
+      "palabras_clave": [
+        "proceso verbal",
+        "verbal inmediato",
+        "audiencia*",
+        "descargos",
+        "apelacion",
+        "apelar",
+        "recurso*",
+        "reclamar",
+        "tramite*",
+        "ahi mismo",
+        "en el sitio"
+      ]
+    }
+  ]
+}

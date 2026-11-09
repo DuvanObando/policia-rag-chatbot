@@ -1,0 +1,26 @@
+[
+  {
+    "id": "p11",
+    "tipo": "articulo_por_numero",
+    "pregunta": "¿Qué dice el artículo 163?",
+    "articulo_esperado": "art-163",
+    "despues_del_token_512": false,
+    "nota": "Pide un artículo por su número: debe ir primero."
+  },
+  {
+    "id": "p12",
+    "tipo": "ambigua_entre_dos_temas",
+    "pregunta": "¿Cuánto me cobran si dejo a mi perro suelto en el parque?",
+    "articulo_esperado": "art-124",
+    "despues_del_token_512": true,
+    "nota": "Mezcla animales (art. 124: dejar deambular animales en espacio público y su tabla de multas) con espacio público y multas."
+  },
+  {
+    "id": "p13",
+    "tipo": "sin_tema_claro",
+    "pregunta": "¿Qué pasa si no hago caso cuando un agente me da una indicación?",
+    "articulo_esperado": "art-222",
+    "despues_del_token_512": false,
+    "nota": "Art. 222, par. 2: si no se cumple la orden de Policía, se impone multa por el proceso verbal abreviado. Sin palabras clave obvias."
+  }
+]

@@ -25,6 +25,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from indexing.embeddings import PREGUNTAS_DEMO, cargar_modelo, embeddings_preguntas  # noqa: E402
+from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
 
 CARPETA_INDICES = Path(__file__).resolve().parents[1] / "indexing" / "indexes"
 ORDINALES = {"PRIMERO": "I", "SEGUNDO": "II", "TERCERO": "III", "CUARTO": "IV", "QUINTO": "V"}
@@ -32,6 +33,8 @@ ORDINALES = {"PRIMERO": "I", "SEGUNDO": "II", "TERCERO": "III", "CUARTO": "IV", 
 # Modos de búsqueda. Hoy solo "semantico"; BM25 / híbrido se agregan aquí
 # (nuevos valores de `modo`) sin cambiar la firma de buscar().
 MODOS = ("semantico",)
+
+POOL_MAX = 2000  # máximo de candidatos que se traen del índice para reordenar (empuje por tema)
 
 
 @lru_cache(maxsize=1)
@@ -120,7 +123,8 @@ def formatear_ubicacion(ub: dict) -> str:
     return ", ".join(partes)
 
 
-def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: str = "semantico") -> List[dict]:
+def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: str = "semantico",
+           clasificador: bool = True) -> List[dict]:
     """Devuelve los k fragmentos más relevantes, de mayor a menor score.
 
     Formato de cada fragmento (docs/api_contract.md):
@@ -128,32 +132,49 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: str = 
 
     `modo` está para poder agregar BM25 o búsqueda híbrida más adelante
     sin cambiar la firma.
+
+    Con `clasificador=True` (por defecto):
+      - Tema: el clasificador (retrieval/clasificador.py + temas.json) detecta el tema de la
+        pregunta y SUMA un empuje al score de los candidatos de ese tema. Es un empuje, nunca
+        un filtro: un candidato de otro tema todavía puede ganar. El `score` devuelto incluye
+        el empuje, que es el que decide el orden.
+      - Artículo por número: si la pregunta pide "artículo N" / "art. N" y ese artículo existe
+        en el índice, va primero (en ese caso la lista puede no quedar ordenada por score).
+    Con `clasificador=False` el orden es solo por similitud semántica.
+
+    Se devuelve como máximo un fragmento por artículo (el de mayor score).
     """
     if modo not in MODOS:
         raise ValueError(f"Modo no soportado: {modo!r}. Disponibles: {list(MODOS)}")
     indice, meta = _indice(estrategia)
     consulta = embeddings_preguntas([pregunta], _modelo()).astype("float32")
 
-    # Con trozos, varios del mismo artículo pueden salir a la vez. Se conserva el de
-    # mayor score por artículo y se amplía la búsqueda hasta tener k artículos distintos.
-    agrupar = estrategia == "fragmentos"
-    n = min(k * 4 if agrupar else k, indice.ntotal)
-    while True:
-        scores, posiciones = indice.search(consulta, n)
-        elegidos, vistos = [], set()
-        for score, pos in zip(scores[0], posiciones[0]):
-            f = meta["fragmentos"][pos]
-            if agrupar:
-                art = id_articulo(f["id"])
-                if art in vistos:
-                    continue
-                vistos.add(art)
-            elegidos.append((score, f))
-            if len(elegidos) == k:
-                break
-        if len(elegidos) == k or n >= indice.ntotal:
-            break
-        n = min(n * 2, indice.ntotal)
+    # Se piden todos los candidatos del índice (hasta POOL_MAX): el empuje por tema puede
+    # subir a uno que quedaba fuera de los primeros k.
+    scores, posiciones = indice.search(consulta, min(POOL_MAX, indice.ntotal))
+    candidatos = [(float(sc), meta["fragmentos"][pos]) for sc, pos in zip(scores[0], posiciones[0])]
+
+    pedidos = []
+    if clasificador:
+        empuje = empujes(clasificar(pregunta))
+        if empuje:
+            candidatos = [(sc + empuje.get(f["tema"], 0.0), f) for sc, f in candidatos]
+            candidatos.sort(key=lambda c: -c[0])
+        existentes = {id_articulo(f["id"]) for _, f in candidatos}
+        pedidos = [f"art-{n}" for n in articulos_mencionados(pregunta) if f"art-{n}" in existentes]
+
+    # Un solo fragmento por artículo: el de mayor score.
+    mejores, vistos = [], set()
+    for sc, f in candidatos:
+        art = id_articulo(f["id"])
+        if art not in vistos:
+            vistos.add(art)
+            mejores.append((sc, f))
+
+    # Artículos pedidos por número: primero y en el orden en que se pidieron.
+    primeros = [next(c for c in mejores if id_articulo(c[1]["id"]) == art) for art in pedidos]
+    resto = [c for c in mejores if id_articulo(c[1]["id"]) not in pedidos]
+    elegidos = (primeros + resto)[:k]
 
     resultados = []
     for score, f in elegidos:
@@ -182,6 +203,7 @@ def main() -> None:
     ap.add_argument("-k", type=int, default=3)
     ap.add_argument("--estrategia", default="articulo")
     ap.add_argument("--demo", action="store_true", help="prueba 3 preguntas y mide tiempos")
+    ap.add_argument("--sin-clasificador", action="store_true", help="solo similitud semántica, sin empuje por tema")
     args = ap.parse_args()
 
     preguntas = PREGUNTAS_DEMO if args.demo else [" ".join(args.pregunta)] if args.pregunta else []
@@ -195,7 +217,7 @@ def main() -> None:
     tiempos = []
     for p in preguntas:
         t = time.perf_counter()
-        res = buscar(p, k=args.k, estrategia=args.estrategia)
+        res = buscar(p, k=args.k, estrategia=args.estrategia, clasificador=not args.sin_clasificador)
         tiempos.append(time.perf_counter() - t)
         _mostrar(p, res)
 

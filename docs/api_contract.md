@@ -34,7 +34,8 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
   "fuera_de_dominio": false,
   "citas": [
     { "articulo": "Artículo 163", "numeral": "2", "paragrafo": null, "texto": "Art. 163, num. 2" }
-  ]
+  ],
+  "tema_detectado": "Ingreso a domicilio"
 }
 ```
 
@@ -45,6 +46,10 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
   - `paragrafo`: número del parágrafo (`"1"`), `"único"` (parágrafo sin número), `"transitorio"`, o `null`.
   - `texto`: forma legible para mostrar (`"Art. 163, num. 2"`, `"Art. 183, par."`, `"Art. 180"`).
   - Solo incluye citas de artículos que estaban en el contexto y cuyo numeral o parágrafo existe en el texto del artículo. Si `fuera_de_dominio` es `true`, va vacío.
+
+- `tema_detectado` (**opcional**): tema que detectó el clasificador temático al leer la pregunta (por ejemplo `"Ingreso a domicilio"`), o `"general"` si no detectó ninguno. Es informativo: el motor lo usa para empujar el orden de la búsqueda hacia ese tema (nunca como filtro), y el frontend puede mostrarlo como etiqueta. Ver [clasificador.md](clasificador.md).
+  - Si la pregunta pide un artículo por su número («¿Qué dice el artículo 163?») y ese artículo existe, sus fragmentos van primero en `fragmentos`, aunque su `score` no sea el más alto.
+  - Con un empate entre varios temas el nombre es poco informativo; el clasificador interno tiene una confianza que la API no expone.
 
 ### Campos de cada elemento de `fragmentos`
 

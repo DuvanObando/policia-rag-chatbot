@@ -133,6 +133,7 @@ class RespuestaQuery(BaseModel):
     fragmentos: List[Fragmento]
     fuera_de_dominio: bool
     citas: Optional[List[Cita]] = None
+    tema_detectado: Optional[str] = None
 
 
 # ---------------------------------------------------------------- errores (todos en español)

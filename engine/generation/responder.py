@@ -11,6 +11,7 @@ Uso por línea de comandos (desde la raíz del repo):
 Devuelve el formato de docs/api_contract.md:
     respuesta, articulos_citados, fragmentos, fuera_de_dominio
     + citas (opcional): artículo y, si aparece, numeral o parágrafo de cada cita
+    + tema_detectado (opcional): tema que detectó el clasificador temático, o "general"
 (con incluir_diagnostico=True agrega "diagnostico": tiempos, modelo y citas descartadas).
 """
 import argparse
@@ -23,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from generation.citas import existe_en_articulo, extraer_citas, texto_cita  # noqa: E402
 from generation.llm import ErrorLLM, estadisticas, generar  # noqa: E402
 from generation.prompt import FRASE_NO_ENCONTRADO, SISTEMA, construir_mensaje  # noqa: E402
+from retrieval.clasificador import clasificar  # noqa: E402
 from retrieval.search import articulo_completo, buscar, id_articulo, precargar  # noqa: E402
 
 ESTRATEGIA = "fragmentos"
@@ -88,6 +90,7 @@ def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> d
         "fragmentos": fragmentos,
         "fuera_de_dominio": fuera_de_dominio,
         "citas": [] if fuera_de_dominio else citas,
+        "tema_detectado": clasificar(pregunta)["tema"],
     }
     if incluir_diagnostico:
         resultado["diagnostico"] = {
@@ -112,6 +115,7 @@ def _mostrar(pregunta: str, r: dict) -> None:
     print("-" * 80)
     print(f"articulos_citados: {r['articulos_citados']}")
     print("citas:             " + (", ".join(c["texto"] for c in r.get("citas", [])) or "ninguna"))
+    print(f"tema_detectado:    {r.get('tema_detectado')}")
     print(f"fuera_de_dominio:  {r['fuera_de_dominio']}")
     print("fragmentos:        " + ", ".join(f"{f['id']} ({f['score']:.3f})" for f in r["fragmentos"]))
     if d:
