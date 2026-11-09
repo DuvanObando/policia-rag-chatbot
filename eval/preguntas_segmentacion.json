@@ -1,0 +1,72 @@
+[
+  {
+    "id": "p01",
+    "pregunta": "¿Quién decide en qué zonas de la ciudad no se puede consumir drogas, y con qué criterio las eligen?",
+    "articulo_esperado": "art-140",
+    "despues_del_token_512": true,
+    "nota": "Numeral 14: zonas definidas por el alcalde con razonabilidad y proporcionalidad."
+  },
+  {
+    "id": "p02",
+    "pregunta": "Aparte de este código, ¿hay otra ley que castigue el maltrato a los animales?",
+    "articulo_esperado": "art-124",
+    "despues_del_token_512": true,
+    "nota": "Parágrafo 3: remite a la Ley 1774 de 2016 sobre protección animal."
+  },
+  {
+    "id": "p03",
+    "pregunta": "Si pago rápido el comparendo, ¿me rebajan algo del valor?",
+    "articulo_esperado": "art-180",
+    "despues_del_token_512": true,
+    "nota": "Descuento del 50 % por pronto pago en los cinco días hábiles siguientes."
+  },
+  {
+    "id": "p04",
+    "pregunta": "¿Se considera de todos el agua de los ríos y los caminos públicos?",
+    "articulo_esperado": "art-139",
+    "despues_del_token_512": true,
+    "nota": "Parágrafo 2: bienes de uso público (parques, caminos, vías públicas y aguas que corren)."
+  },
+  {
+    "id": "p05",
+    "pregunta": "Hay un incendio en mi edificio, ¿puede la policía entrar a mi apartamento sin permiso de un juez?",
+    "articulo_esperado": "art-163",
+    "despues_del_token_512": false,
+    "nota": "Numeral 2: extinguir un incendio como causal de ingreso sin orden escrita."
+  },
+  {
+    "id": "p06",
+    "pregunta": "¿Qué otras sanciones, además de la multa, me puede imponer la policía?",
+    "articulo_esperado": "art-173",
+    "despues_del_token_512": false,
+    "nota": "Lista de las medidas correctivas."
+  },
+  {
+    "id": "p07",
+    "pregunta": "Tengo una multa sin pagar desde hace un año, ¿qué trámites no puedo hacer?",
+    "articulo_esperado": "art-183",
+    "despues_del_token_512": false,
+    "nota": "Consecuencias del no pago pasados seis meses."
+  },
+  {
+    "id": "p08",
+    "pregunta": "¿Quiénes tienen la autoridad para resolver los conflictos de convivencia, aparte de los agentes?",
+    "articulo_esperado": "art-198",
+    "despues_del_token_512": false,
+    "nota": "Lista de autoridades de policía (presidente, gobernadores, alcaldes, inspectores...)."
+  },
+  {
+    "id": "p09",
+    "pregunta": "¿Qué es el documento que me entrega el policía cuando me sorprende cometiendo una falta?",
+    "articulo_esperado": "art-218",
+    "despues_del_token_512": false,
+    "nota": "Definición de orden de comparendo."
+  },
+  {
+    "id": "p10",
+    "pregunta": "¿Cómo es el trámite cuando el policía resuelve el problema ahí mismo en la calle, sin audiencia?",
+    "articulo_esperado": "art-222",
+    "despues_del_token_512": false,
+    "nota": "Etapas del proceso verbal inmediato."
+  }
+]

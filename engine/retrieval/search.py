@@ -64,6 +64,11 @@ def _parte(texto: Optional[str]) -> Optional[str]:
     return texto.split(".")[0].strip() if texto else None
 
 
+def id_articulo(id_fragmento: str) -> str:
+    """'art-140-f2' -> 'art-140' (un id de artículo se queda igual)."""
+    return id_fragmento.split("-f")[0]
+
+
 def formatear_ubicacion(ub: dict) -> str:
     """Ubicación legible, p. ej. 'Libro II, Título XIV, Capítulo II, Artículo 140'."""
     partes = []
@@ -92,10 +97,30 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: str = 
         raise ValueError(f"Modo no soportado: {modo!r}. Disponibles: {list(MODOS)}")
     indice, meta = _indice(estrategia)
     consulta = embeddings_preguntas([pregunta], _modelo()).astype("float32")
-    scores, posiciones = indice.search(consulta, min(k, indice.ntotal))
+
+    # Con trozos, varios del mismo artículo pueden salir a la vez. Se conserva el de
+    # mayor score por artículo y se amplía la búsqueda hasta tener k artículos distintos.
+    agrupar = estrategia == "fragmentos"
+    n = min(k * 4 if agrupar else k, indice.ntotal)
+    while True:
+        scores, posiciones = indice.search(consulta, n)
+        elegidos, vistos = [], set()
+        for score, pos in zip(scores[0], posiciones[0]):
+            f = meta["fragmentos"][pos]
+            if agrupar:
+                art = id_articulo(f["id"])
+                if art in vistos:
+                    continue
+                vistos.add(art)
+            elegidos.append((score, f))
+            if len(elegidos) == k:
+                break
+        if len(elegidos) == k or n >= indice.ntotal:
+            break
+        n = min(n * 2, indice.ntotal)
+
     resultados = []
-    for score, pos in zip(scores[0], posiciones[0]):
-        f = meta["fragmentos"][pos]
+    for score, f in elegidos:
         resultados.append({
             "id": f["id"],
             "ubicacion": formatear_ubicacion(f["ubicacion"]),
