@@ -28,7 +28,18 @@ def query(q: Query):
                 "epigrafe": "Objeto",
                 "texto": "Texto simulado del fragmento.",
                 "score": 0.0,
-            }
+                "vigencia": "vigente",
+                "tema": "Disposiciones generales",
+            },
+            {
+                "id": "art-2",
+                "ubicacion": "Título I, Capítulo único",
+                "epigrafe": "Ejemplo de artículo modificado",
+                "texto": "Texto simulado de un fragmento modificado.",
+                "score": 0.0,
+                "vigencia": "modificado",
+                "tema": "Disposiciones generales",
+            },
         ],
         "fuera_de_dominio": False,
     }

@@ -140,7 +140,7 @@ Un responsable principal por bloque. **Todos deben poder explicar el flujo compl
 - [ ] **CORS restringido** a `ORIGENES_PERMITIDOS` (RNF3)
 - [ ] Manejo de errores cuando el motor no responde
 - [ ] Frontend de chat con **historial de conversación**
-- [ ] **Visualización de las fuentes citadas** (artículos y fragmentos recuperados, con score) (RF5)
+- [ ] **Visualización de las fuentes citadas** (artículos y fragmentos recuperados, con score) (RF5), mostrando la **vigencia** de cada fragmento (con señal visible si no es `vigente`) y el `tema`
 - [ ] Mostrar el caso `fuera_de_dominio`
 - [ ] **Aviso visible** de que es una herramienta informativa y no sustituye la asesoría jurídica
 - [ ] Claves y configuración en **`.env`**; solo `.env.example` en Git (RNF2)
@@ -193,7 +193,7 @@ Fecha de inicio: **2026-11-09** (lunes). Cambiar la columna "Fecha" si se mueve 
 - **Datos personales (Ley 1581 de 2012).** Las preguntas de los usuarios pueden contener datos personales; no se persisten sin consentimiento informado.
 - **Dependencia de la clave del LLM.** Vive solo en `.env`; si falla, el sistema devuelve un error claro y no una respuesta inventada.
 - **Duración del enunciado.** El enunciado indica 3 semanas y el plan usa 2 (9 al 20 de noviembre, decisión del equipo). Confirmar la fecha oficial de entrega con el docente; si hay más tiempo, el margen se usa en evaluación y análisis de errores.
-- **Campos `vigencia` y `tema` en la API.** El contrato actual de `fragmentos` no los incluye. Decisión pendiente para Duvan y Santiago Bulla: agregarlos como campos opcionales por PR (no cambia el contrato existente).
+- **Campos `vigencia` y `tema` en la API (resuelto).** El contrato ya los incluye como campos opcionales de cada elemento de `fragmentos` (`vigencia`: `vigente | modificado | inexequible | exequible_condicionado`). Los valores salen de los metadatos del corpus (Fase 1, Wilder) y el frontend (Santiago Bulla) debe mostrar la vigencia en el panel de fuentes. Las respuestas simuladas de `engine/api.py` ya usan el formato final.
 - **Conflictos de integración.** Cada persona trabaja en carpetas propias; los cambios en archivos compartidos pasan por PR.
 
 ## 7. Reglas del equipo

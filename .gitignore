@@ -31,5 +31,8 @@ Thumbs.db
 .vscode/
 .idea/
 
+# PDFs de docs (p. ej. el enunciado del curso): no se suben
+docs/*.pdf
+
 # Graphify (grafo local, no se versiona por ahora)
 graphify-out/
