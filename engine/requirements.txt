@@ -8,3 +8,5 @@ python-dotenv
 python-multipart
 numpy
 pandas
+google-genai
+pypdf

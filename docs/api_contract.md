@@ -11,8 +11,8 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 }
 ```
 
-- `pregunta` (string, obligatorio)
-- `historial` (arreglo, opcional)
+- `pregunta` (string, obligatorio): no puede estar vacía (se ignoran los espacios al inicio y al final) ni pasar de **500 caracteres**.
+- `historial` (arreglo, opcional): de máximo **50** mensajes. **Por ahora el motor lo acepta pero NO lo usa**: la respuesta depende solo de `pregunta`. El frontend ya puede enviarlo; cuando el motor lo use, este contrato avisará.
 
 ## Salida
 
@@ -31,11 +31,20 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
       "tema": "string"
     }
   ],
-  "fuera_de_dominio": false
+  "fuera_de_dominio": false,
+  "citas": [
+    { "articulo": "Artículo 163", "numeral": "2", "paragrafo": null, "texto": "Art. 163, num. 2" }
+  ]
 }
 ```
 
 - `fuera_de_dominio`: `true` si la pregunta no corresponde a la Ley 1801 de 2016.
+- `citas` (**opcional**): detalle de cada cita de la respuesta. `articulos_citados` sigue igual (solo artículos), así que quien no use `citas` no se ve afectado.
+  - `articulo`: como en `articulos_citados` (`"Artículo 163"`).
+  - `numeral`: número del numeral citado, o `null`.
+  - `paragrafo`: número del parágrafo (`"1"`), `"único"` (parágrafo sin número), `"transitorio"`, o `null`.
+  - `texto`: forma legible para mostrar (`"Art. 163, num. 2"`, `"Art. 183, par."`, `"Art. 180"`).
+  - Solo incluye citas de artículos que estaban en el contexto y cuyo numeral o parágrafo existe en el texto del artículo. Si `fuera_de_dominio` es `true`, va vacío.
 
 ### Campos de cada elemento de `fragmentos`
 
@@ -46,7 +55,7 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 | `epigrafe` | string | sí | Epígrafe del artículo |
 | `texto` | string | sí | Texto del fragmento |
 | `score` | number | sí | Puntaje de relevancia de la recuperación |
-| `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible` o `exequible_condicionado` |
+| `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible`, `exequible_condicionado` o `no_verificada` (documentos complementarios subidos con `/upload_pdf/`) |
 | `tema` | string | no | Tema asignado al fragmento en el corpus |
 
 ### Origen y uso de `vigencia` y `tema`
@@ -56,6 +65,91 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 - **El frontend debe mostrar la `vigencia` en el panel de fuentes** junto a cada fragmento, con una señal visible cuando no sea `vigente` (`modificado`, `inexequible` o `exequible_condicionado`).
 - El frontend puede mostrar el `tema` como etiqueta del fragmento.
 
+## Errores de `POST /query`
+
+Todos devuelven JSON `{ "error": "mensaje en español" }`.
+
+| Código | Cuándo | Ejemplo de `error` |
+|---|---|---|
+| 422 | Entrada inválida | `"La pregunta no puede estar vacía."` · `"La pregunta es demasiado larga: máximo 500 caracteres."` · `"Falta el campo obligatorio 'pregunta'."` |
+| 503 | Ningún modelo de lenguaje pudo responder, o el motor no está listo | `"El servicio está ocupado, intenta de nuevo en unos minutos."` |
+| 500 | Error interno inesperado | `"Ocurrió un error interno. Intenta de nuevo en unos minutos."` |
+
+El frontend puede mostrar el campo `error` tal cual al usuario. El mensaje de un 422 no repite el texto enviado.
+
+## `GET /health`
+
+Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede atender preguntas).
+
+```json
+{
+  "listo": true,
+  "error": null,
+  "modelo_embeddings": "intfloat/multilingual-e5-base",
+  "estrategia_busqueda": "fragmentos",
+  "fragmentos_en_indice": 30,
+  "llm_proveedor": "gemini",
+  "llm_principal": "gemini-3.5-flash-lite",
+  "llm_respaldo": "gemini-3.6-flash",
+  "tiempos_de_carga_s": { "embeddings_e_indice_s": 8.1, "cliente_llm_s": 0.4, "total_s": 8.5 }
+}
+```
+
+El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. Si falta la clave del LLM, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
+
+## Privacidad (Ley 1581 de 2012)
+
+El motor **no registra el texto de las preguntas, de las respuestas ni del historial** en logs, y no guarda nada en disco ni en base de datos. Los logs solo contienen estado, tiempos, modelo usado y conteos. El historial de conversación debe vivir en el navegador del usuario (sesión), no en el servidor. Quien agregue logs al backend o al motor debe respetar esta regla.
+
 ## `POST /upload_pdf/`
 
-Recibe un PDF (multipart, campo `file`). No regenera embeddings ni índices.
+Sube un documento PDF **sin regenerar los embeddings** (RF4). Es el primer paso de un flujo de dos pasos.
+
+### Por qué dos pasos (RF4)
+
+Generar embeddings es lento y reconstruye el índice con el que responde el buscador. Si cada subida lo hiciera automáticamente, cualquier usuario podría degradar o cambiar el motor sin revisión, y un PDF malo contaminaría las respuestas. Por eso:
+
+1. **Subir** (`POST /upload_pdf/`): la API valida el archivo, lo guarda, extrae su texto y lo registra como `pendiente_de_indexar`. **No toca los índices:** el buscador sigue igual y el documento todavía no aparece en las respuestas.
+2. **Indexar a mano** (una persona del equipo, cuando decida): reconstruye el índice incluyendo los documentos subidos:
+
+   ```bash
+   python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads
+   ```
+
+   Por defecto `build_index.py` **no** incluye los documentos subidos. Hay que repetir `--incluir-uploads` en cada reconstrucción (el índice se arma desde cero), y reiniciar el motor para que cargue el índice nuevo. Los documentos pasan a `indexado` en el registro.
+
+Los documentos indexados entran como fragmentos con `tema: "documento complementario"` y `vigencia: "no_verificada"` (nadie ha revisado su texto; el motor avisa de ello en la respuesta). Su `ubicacion` es `"Documento complementario: <nombre guardado>"`.
+
+### Petición
+
+`multipart/form-data` con un campo `file` (el PDF).
+
+### Respuesta 200
+
+```json
+{
+  "nombre_guardado": "reglamento_20261109-133045.pdf",
+  "paginas": 3,
+  "caracteres": 5120,
+  "estado": "pendiente_de_indexar",
+  "mensaje": "Documento guardado. Todavía NO está disponible en las consultas: quedará disponible cuando se reconstruya el índice manualmente (...). No se regeneraron embeddings."
+}
+```
+
+### Validaciones y errores
+
+Todos devuelven `{ "error": "mensaje en español" }`.
+
+| Código | Cuándo |
+|---|---|
+| 413 | El archivo pesa más de **10 MB** |
+| 422 | No es un PDF real (el contenido debe empezar con la cabecera `%PDF`; no basta con la extensión), está dañado, tiene contraseña, no contiene texto extraíble (p. ej. escaneado) o falta el campo `file` |
+
+### Qué se guarda y dónde
+
+En `corpus/uploads/` (ignorada por git):
+
+- `<nombre>_<AAAAMMDD-HHMMSS>.pdf` y `.txt` (texto extraído). El nombre original se limpia: sin carpetas ni `../`, solo letras, números, `_` y `-`; la fecha y hora evitan sobrescribir.
+- `pendientes.json`: registro con `id`, `nombre`, `texto`, `fecha`, `paginas`, `caracteres` y `estado` (`pendiente_de_indexar` o `indexado`).
+
+Por privacidad, los logs no registran el nombre ni el contenido de los documentos, solo tamaño, páginas y caracteres.
