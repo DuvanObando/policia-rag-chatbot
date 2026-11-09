@@ -2,7 +2,7 @@
 
 Uso (desde la raíz del repo):
     python engine/indexing/build_index.py [--corpus RUTA] [--estrategia articulo|fragmentos]
-                                          [--tamano 250] [--solape 50]
+                                          [--tamano 250] [--solape 50] [--incluir-uploads]
 
 Guarda en engine/indexing/indexes/<estrategia>/:
   - index.faiss     índice FAISS IndexFlatIP con los vectores normalizados
@@ -17,6 +17,12 @@ Estrategias:
                  (--tamano tokens, con --solape tokens de solapamiento).
                  Cada trozo hereda los metadatos de su artículo, tiene id propio
                  (art-140-f2) y se vectoriza con el epígrafe antepuesto.
+
+--incluir-uploads: agrega al índice los documentos subidos por POST /upload_pdf/
+(corpus/uploads/), partidos en trozos igual que la estrategia 'fragmentos', con
+tema "documento complementario" y vigencia "no_verificada". Los pendientes pasan a
+"indexado" en pendientes.json. Por defecto NO se incluyen. Hay que repetir la opción
+en cada reconstrucción, porque el índice se arma desde cero cada vez.
 """
 import argparse
 import json
@@ -27,6 +33,7 @@ from pathlib import Path
 import faiss
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
+from indexing import uploads  # noqa: E402
 from indexing.embeddings import (  # noqa: E402
     CORPUS_POR_DEFECTO,
     MODELO,
@@ -86,6 +93,27 @@ def fragmentos_por_tamano(articulos, modelo, tamano=TAMANO_POR_DEFECTO, solape=S
 ESTRATEGIAS = {"articulo": fragmentos_articulo, "fragmentos": fragmentos_por_tamano}
 
 
+def fragmentos_de_documentos(documentos, modelo, tamano=TAMANO_POR_DEFECTO, solape=SOLAPE_POR_DEFECTO):
+    """Trozos de los documentos subidos. Mismos campos que los fragmentos del corpus.
+
+    vigencia "no_verificada": nadie ha revisado su texto; el prompt avisa al usuario.
+    """
+    resultado = []
+    for d in documentos:
+        texto = (uploads.CARPETA_UPLOADS / d["texto"]).read_text(encoding="utf-8")
+        for i, trozo in enumerate(trozos_de_texto(texto, modelo.tokenizer, tamano, solape), start=1):
+            resultado.append({
+                "id": f"doc-{d['id']}-f{i}",
+                "ubicacion": {"libro": None, "titulo": None, "capitulo": None,
+                              "articulo": f"Documento complementario: {d['id']}"},
+                "epigrafe": d["id"],
+                "texto": trozo,
+                "vigencia": "no_verificada",
+                "tema": "documento complementario",
+            })
+    return resultado
+
+
 def guardar_indice(indice, ruta: Path) -> None:
     # Se serializa y se escribe con Python: faiss.write_index puede fallar en
     # Windows con rutas que tienen tildes (esta carpeta tiene "Beltrán").
@@ -93,12 +121,16 @@ def guardar_indice(indice, ruta: Path) -> None:
 
 
 def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
-              tamano: int = TAMANO_POR_DEFECTO, solape: int = SOLAPE_POR_DEFECTO) -> Path:
+              tamano: int = TAMANO_POR_DEFECTO, solape: int = SOLAPE_POR_DEFECTO,
+              incluir_uploads: bool = False) -> Path:
     if estrategia not in ESTRATEGIAS:
         raise ValueError(f"Estrategia desconocida: {estrategia!r}. Disponibles: {list(ESTRATEGIAS)}")
 
     modelo = cargar_modelo()
     fragmentos = ESTRATEGIAS[estrategia](cargar_corpus(corpus), modelo, tamano=tamano, solape=solape)
+    documentos = uploads.documentos_para_indexar() if incluir_uploads else []
+    if documentos:
+        fragmentos = list(fragmentos) + fragmentos_de_documentos(documentos, modelo, tamano, solape)
     vectores = embeddings_articulos(fragmentos, modelo).astype("float32")
 
     indice = faiss.IndexFlatIP(vectores.shape[1])
@@ -115,12 +147,16 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
         "fecha_construccion": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "corpus": str(corpus),
         "dimension": int(vectores.shape[1]),
+        "documentos_incluidos": [d["id"] for d in documentos],
         "n_fragmentos": len(fragmentos),
         "fragmentos": [{c: f[c] for c in CAMPOS} for f in fragmentos],
     }
     (destino / "metadatos.json").write_text(
         json.dumps(metadatos, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    # Solo después de guardar el índice: los pendientes pasan a "indexado".
+    if documentos:
+        uploads.marcar_indexados([d["id"] for d in documentos])
     return destino
 
 
@@ -130,13 +166,17 @@ def main() -> None:
     ap.add_argument("--estrategia", default="articulo", choices=list(ESTRATEGIAS))
     ap.add_argument("--tamano", type=int, default=TAMANO_POR_DEFECTO, help="tokens por trozo (estrategia fragmentos)")
     ap.add_argument("--solape", type=int, default=SOLAPE_POR_DEFECTO, help="tokens de solapamiento (estrategia fragmentos)")
+    ap.add_argument("--incluir-uploads", action="store_true",
+                    help="incluye los documentos subidos por /upload_pdf/ (por defecto NO se incluyen)")
     args = ap.parse_args()
-    destino = construir(args.corpus, args.estrategia, args.tamano, args.solape)
+    destino = construir(args.corpus, args.estrategia, args.tamano, args.solape, args.incluir_uploads)
     meta = json.loads((destino / "metadatos.json").read_text(encoding="utf-8"))
     print(f"Índice '{args.estrategia}' construido en {destino}")
     print(f"  fragmentos: {meta['n_fragmentos']} | dimensión: {meta['dimension']} | modelo: {meta['modelo']}")
     if meta["parametros"]:
         print(f"  parámetros: {meta['parametros']}")
+    if args.incluir_uploads:
+        print(f"  documentos subidos incluidos: {len(meta['documentos_incluidos'])}")
 
 
 if __name__ == "__main__":

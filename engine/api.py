@@ -5,7 +5,7 @@ Contrato: ver docs/api_contract.md
 Endpoints:
     GET  /health        estado del motor
     POST /query         pregunta -> respuesta con citas (motor real: búsqueda + LLM)
-    POST /upload_pdf/   recibe un PDF (simulado; NO regenera embeddings)
+    POST /upload_pdf/   guarda un PDF como "pendiente_de_indexar" (NO regenera embeddings)
 
 Arranque (desde la carpeta engine/):
     uvicorn api:app --port 8000
@@ -32,6 +32,7 @@ from pydantic import BaseModel, field_validator
 
 from generation.llm import ErrorLLM, configuracion, precargar_cliente
 from generation.responder import ESTRATEGIA, responder
+from indexing import uploads
 from indexing.embeddings import MODELO
 from retrieval.search import buscar, info_indice, precargar
 
@@ -118,6 +119,14 @@ class Cita(BaseModel):
     texto: str
 
 
+class RespuestaUpload(BaseModel):
+    nombre_guardado: str
+    paginas: int
+    caracteres: int
+    estado: str
+    mensaje: str
+
+
 class RespuestaQuery(BaseModel):
     respuesta: str
     articulos_citados: List[str]
@@ -198,12 +207,29 @@ def query(q: Query, request: Request):
     return r
 
 
-@app.post("/upload_pdf/")
-async def upload_pdf(file: UploadFile = File(...)):
-    # Solo recibe el archivo. NO regenera embeddings ni índices.
-    contenido = await file.read()
+@app.post("/upload_pdf/", response_model=RespuestaUpload)
+def upload_pdf(file: UploadFile = File(...)):
+    """Guarda un PDF y lo deja "pendiente_de_indexar". NO genera embeddings ni toca los índices (RF4)."""
+    contenido = file.file.read(uploads.MAX_BYTES + 1)  # lee a lo sumo 10 MB + 1 byte
+    if len(contenido) > uploads.MAX_BYTES:
+        return JSONResponse(status_code=413, content={"error": "El archivo supera el máximo permitido de 10 MB."})
+    try:
+        d = uploads.guardar(contenido, file.filename)
+    except uploads.PDFInvalido as e:
+        return JSONResponse(status_code=422, content={"error": str(e)})
+
+    # Sin nombre ni contenido del documento en el log (privacidad).
+    log.info("/upload_pdf 200 bytes=%d paginas=%d caracteres=%d estado=%s",
+             len(contenido), d["paginas"], d["caracteres"], d["estado"])
     return {
-        "mensaje": "PDF recibido (simulado). No se regeneraron embeddings.",
-        "archivo": file.filename,
-        "bytes": len(contenido),
+        "nombre_guardado": d["nombre"],
+        "paginas": d["paginas"],
+        "caracteres": d["caracteres"],
+        "estado": d["estado"],
+        "mensaje": (
+            "Documento guardado. Todavía NO está disponible en las consultas: quedará disponible "
+            "cuando se reconstruya el índice manualmente "
+            "(python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads). "
+            "No se regeneraron embeddings."
+        ),
     }

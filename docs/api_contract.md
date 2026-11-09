@@ -55,7 +55,7 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 | `epigrafe` | string | sí | Epígrafe del artículo |
 | `texto` | string | sí | Texto del fragmento |
 | `score` | number | sí | Puntaje de relevancia de la recuperación |
-| `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible` o `exequible_condicionado` |
+| `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible`, `exequible_condicionado` o `no_verificada` (documentos complementarios subidos con `/upload_pdf/`) |
 | `tema` | string | no | Tema asignado al fragmento en el corpus |
 
 ### Origen y uso de `vigencia` y `tema`
@@ -103,4 +103,53 @@ El motor **no registra el texto de las preguntas, de las respuestas ni del histo
 
 ## `POST /upload_pdf/`
 
-Recibe un PDF (multipart, campo `file`). No regenera embeddings ni índices.
+Sube un documento PDF **sin regenerar los embeddings** (RF4). Es el primer paso de un flujo de dos pasos.
+
+### Por qué dos pasos (RF4)
+
+Generar embeddings es lento y reconstruye el índice con el que responde el buscador. Si cada subida lo hiciera automáticamente, cualquier usuario podría degradar o cambiar el motor sin revisión, y un PDF malo contaminaría las respuestas. Por eso:
+
+1. **Subir** (`POST /upload_pdf/`): la API valida el archivo, lo guarda, extrae su texto y lo registra como `pendiente_de_indexar`. **No toca los índices:** el buscador sigue igual y el documento todavía no aparece en las respuestas.
+2. **Indexar a mano** (una persona del equipo, cuando decida): reconstruye el índice incluyendo los documentos subidos:
+
+   ```bash
+   python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads
+   ```
+
+   Por defecto `build_index.py` **no** incluye los documentos subidos. Hay que repetir `--incluir-uploads` en cada reconstrucción (el índice se arma desde cero), y reiniciar el motor para que cargue el índice nuevo. Los documentos pasan a `indexado` en el registro.
+
+Los documentos indexados entran como fragmentos con `tema: "documento complementario"` y `vigencia: "no_verificada"` (nadie ha revisado su texto; el motor avisa de ello en la respuesta). Su `ubicacion` es `"Documento complementario: <nombre guardado>"`.
+
+### Petición
+
+`multipart/form-data` con un campo `file` (el PDF).
+
+### Respuesta 200
+
+```json
+{
+  "nombre_guardado": "reglamento_20261109-133045.pdf",
+  "paginas": 3,
+  "caracteres": 5120,
+  "estado": "pendiente_de_indexar",
+  "mensaje": "Documento guardado. Todavía NO está disponible en las consultas: quedará disponible cuando se reconstruya el índice manualmente (...). No se regeneraron embeddings."
+}
+```
+
+### Validaciones y errores
+
+Todos devuelven `{ "error": "mensaje en español" }`.
+
+| Código | Cuándo |
+|---|---|
+| 413 | El archivo pesa más de **10 MB** |
+| 422 | No es un PDF real (el contenido debe empezar con la cabecera `%PDF`; no basta con la extensión), está dañado, tiene contraseña, no contiene texto extraíble (p. ej. escaneado) o falta el campo `file` |
+
+### Qué se guarda y dónde
+
+En `corpus/uploads/` (ignorada por git):
+
+- `<nombre>_<AAAAMMDD-HHMMSS>.pdf` y `.txt` (texto extraído). El nombre original se limpia: sin carpetas ni `../`, solo letras, números, `_` y `-`; la fecha y hora evitan sobrescribir.
+- `pendientes.json`: registro con `id`, `nombre`, `texto`, `fecha`, `paginas`, `caracteres` y `estado` (`pendiente_de_indexar` o `indexado`).
+
+Por privacidad, los logs no registran el nombre ni el contenido de los documentos, solo tamaño, páginas y caracteres.

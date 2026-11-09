@@ -13,6 +13,7 @@ o antes con precargar()) y se reutilizan en las llamadas siguientes.
 """
 import argparse
 import json
+import re
 import sys
 import time
 from functools import lru_cache
@@ -77,7 +78,13 @@ def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict
 
     Devuelve id, ubicacion (cadena), epigrafe, texto, vigencia y tema del artículo.
     """
-    a = _articulos_del_corpus(estrategia)[id_articulo(id_fragmento)]
+    a = _articulos_del_corpus(estrategia).get(id_articulo(id_fragmento))
+    if a is None:
+        # Documento complementario (subido por /upload_pdf/): no está en el corpus,
+        # así que se usa el propio fragmento como contexto.
+        _, meta = _indice(estrategia)
+        a = next(f for f in meta["fragmentos"] if f["id"] == id_fragmento)
+        a = {**a, "id": id_articulo(a["id"])}
     return {
         "id": a["id"],
         "ubicacion": formatear_ubicacion(a["ubicacion"]),
@@ -95,7 +102,7 @@ def _parte(texto: Optional[str]) -> Optional[str]:
 
 def id_articulo(id_fragmento: str) -> str:
     """'art-140-f2' -> 'art-140' (un id de artículo se queda igual)."""
-    return id_fragmento.split("-f")[0]
+    return re.sub(r"-f\d+$", "", id_fragmento)
 
 
 def formatear_ubicacion(ub: dict) -> str:

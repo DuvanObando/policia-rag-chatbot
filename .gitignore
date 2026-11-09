@@ -32,6 +32,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# PDFs subidos por /upload_pdf/ (y su texto y registro): no se suben
+corpus/uploads/
+
 # PDFs de docs (p. ej. el enunciado del curso): no se suben
 docs/*.pdf
 
