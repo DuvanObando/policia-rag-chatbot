@@ -11,8 +11,8 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 }
 ```
 
-- `pregunta` (string, obligatorio)
-- `historial` (arreglo, opcional)
+- `pregunta` (string, obligatorio): no puede estar vacía (se ignoran los espacios al inicio y al final) ni pasar de **500 caracteres**.
+- `historial` (arreglo, opcional): de máximo **50** mensajes. **Por ahora el motor lo acepta pero NO lo usa**: la respuesta depende solo de `pregunta`. El frontend ya puede enviarlo; cuando el motor lo use, este contrato avisará.
 
 ## Salida
 
@@ -64,6 +64,42 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 - Sus valores **salen de los metadatos del corpus** (Fase 1); el motor los copia tal cual, sin calcularlos.
 - **El frontend debe mostrar la `vigencia` en el panel de fuentes** junto a cada fragmento, con una señal visible cuando no sea `vigente` (`modificado`, `inexequible` o `exequible_condicionado`).
 - El frontend puede mostrar el `tema` como etiqueta del fragmento.
+
+## Errores de `POST /query`
+
+Todos devuelven JSON `{ "error": "mensaje en español" }`.
+
+| Código | Cuándo | Ejemplo de `error` |
+|---|---|---|
+| 422 | Entrada inválida | `"La pregunta no puede estar vacía."` · `"La pregunta es demasiado larga: máximo 500 caracteres."` · `"Falta el campo obligatorio 'pregunta'."` |
+| 503 | Ningún modelo de lenguaje pudo responder, o el motor no está listo | `"El servicio está ocupado, intenta de nuevo en unos minutos."` |
+| 500 | Error interno inesperado | `"Ocurrió un error interno. Intenta de nuevo en unos minutos."` |
+
+El frontend puede mostrar el campo `error` tal cual al usuario. El mensaje de un 422 no repite el texto enviado.
+
+## `GET /health`
+
+Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede atender preguntas).
+
+```json
+{
+  "listo": true,
+  "error": null,
+  "modelo_embeddings": "intfloat/multilingual-e5-base",
+  "estrategia_busqueda": "fragmentos",
+  "fragmentos_en_indice": 30,
+  "llm_proveedor": "gemini",
+  "llm_principal": "gemini-3.5-flash-lite",
+  "llm_respaldo": "gemini-3.6-flash",
+  "tiempos_de_carga_s": { "embeddings_e_indice_s": 8.1, "cliente_llm_s": 0.4, "total_s": 8.5 }
+}
+```
+
+El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. Si falta la clave del LLM, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
+
+## Privacidad (Ley 1581 de 2012)
+
+El motor **no registra el texto de las preguntas, de las respuestas ni del historial** en logs, y no guarda nada en disco ni en base de datos. Los logs solo contienen estado, tiempos, modelo usado y conteos. El historial de conversación debe vivir en el navegador del usuario (sesión), no en el servidor. Quien agregue logs al backend o al motor debe respetar esta regla.
 
 ## `POST /upload_pdf/`
 

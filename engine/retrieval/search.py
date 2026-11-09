@@ -59,6 +59,12 @@ def precargar(estrategia: str = "articulo") -> None:
     _indice(estrategia)
 
 
+def info_indice(estrategia: str = "articulo") -> dict:
+    """Datos del índice cargado: estrategia, modelo de embeddings y número de fragmentos."""
+    indice, meta = _indice(estrategia)
+    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal)}
+
+
 @lru_cache(maxsize=None)
 def _articulos_del_corpus(estrategia: str) -> dict:
     """Artículos completos del corpus con que se construyó el índice, por id (se carga una vez)."""

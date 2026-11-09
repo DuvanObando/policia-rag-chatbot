@@ -161,6 +161,20 @@ PROVEEDORES = {
 }
 
 
+PRECARGADORES = {
+    "gemini": _cliente_gemini,
+}
+
+
+def precargar_cliente() -> None:
+    """Crea el cliente del proveedor por adelantado (p. ej. al arrancar la API).
+
+    Lanza ErrorLLM si falta la clave. No hace ninguna llamada de red.
+    """
+    proveedor, _, _ = configuracion()
+    PRECARGADORES[proveedor]()
+
+
 def configuracion() -> tuple:
     """(proveedor, modelo principal, modelo de respaldo o None)."""
     proveedor = os.getenv("LLM_PROVEEDOR", "gemini").strip().lower()
