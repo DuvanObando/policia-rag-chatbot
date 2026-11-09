@@ -43,7 +43,7 @@ La instalación es pesada (incluye PyTorch). La primera vez que se usa el modelo
 cp .env.example .env
 ```
 
-Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `hibrido` (recomendado y por defecto), `semantico` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md).
+Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `hibrido` (recomendado y por defecto), `semantico` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md). `BUSQUEDA_EXPANSION=1` (por defecto) activa la expansión de consultas con el glosario `engine/glossary/sinonimos.json` (provisional; solo afecta a la búsqueda léxica).
 
 **3. Construir los índices** (los índices no se versionan; hay que generarlos)
 

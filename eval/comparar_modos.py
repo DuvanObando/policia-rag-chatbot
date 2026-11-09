@@ -15,9 +15,14 @@ Uso (desde la raíz del repo):
     python eval/comparar_modos.py
 """
 import json
+import os
 import sys
 import time
 from pathlib import Path
+
+# Estos resultados son SIN expansión de consultas (la expansión se evalúa aparte en
+# eval/comparar_expansion.py), sin importar BUSQUEDA_EXPANSION del .env.
+os.environ["BUSQUEDA_EXPANSION"] = "0"
 
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "engine"))

@@ -93,6 +93,7 @@ Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede ate
   "modelo_embeddings": "intfloat/multilingual-e5-base",
   "estrategia_busqueda": "fragmentos",
   "busqueda_modo": "hibrido",
+  "busqueda_expansion": { "activa": true, "entradas": 18 },
   "rrf_k": 60,
   "fragmentos_en_indice": 30,
   "llm_proveedor": "gemini",
@@ -102,7 +103,7 @@ Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede ate
 }
 ```
 
-El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. `busqueda_modo` es el modo activo (`semantico`, `lexico` o `hibrido`, según `BUSQUEDA_MODO` en el `.env`) y `rrf_k` la constante de la fusión (solo en `hibrido`; `null` en los otros). Si falta la clave del LLM, si `BUSQUEDA_MODO` no existe o si falta el índice BM25, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
+El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. `busqueda_modo` es el modo activo (`semantico`, `lexico` o `hibrido`, según `BUSQUEDA_MODO` en el `.env`), `rrf_k` la constante de la fusión (solo en `hibrido`; `null` en los otros) y `busqueda_expansion` indica si la expansión de consultas con glosario está activa (`BUSQUEDA_EXPANSION`) y cuántas entradas tiene el glosario. Si falta la clave del LLM, si `BUSQUEDA_MODO` no existe, si falta el índice BM25 o si se construyó con otro método de preparación de texto que el disponible ahora, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
 
 ## Privacidad (Ley 1581 de 2012)
 

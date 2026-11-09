@@ -152,3 +152,113 @@ python eval/calibrar_empuje.py          # empuje equivalente por modo
 python eval/comparar_modos.py           # resultados de este documento
 python engine/retrieval/search.py --modo lexico "¿Cuántos smdlv cuesta una multa tipo 4?"
 ```
+
+---
+
+# Expansión de consultas con glosario
+
+## Para qué sirve
+
+El usuario dice «guaro», «boleta», «tombos»; la ley dice «bebidas alcohólicas», «orden de comparendo», «autoridades de policía». BM25 solo compara palabras, así que no los une. La expansión detecta los términos coloquiales de un glosario y **le agrega a la consulta de BM25** las palabras del término legal.
+
+## Cómo funciona
+
+[`engine/retrieval/expansion.py`](../engine/retrieval/expansion.py), `expandir(pregunta)`:
+
+1. Prepara la pregunta con la **misma función del índice** (`tokens_bm25`: minúsculas, sin tildes, sin stopwords, stemming o lematización). Por eso «drogas» encuentra «droga» y no hay que listar plurales.
+2. Busca en la pregunta cada término coloquial del glosario (también los de varias palabras, en orden: `multa de la policía`).
+3. Por cada término legal con alguna coincidencia, agrega a la consulta las palabras del término legal que **la pregunta todavía no tiene** (no se duplican).
+
+Ejemplo: «¿Me ponen boleta si me cogen tomando guaro en el parque?» agrega `beb alcohol` (bebidas alcohólicas), `orden comparend` (orden de comparendo) y `espaci public` (espacio público).
+
+Reglas:
+
+- **Solo BM25.** Se aplica a la consulta léxica de los modos `lexico` e `hibrido`, **nunca a la consulta semántica**: el modelo de embeddings ya entiende «guaro», y agregarle palabras solo desviaría su significado.
+- **Activable:** `BUSQUEDA_EXPANSION` en el `.env` (`1` activa por defecto; `0`, `false`, `no` u `off` la desactivan). `/health` → `busqueda_expansion` muestra si está activa y cuántas entradas tiene el glosario.
+
+## El glosario (`engine/glossary/sinonimos.json`)
+
+```json
+{
+  "_provisional": "...",
+  "bebidas alcohólicas": ["trago", "tragos", "licor", "guaro", "alcohol", "cerveza"],
+  "orden de comparendo": ["comparendo", "boleta", "papeleta", "multa de la policía"]
+}
+```
+
+- Formato: `{"termino_legal": ["coloquial1", "coloquial2", ...]}`. El término legal va **como aparece en el Código** (así lo encuentra BM25). Las claves que empiezan con `_` se ignoran.
+- Hoy tiene **18 entradas semilla** sacadas del corpus de muestra.
+- **Es PROVISIONAL**: lo escribió el motor RAG solo para probar el mecanismo. **Santiago Castro lo reemplaza con el glosario de la Fase 2** (mismo formato); el archivo lo dice en su primera clave.
+
+## Verificación de consistencia del índice
+
+El índice BM25 guarda con qué método se prepararon sus textos (`snowball:spanish` o `spacy:es_core_news_sm-<versión>`). Si el método disponible cambia (por ejemplo, se instala spaCy después de construir el índice), las palabras de las preguntas dejarían de coincidir con las del índice y BM25 fallaría **en silencio**. Por eso, **al arrancar** y en los modos que usan BM25, el motor compara los dos métodos; si no coinciden, arranca con `listo: false` y un error como:
+
+> El índice BM25 de 'fragmentos' se construyó con la preparación de texto 'spacy:es_core_news_sm-3.8.0', pero ahora está disponible 'snowball:spanish'. Hay que reconstruir el índice: python engine/indexing/build_index.py --estrategia fragmentos
+
+Se probó modificando una copia del archivo del índice para simular el desajuste (después se restauró): el servidor arrancó con `listo: false` y `/query` respondió 503.
+
+## Evaluación: híbrido con y sin expansión
+
+`eval/comparar_expansion.py`. **19 preguntas**: las 16 de la evaluación anterior más **3 muy coloquiales**, escritas antes de evaluar y sin ajustarlas después:
+
+| # | Pregunta | Esperado |
+|---|---|---|
+| p17 | ¿Me ponen boleta si me cogen tomando guaro en el parque? | 140 |
+| p18 | Mi perro es un pitbull y se me escapó a la calle, ¿me cobran mucho? | 124 |
+| p19 | Los tombos se metieron a mi apartamento sin papel, ¿eso se puede? | 163 |
+
+Modo híbrido, con clasificador:
+
+| Preguntas | Expansión | Acierto@1 | Acierto@3 | MRR |
+|---|---|---|---|---|
+| 19 (todas) | sin | 0.84 | 1.00 | 0.912 |
+| | **con** | 0.84 | 1.00 | **0.921** |
+| 16 de la evaluación anterior | sin | **0.88** | 1.00 | **0.927** |
+| | con | 0.81 | 1.00 | 0.906 |
+| 3 muy coloquiales (p17–p19) | sin | 0.67 | 1.00 | 0.833 |
+| | **con** | **1.00** | 1.00 | **1.000** |
+| *Informativo: modo léxico, 19* | sin | 0.79 | 0.89 | 0.855 |
+| | con | **0.89** | 0.89 | **0.912** |
+| *Informativo: modo léxico, 3 coloquiales* | sin | 0.33 | 0.67 | 0.583 |
+| | con | **1.00** | **1.00** | **1.000** |
+
+### En qué preguntas cambió el resultado (híbrido) y por qué
+
+Cambiaron tres de las 19:
+
+- **p17 (boleta + guaro + parque): puesto 2 → 1.** La expansión agregó `bebidas alcohólicas`, `orden de comparendo` y `espacio público`; el artículo 140 (que habla de consumir bebidas alcohólicas en parques) pasó adelante del 124. Es el caso para el que sirve.
+- **p06 (otras sanciones además de la multa): puesto 3 → 2.** `sanción` → `medidas correctivas` agregó `med correct` y el 173 (que trata justamente de las medidas correctivas) subió.
+- **p13 (no hago caso a un agente): puesto 1 → 2. EMPEORÓ.** Dos causas, ambas de la expansión: (1) `agente` → `autoridades de policía` agregó `autor polic`, que favorece al artículo 198; (2) peor, **`caso` activó el coloquial `casa`** (→ `domicilio`) porque el stemmer Snowball reduce las dos palabras a `cas`. Es un falso positivo del stemming que una lematización con spaCy no tendría («caso» y «casa» son lemas distintos). El 163 (domicilio) pasó adelante del 222.
+
+En las otras 16 preguntas el resultado no cambió, aunque la expansión agregó palabras en varias (p01, p02, p03, p05, p07, p08, p10, p12, p14, p18, p19): ya iban primero, o el artículo esperado no estaba en juego. En p18 y p19 no cambió nada porque la mitad semántica del híbrido ya las acertaba sin ayuda; en modo léxico puro sí hay diferencia (0.33 → 1.00 en las tres coloquiales).
+
+### Preguntas fuera de dominio (LLM real, híbrido, expansión activa)
+
+| Pregunta | Palabras agregadas | `fuera_de_dominio` | Tiempo |
+|---|---|---|---|
+| ¿Cuánto cuesta renovar el pase de conducción? | ninguna | **True** | 3.3 s |
+| ¿Cuál es la tarifa del impuesto predial en Bogotá? | ninguna | **True** | 1.2 s |
+| *(control)* ¿Me ponen boleta si me cogen tomando guaro en el parque? | `bebidas alcohólicas`, `orden de comparendo`, `espacio público` | False; cita Art. 140, num. 7 y par. 2 | 1.6 s |
+
+Las dos preguntas fuera de dominio no tocan ningún término del glosario, así que la expansión no cambia lo que se recupera para ellas.
+
+## Conclusión sobre la expansión
+
+- **Ayuda cuando el usuario usa jerga** que solo el léxico necesita (p17; y, en modo léxico, las tres coloquiales: 0.33 → 1.00).
+- **En modo híbrido la ganancia neta es pequeña y no es concluyente:** Acierto@1 igual (0.84), MRR +0.009. Gana p17 y p06 y pierde p13.
+- Se mantiene **activa por defecto** (como se pidió), pero es la primera opción que conviene desactivar (`BUSQUEDA_EXPANSION=0`) si aparecen regresiones.
+
+### Límites de esta evaluación
+
+1. **Muestra mínima y parcialmente circular.** Las tres preguntas coloquiales se escribieron con jerga (`guaro`, `boleta`, `tombos`, `pitbull`) que está en el glosario semilla, y el glosario salió de los mismos 10 artículos. Es una prueba de que **el mecanismo funciona**, no de que cubra la jerga real. («sin papel», en p19, quedó fuera del glosario a propósito y no se detecta.) Una pregunta mueve 5 puntos de Acierto@1.
+2. **Un falso positivo dañó una pregunta** (p13) por el stemmer. Con spaCy (no probado en este equipo) los lemas de «caso» y «casa» serían distintos.
+3. **Términos genéricos como `agente` o `casa`** en el glosario agregan palabras en preguntas donde no hacen falta. El glosario de la Fase 2 debería revisarse con ese criterio.
+4. **El glosario es provisional**: las conclusiones cambian cuando Santiago Castro entregue el definitivo.
+5. **Las palabras agregadas pesan igual que las de la pregunta** (no hay peso menor para lo expandido).
+
+### Cómo reproducir
+
+```bash
+python eval/comparar_expansion.py
+```

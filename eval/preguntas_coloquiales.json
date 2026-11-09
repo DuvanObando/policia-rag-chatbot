@@ -1,0 +1,26 @@
+[
+  {
+    "id": "p17",
+    "tipo": "muy_coloquial",
+    "pregunta": "¿Me ponen boleta si me cogen tomando guaro en el parque?",
+    "articulo_esperado": "art-140",
+    "despues_del_token_512": true,
+    "nota": "Art. 140, num. 7: consumir bebidas alcohólicas en parques. «boleta» = comparendo; «guaro» = aguardiente."
+  },
+  {
+    "id": "p18",
+    "tipo": "muy_coloquial",
+    "pregunta": "Mi perro es un pitbull y se me escapó a la calle, ¿me cobran mucho?",
+    "articulo_esperado": "art-124",
+    "despues_del_token_512": true,
+    "nota": "Art. 124: dejar deambular animales en espacio público y canino de raza potencialmente peligrosa; la multa va en la tabla del parágrafo 2."
+  },
+  {
+    "id": "p19",
+    "tipo": "muy_coloquial",
+    "pregunta": "Los tombos se metieron a mi apartamento sin papel, ¿eso se puede?",
+    "articulo_esperado": "art-163",
+    "despues_del_token_512": false,
+    "nota": "Art. 163: ingreso a inmueble sin orden escrita. «tombos» = policías; «sin papel» no está en el glosario a propósito."
+  }
+]

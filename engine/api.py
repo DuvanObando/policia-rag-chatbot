@@ -34,7 +34,8 @@ from generation.llm import ErrorLLM, configuracion, precargar_cliente
 from generation.responder import ESTRATEGIA, responder
 from indexing import uploads
 from indexing.embeddings import MODELO
-from retrieval.search import buscar, info_indice, modo_por_defecto, precargar_busqueda, rrf_k
+from retrieval import expansion
+from retrieval.search import buscar, info_indice, modo_por_defecto, precargar_busqueda, rrf_k, verificar_bm25
 
 MAX_PREGUNTA = 500  # caracteres
 MAX_HISTORIAL = 50  # mensajes
@@ -59,8 +60,12 @@ async def lifespan(app: FastAPI):
     try:
         estado["modo_busqueda"] = modo_por_defecto()   # BUSQUEDA_MODO del .env
         precargar_busqueda(ESTRATEGIA)                 # embeddings + índice FAISS (+ BM25 si el modo lo usa)
+        if estado["modo_busqueda"] in ("lexico", "hibrido"):
+            problema = verificar_bm25(ESTRATEGIA)      # ¿el índice BM25 se preparó igual que ahora?
+            if problema:
+                raise ValueError(problema)
         buscar("calentamiento", k=1, estrategia=ESTRATEGIA)  # primera codificación (más lenta)
-    except (ValueError, FileNotFoundError) as e:       # modo inválido o falta el índice BM25
+    except (ValueError, FileNotFoundError, RuntimeError) as e:  # modo inválido, índice BM25 faltante o inconsistente
         busqueda_ok = False
         estado["error"] = str(e)
         log.error("  búsqueda no disponible: %s", e)
@@ -184,6 +189,7 @@ def health(request: Request):
         "estrategia_busqueda": ESTRATEGIA,
         "busqueda_modo": estado["modo_busqueda"],
         "rrf_k": rrf_k() if estado["modo_busqueda"] == "hibrido" else None,
+        "busqueda_expansion": expansion.info(),
         "fragmentos_en_indice": idx["fragmentos"],
         "llm_proveedor": proveedor,
         "llm_principal": principal,

@@ -28,7 +28,8 @@ from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from indexing.embeddings import PREGUNTAS_DEMO, cargar_modelo, embeddings_preguntas  # noqa: E402
-from preprocess.texto_bm25 import tokens_bm25  # noqa: E402
+from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
+from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
 from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -160,6 +161,27 @@ def _bm25(estrategia: str):
     return BM25Okapi(datos["tokens"], k1=datos["k1"], b=datos["b"]), datos["metodo"]
 
 
+def verificar_bm25(estrategia: str) -> Optional[str]:
+    """None si el índice BM25 es consistente con el entorno; si no, un mensaje de error.
+
+    El índice guarda con qué método se prepararon sus textos ("spacy:es_core_news_sm-3.8.0" o
+    "snowball:spanish"). Las preguntas deben prepararse igual; si el método disponible ahora es
+    otro (p. ej. se instaló spaCy después), las palabras ya no coincidirían y BM25 fallaría
+    en silencio.
+    """
+    ruta = CARPETA_INDICES / estrategia / "bm25_tokens.json"
+    if not ruta.exists():
+        return (f"No existe el índice BM25 de '{estrategia}'. Reconstruye el índice: "
+                f"python engine/indexing/build_index.py --estrategia {estrategia}")
+    guardado = json.loads(ruta.read_text(encoding="utf-8")).get("descripcion_metodo", "desconocido")
+    actual = descripcion_metodo(metodo_disponible())
+    if guardado != actual:
+        return (f"El índice BM25 de '{estrategia}' se construyó con la preparación de texto '{guardado}', "
+                f"pero ahora está disponible '{actual}'. Hay que reconstruir el índice: "
+                f"python engine/indexing/build_index.py --estrategia {estrategia}")
+    return None
+
+
 def precargar_busqueda(estrategia: str, modo: Optional[str] = None) -> None:
     """Carga lo que necesita el modo (modelo, índice FAISS y, si hace falta, BM25)."""
     precargar(estrategia)
@@ -179,7 +201,8 @@ def _puntajes_base(pregunta: str, estrategia: str, modo: str) -> list:
         sem = [(int(p), float(s)) for s, p in zip(sc[0], ps[0])]
     if modo in ("lexico", "hibrido"):
         bm25, metodo = _bm25(estrategia)
-        pesos = bm25.get_scores(tokens_bm25(pregunta, metodo))
+        # La expansión con glosario (BUSQUEDA_EXPANSION) se aplica SOLO a esta consulta léxica.
+        pesos = bm25.get_scores(tokens_consulta_lexica(pregunta, metodo))
         orden = np.argsort(-pesos, kind="stable")[:POOL_MAX]
         lex = [(int(i), float(pesos[i])) for i in orden if pesos[i] > 0]  # solo los que comparten palabras
 

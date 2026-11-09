@@ -1,0 +1,23 @@
+{
+  "_provisional": "PROVISIONAL. Glosario SEMILLA de ~18 entradas sacado del corpus de muestra de 10 artículos, escrito por el motor RAG (Duvan) solo para probar la expansión de consultas. Santiago Castro (Fase 2, análisis lingüístico) lo REEMPLAZA con el glosario de términos jurídicos y sinónimos coloquiales de la Fase 2; mientras tanto, no lo uses como fuente de verdad.",
+  "_formato": "{\"termino_legal\": [\"coloquial1\", \"coloquial2\", ...]}. 'termino_legal' es la expresión tal como aparece en el Código (así la encuentra BM25). Si la pregunta del usuario contiene alguno de los coloquiales, se agregan a la consulta léxica las palabras del término legal. Las claves que empiezan con _ se ignoran. No hace falta poner tildes ni mayúsculas, ni plurales: se comparan ya preparadas con la misma función de preprocess/texto_bm25.py (ver engine/retrieval/expansion.py). Un coloquial de varias palabras ('multa de la policía') debe aparecer completo y en ese orden.",
+
+  "bebidas alcohólicas": ["trago", "tragos", "licor", "guaro", "alcohol", "cerveza", "cervezas"],
+  "sustancias psicoactivas": ["droga", "drogas", "marihuana", "bazuco", "porro", "mota", "perico", "vicio"],
+  "orden de comparendo": ["comparendo", "boleta", "papeleta", "multa de la policía"],
+  "multa": ["multazo", "me cobran", "cuánto cobran"],
+  "descuento por pronto pago": ["descuento", "rebaja", "me rebajan", "pagar rápido", "pagar pronto"],
+  "medidas correctivas": ["sanción", "sanciones", "castigo", "castigos"],
+  "consecuencias por el no pago de multas": ["multa sin pagar", "deuda", "multas vencidas", "no he pagado", "moroso"],
+  "espacio público": ["calle", "andén", "acera", "parque", "plaza"],
+  "canino": ["perro", "perros", "perrito", "chucho"],
+  "raza potencialmente peligrosa": ["pitbull", "pit bull", "rottweiler", "perro bravo", "perro peligroso"],
+  "semoviente": ["vaca", "caballo", "ganado", "burro", "mula"],
+  "domicilio": ["casa", "apartamento", "apto", "vivienda", "hogar", "residencia"],
+  "orden escrita": ["sin orden", "allanamiento", "allanar", "sin permiso del juez"],
+  "autoridades de policía": ["tombo", "tombos", "agente", "agentes", "uniformado", "patrullero"],
+  "apelación": ["apelar", "reclamar", "recurrir", "impugnar", "no estoy de acuerdo", "objetar"],
+  "proceso verbal inmediato": ["trámite rápido", "juicio rápido", "resolver ahí mismo"],
+  "decomiso": ["me quitan", "me quitaron", "me decomisan", "incautan"],
+  "salarios mínimos diarios legales vigentes": ["smdlv"]
+}
