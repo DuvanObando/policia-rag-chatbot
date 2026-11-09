@@ -3,6 +3,8 @@
 Chatbot RAG sobre la **Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana, "Código Nacional de Policía")**.
 Equipo: Duvan (líder), Wilder, Santiago Castro, Santiago Bulla.
 
+> **Estado actual:** el bloque de Duvan (motor RAG: embeddings, FAISS, búsqueda híbrida, clasificador, generación con citas, API y `/upload_pdf/`) **ya está entregado y fusionado a `main`**, antes de lo que marca el cronograma. Su estado detallado, las reglas comunes y las guías por persona están en el [README de esta carpeta](README.md). Las casillas `[ ]` de Duvan en este plan no se actualizaron.
+
 > Fecha de inicio del plan: **lunes 9 de noviembre de 2026**. Entrega: **viernes 20 de noviembre de 2026**.
 > Para cambiar fechas, ajustar la columna "Fecha" de la sección 5 (el resto del documento usa "Día N").
 >
@@ -44,7 +46,7 @@ flowchart LR
     J --> K[Documentación<br/>informe, video, sustentación]
 ```
 
-Contrato de la API (referencia compartida): [api_contract.md](api_contract.md).
+Contrato de la API (referencia compartida): [api_contract.md](../api_contract.md).
 
 ## 3. Fases, entregables y peso en la nota
 
