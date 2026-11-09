@@ -31,11 +31,20 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
       "tema": "string"
     }
   ],
-  "fuera_de_dominio": false
+  "fuera_de_dominio": false,
+  "citas": [
+    { "articulo": "Artículo 163", "numeral": "2", "paragrafo": null, "texto": "Art. 163, num. 2" }
+  ]
 }
 ```
 
 - `fuera_de_dominio`: `true` si la pregunta no corresponde a la Ley 1801 de 2016.
+- `citas` (**opcional**): detalle de cada cita de la respuesta. `articulos_citados` sigue igual (solo artículos), así que quien no use `citas` no se ve afectado.
+  - `articulo`: como en `articulos_citados` (`"Artículo 163"`).
+  - `numeral`: número del numeral citado, o `null`.
+  - `paragrafo`: número del parágrafo (`"1"`), `"único"` (parágrafo sin número), `"transitorio"`, o `null`.
+  - `texto`: forma legible para mostrar (`"Art. 163, num. 2"`, `"Art. 183, par."`, `"Art. 180"`).
+  - Solo incluye citas de artículos que estaban en el contexto y cuyo numeral o parágrafo existe en el texto del artículo. Si `fuera_de_dominio` es `true`, va vacío.
 
 ### Campos de cada elemento de `fragmentos`
 

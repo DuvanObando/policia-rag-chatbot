@@ -10,16 +10,17 @@ Uso por línea de comandos (desde la raíz del repo):
 
 Devuelve el formato de docs/api_contract.md:
     respuesta, articulos_citados, fragmentos, fuera_de_dominio
-(con incluir_diagnostico=True agrega "diagnostico": tiempos y citas descartadas).
+    + citas (opcional): artículo y, si aparece, numeral o parágrafo de cada cita
+(con incluir_diagnostico=True agrega "diagnostico": tiempos, modelo y citas descartadas).
 """
 import argparse
-import re
 import sys
 import time
 from pathlib import Path
 from typing import List
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
+from generation.citas import existe_en_articulo, extraer_citas, texto_cita  # noqa: E402
 from generation.llm import ErrorLLM, estadisticas, generar  # noqa: E402
 from generation.prompt import FRASE_NO_ENCONTRADO, SISTEMA, construir_mensaje  # noqa: E402
 from retrieval.search import articulo_completo, buscar, id_articulo, precargar  # noqa: E402
@@ -34,22 +35,8 @@ PREGUNTAS_DEMO = [
     "¿Cuál es la tarifa del impuesto predial en Bogotá?",
 ]
 
-# "Artículo 140", "artículos 180 y 183", "Art. 163", "arts. 173, 180 y 183"
-_CITA = re.compile(r"\b(?:art[íi]culos?|arts?\.)\s+((?:\d+[A-Z]?)(?:\s*(?:,|y|e|o)\s*\d+[A-Z]?)*)", re.IGNORECASE)
-
-
 def numero_articulo(id_art: str) -> str:
     return id_art.replace("art-", "")
-
-
-def extraer_citas(texto: str) -> List[str]:
-    """Números de artículo citados en el texto, en orden de aparición y sin repetir."""
-    numeros = []
-    for grupo in _CITA.findall(texto):
-        for n in re.findall(r"\d+[A-Z]?", grupo):
-            if n not in numeros:
-                numeros.append(n)
-    return numeros
 
 
 def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> dict:
@@ -74,25 +61,41 @@ def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> d
     respuesta = llm.texto
     t_llm = time.perf_counter() - t1
 
-    # 4. Citas: solo se aceptan artículos que estaban en el contexto.
-    en_contexto = {a["numero"] for a in articulos}
-    citados = extraer_citas(respuesta)
-    validos = [n for n in citados if n in en_contexto]
-    descartados = [n for n in citados if n not in en_contexto]
+    # 4. Citas: solo se aceptan artículos que estaban en el contexto, y solo los
+    #    numerales/parágrafos que existen en el texto de ese artículo.
+    textos = {a["numero"]: a["texto"] for a in articulos}
     fuera_de_dominio = FRASE_NO_ENCONTRADO.rstrip(".").lower() in respuesta.lower()
+    citas, descartadas, inexistentes, articulos_ok = [], [], [], []
+    for c in extraer_citas(respuesta):
+        if c["articulo"] not in textos:
+            descartadas.append(texto_cita(c))  # artículo que no estaba en el contexto
+            continue
+        if c["articulo"] not in articulos_ok:
+            articulos_ok.append(c["articulo"])
+        if not existe_en_articulo(c, textos[c["articulo"]]):
+            inexistentes.append(texto_cita(c))  # numeral o parágrafo que el artículo no tiene
+            continue
+        citas.append({
+            "articulo": f"Artículo {c['articulo']}",
+            "numeral": c["numeral"],
+            "paragrafo": c["paragrafo"],
+            "texto": texto_cita(c),
+        })
 
     resultado = {
         "respuesta": respuesta,
-        "articulos_citados": [] if fuera_de_dominio else [f"Artículo {n}" for n in validos],
+        "articulos_citados": [] if fuera_de_dominio else [f"Artículo {n}" for n in articulos_ok],
         "fragmentos": fragmentos,
         "fuera_de_dominio": fuera_de_dominio,
+        "citas": [] if fuera_de_dominio else citas,
     }
     if incluir_diagnostico:
         resultado["diagnostico"] = {
             "modelo_usado": llm.modelo,
             "uso_respaldo": llm.uso_respaldo,
             "articulos_en_contexto": [a["numero"] for a in articulos],
-            "citas_descartadas": descartados,
+            "citas_descartadas": descartadas,
+            "citas_inexistentes": inexistentes,
             "tiempo_busqueda_s": round(t_busqueda, 2),
             "tiempo_llm_s": round(t_llm, 2),
             "tiempo_total_s": round(time.perf_counter() - t0, 2),
@@ -108,11 +111,13 @@ def _mostrar(pregunta: str, r: dict) -> None:
     print(r["respuesta"], flush=True)
     print("-" * 80)
     print(f"articulos_citados: {r['articulos_citados']}")
+    print("citas:             " + (", ".join(c["texto"] for c in r.get("citas", [])) or "ninguna"))
     print(f"fuera_de_dominio:  {r['fuera_de_dominio']}")
     print("fragmentos:        " + ", ".join(f"{f['id']} ({f['score']:.3f})" for f in r["fragmentos"]))
     if d:
         print(f"contexto:          artículos {d['articulos_en_contexto']}")
-        print(f"citas descartadas: {d['citas_descartadas'] or 'ninguna'}")
+        print(f"citas descartadas: {d['citas_descartadas'] or 'ninguna'} (artículo fuera del contexto)")
+        print(f"citas inexistentes: {d['citas_inexistentes'] or 'ninguna'} (numeral/parágrafo que no existe)")
         print(f"tiempo:            total {d['tiempo_total_s']} s "
               f"(búsqueda {d['tiempo_busqueda_s']} s, LLM {d['tiempo_llm_s']} s)")
         print(f"modelo usado:      {d['modelo_usado']}" + (" (RESPALDO)" if d["uso_respaldo"] else ""), flush=True)
