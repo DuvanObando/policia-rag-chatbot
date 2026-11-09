@@ -13,6 +13,7 @@ o antes con precargar()) y se reutilizan en las llamadas siguientes.
 """
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -22,16 +23,43 @@ from typing import List, Optional
 
 import faiss
 import numpy as np
+from dotenv import load_dotenv
+from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from indexing.embeddings import PREGUNTAS_DEMO, cargar_modelo, embeddings_preguntas  # noqa: E402
+from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
+from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
+from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 CARPETA_INDICES = Path(__file__).resolve().parents[1] / "indexing" / "indexes"
 ORDINALES = {"PRIMERO": "I", "SEGUNDO": "II", "TERCERO": "III", "CUARTO": "IV", "QUINTO": "V"}
 
-# Modos de búsqueda. Hoy solo "semantico"; BM25 / híbrido se agregan aquí
-# (nuevos valores de `modo`) sin cambiar la firma de buscar().
-MODOS = ("semantico",)
+# Modos de búsqueda (el `score` de cada fragmento tiene otra escala según el modo):
+#   "semantico"  similitud coseno de los embeddings (0 a 1)
+#   "lexico"     BM25 normalizado por el mejor resultado (0 a 1); solo trae fragmentos que
+#                comparten alguna palabra con la pregunta
+#   "hibrido"    Reciprocal Rank Fusion de los dos rankings: suma de 1/(k + posición); ~0.01 a 0.03
+MODOS = ("semantico", "lexico", "hibrido")
+MODO_POR_DEFECTO = "hibrido"  # si no hay BUSQUEDA_MODO en el .env (recomendado: ver docs/busqueda_hibrida.md)
+
+
+def modo_por_defecto() -> str:
+    """Modo del .env (BUSQUEDA_MODO) o MODO_POR_DEFECTO. Lanza ValueError si el valor no existe."""
+    modo = os.getenv("BUSQUEDA_MODO", "").strip().lower() or MODO_POR_DEFECTO
+    if modo not in MODOS:
+        raise ValueError(f"BUSQUEDA_MODO={modo!r} no existe. Opciones: {list(MODOS)}")
+    return modo
+
+
+def rrf_k() -> int:
+    """Constante k de Reciprocal Rank Fusion (BUSQUEDA_RRF_K en el .env; 60 por defecto)."""
+    return int(os.getenv("BUSQUEDA_RRF_K", "60"))
+
+
+POOL_MAX = 2000  # máximo de candidatos que se traen del índice para reordenar (empuje por tema)
 
 
 @lru_cache(maxsize=1)
@@ -120,40 +148,130 @@ def formatear_ubicacion(ub: dict) -> str:
     return ", ".join(partes)
 
 
-def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: str = "semantico") -> List[dict]:
+@lru_cache(maxsize=None)
+def _bm25(estrategia: str):
+    """(BM25Okapi, método de preparación del texto) del índice, cargado una sola vez."""
+    ruta = CARPETA_INDICES / estrategia / "bm25_tokens.json"
+    if not ruta.exists():
+        raise FileNotFoundError(
+            f"No existe el índice BM25 de '{estrategia}'. Reconstruye el índice: "
+            f"python engine/indexing/build_index.py --estrategia {estrategia}"
+        )
+    datos = json.loads(ruta.read_text(encoding="utf-8"))
+    return BM25Okapi(datos["tokens"], k1=datos["k1"], b=datos["b"]), datos["metodo"]
+
+
+def verificar_bm25(estrategia: str) -> Optional[str]:
+    """None si el índice BM25 es consistente con el entorno; si no, un mensaje de error.
+
+    El índice guarda con qué método se prepararon sus textos ("spacy:es_core_news_sm-3.8.0" o
+    "snowball:spanish"). Las preguntas deben prepararse igual; si el método disponible ahora es
+    otro (p. ej. se instaló spaCy después), las palabras ya no coincidirían y BM25 fallaría
+    en silencio.
+    """
+    ruta = CARPETA_INDICES / estrategia / "bm25_tokens.json"
+    if not ruta.exists():
+        return (f"No existe el índice BM25 de '{estrategia}'. Reconstruye el índice: "
+                f"python engine/indexing/build_index.py --estrategia {estrategia}")
+    guardado = json.loads(ruta.read_text(encoding="utf-8")).get("descripcion_metodo", "desconocido")
+    actual = descripcion_metodo(metodo_disponible())
+    if guardado != actual:
+        return (f"El índice BM25 de '{estrategia}' se construyó con la preparación de texto '{guardado}', "
+                f"pero ahora está disponible '{actual}'. Hay que reconstruir el índice: "
+                f"python engine/indexing/build_index.py --estrategia {estrategia}")
+    return None
+
+
+def precargar_busqueda(estrategia: str, modo: Optional[str] = None) -> None:
+    """Carga lo que necesita el modo (modelo, índice FAISS y, si hace falta, BM25)."""
+    precargar(estrategia)
+    if (modo or modo_por_defecto()) in ("lexico", "hibrido"):
+        _bm25(estrategia)
+
+
+def _puntajes_base(pregunta: str, estrategia: str, modo: str) -> list:
+    """[(score, fragmento)] de mayor a menor, según el modo y SIN clasificador."""
+    indice, meta = _indice(estrategia)
+    frs = meta["fragmentos"]
+
+    sem, lex = [], []
+    if modo in ("semantico", "hibrido"):
+        consulta = embeddings_preguntas([pregunta], _modelo()).astype("float32")
+        sc, ps = indice.search(consulta, min(POOL_MAX, indice.ntotal))
+        sem = [(int(p), float(s)) for s, p in zip(sc[0], ps[0])]
+    if modo in ("lexico", "hibrido"):
+        bm25, metodo = _bm25(estrategia)
+        # La expansión con glosario (BUSQUEDA_EXPANSION) se aplica SOLO a esta consulta léxica.
+        pesos = bm25.get_scores(tokens_consulta_lexica(pregunta, metodo))
+        orden = np.argsort(-pesos, kind="stable")[:POOL_MAX]
+        lex = [(int(i), float(pesos[i])) for i in orden if pesos[i] > 0]  # solo los que comparten palabras
+
+    if modo == "semantico":
+        base = sem
+    elif modo == "lexico":
+        base = [(i, s / lex[0][1]) for i, s in lex] if lex else []
+    else:  # hibrido: Reciprocal Rank Fusion
+        k = rrf_k()
+        puntos = {}
+        for lista in (sem, lex):
+            for rango, (i, _) in enumerate(lista, start=1):
+                puntos[i] = puntos.get(i, 0.0) + 1.0 / (k + rango)
+        base = sorted(puntos.items(), key=lambda x: -x[1])
+    return [(s, frs[i]) for i, s in base]
+
+
+def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Optional[str] = None,
+           clasificador: bool = True) -> List[dict]:
     """Devuelve los k fragmentos más relevantes, de mayor a menor score.
 
     Formato de cada fragmento (docs/api_contract.md):
         id, ubicacion (cadena), epigrafe, texto, score, vigencia, tema
 
-    `modo` está para poder agregar BM25 o búsqueda híbrida más adelante
-    sin cambiar la firma.
+    modo: "semantico", "lexico" (BM25) o "hibrido" (RRF de los dos). Si es None se usa
+        BUSQUEDA_MODO del .env. La escala del `score` cambia con el modo (ver MODOS).
+
+    Con `clasificador=True` (por defecto), igual en los tres modos:
+      - Tema: el clasificador (retrieval/clasificador.py + temas.json) detecta el tema de la
+        pregunta y SUMA un empuje al score de los candidatos de ese tema. Es un empuje, nunca
+        un filtro. El empuje es el equivalente en la escala de cada modo (`empuje_por_modo`).
+        El `score` devuelto incluye el empuje, que es el que decide el orden.
+      - Artículo por número: si la pregunta pide "artículo N" / "art. N" y ese artículo existe
+        en el índice, va primero (en ese caso la lista puede no quedar ordenada por score).
+    Con `clasificador=False` el orden es solo el del modo elegido.
+
+    Se devuelve como máximo un fragmento por artículo (el de mayor score).
     """
+    modo = modo or modo_por_defecto()
     if modo not in MODOS:
         raise ValueError(f"Modo no soportado: {modo!r}. Disponibles: {list(MODOS)}")
-    indice, meta = _indice(estrategia)
-    consulta = embeddings_preguntas([pregunta], _modelo()).astype("float32")
+    _, meta = _indice(estrategia)
+    candidatos = _puntajes_base(pregunta, estrategia, modo)
 
-    # Con trozos, varios del mismo artículo pueden salir a la vez. Se conserva el de
-    # mayor score por artículo y se amplía la búsqueda hasta tener k artículos distintos.
-    agrupar = estrategia == "fragmentos"
-    n = min(k * 4 if agrupar else k, indice.ntotal)
-    while True:
-        scores, posiciones = indice.search(consulta, n)
-        elegidos, vistos = [], set()
-        for score, pos in zip(scores[0], posiciones[0]):
-            f = meta["fragmentos"][pos]
-            if agrupar:
-                art = id_articulo(f["id"])
-                if art in vistos:
-                    continue
-                vistos.add(art)
-            elegidos.append((score, f))
-            if len(elegidos) == k:
-                break
-        if len(elegidos) == k or n >= indice.ntotal:
-            break
-        n = min(n * 2, indice.ntotal)
+    pedidos = []
+    if clasificador:
+        empuje = empujes(clasificar(pregunta), modo)
+        if empuje:
+            candidatos = [(sc + empuje.get(f["tema"], 0.0), f) for sc, f in candidatos]
+            candidatos.sort(key=lambda c: -c[0])
+        existentes = {id_articulo(f["id"]) for f in meta["fragmentos"]}
+        pedidos = [f"art-{n}" for n in articulos_mencionados(pregunta) if f"art-{n}" in existentes]
+
+    # Un solo fragmento por artículo: el de mayor score.
+    mejores, vistos = [], set()
+    for sc, f in candidatos:
+        art = id_articulo(f["id"])
+        if art not in vistos:
+            vistos.add(art)
+            mejores.append((sc, f))
+
+    # Artículos pedidos por número: primero y en el orden en que se pidieron. Si el modo no
+    # trajo ese artículo (p. ej. léxico sin coincidencias), entra su primer fragmento con score 0.
+    primeros = []
+    for art in pedidos:
+        c = next((c for c in mejores if id_articulo(c[1]["id"]) == art), None)
+        primeros.append(c or (0.0, next(f for f in meta["fragmentos"] if id_articulo(f["id"]) == art)))
+    resto = [c for c in mejores if id_articulo(c[1]["id"]) not in pedidos]
+    elegidos = (primeros + resto)[:k]
 
     resultados = []
     for score, f in elegidos:
@@ -182,6 +300,8 @@ def main() -> None:
     ap.add_argument("-k", type=int, default=3)
     ap.add_argument("--estrategia", default="articulo")
     ap.add_argument("--demo", action="store_true", help="prueba 3 preguntas y mide tiempos")
+    ap.add_argument("--sin-clasificador", action="store_true", help="sin empuje por tema ni regla del artículo por número")
+    ap.add_argument("--modo", choices=MODOS, default=None, help="semantico, lexico o hibrido (por defecto BUSQUEDA_MODO)")
     args = ap.parse_args()
 
     preguntas = PREGUNTAS_DEMO if args.demo else [" ".join(args.pregunta)] if args.pregunta else []
@@ -189,13 +309,13 @@ def main() -> None:
         ap.error("indica una pregunta o usa --demo")
 
     t0 = time.perf_counter()
-    precargar(args.estrategia)
+    precargar_busqueda(args.estrategia, args.modo)
     t_carga = time.perf_counter() - t0
 
     tiempos = []
     for p in preguntas:
         t = time.perf_counter()
-        res = buscar(p, k=args.k, estrategia=args.estrategia)
+        res = buscar(p, k=args.k, estrategia=args.estrategia, modo=args.modo, clasificador=not args.sin_clasificador)
         tiempos.append(time.perf_counter() - t)
         _mostrar(p, res)
 

@@ -9,6 +9,9 @@ Guarda en engine/indexing/indexes/<estrategia>/:
                     (producto punto == similitud coseno)
   - metadatos.json  modelo, fecha de construcción y, por posición del índice,
                     el fragmento (id, ubicacion, epigrafe, texto, vigencia, tema)
+  - bm25_tokens.json  los fragmentos ya preparados para la búsqueda léxica (BM25) y el método
+                    de preparación usado (ver preprocess/texto_bm25.py). Se arma con rank-bm25
+                    al cargar. Mismas posiciones que index.faiss.
 
 Estrategias:
   - articulo     un fragmento por artículo completo (epígrafe + texto).
@@ -34,12 +37,14 @@ import faiss
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from indexing import uploads  # noqa: E402
+from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible, tokens_bm25_lote  # noqa: E402
 from indexing.embeddings import (  # noqa: E402
     CORPUS_POR_DEFECTO,
     MODELO,
     cargar_corpus,
     cargar_modelo,
     embeddings_articulos,
+    texto_articulo,
 )
 
 CARPETA_INDICES = Path(__file__).resolve().parent / "indexes"
@@ -140,6 +145,15 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
     destino.mkdir(parents=True, exist_ok=True)
     guardar_indice(indice, destino / "index.faiss")
 
+    # Índice léxico (BM25) sobre los MISMOS fragmentos, en las mismas posiciones.
+    metodo = metodo_disponible()
+    tokens = tokens_bm25_lote([texto_articulo(f) for f in fragmentos], metodo)
+    (destino / "bm25_tokens.json").write_text(
+        json.dumps({"metodo": metodo, "descripcion_metodo": descripcion_metodo(metodo),
+                    "k1": 1.5, "b": 0.75, "tokens": tokens}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
     metadatos = {
         "modelo": MODELO,
         "estrategia": estrategia,
@@ -148,6 +162,7 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
         "corpus": str(corpus),
         "dimension": int(vectores.shape[1]),
         "documentos_incluidos": [d["id"] for d in documentos],
+        "bm25": {"metodo": metodo, "descripcion": descripcion_metodo(metodo)},
         "n_fragmentos": len(fragmentos),
         "fragmentos": [{c: f[c] for c in CAMPOS} for f in fragmentos],
     }
@@ -175,6 +190,7 @@ def main() -> None:
     print(f"  fragmentos: {meta['n_fragmentos']} | dimensión: {meta['dimension']} | modelo: {meta['modelo']}")
     if meta["parametros"]:
         print(f"  parámetros: {meta['parametros']}")
+    print(f"  BM25: {meta['bm25']['descripcion']}")
     if args.incluir_uploads:
         print(f"  documentos subidos incluidos: {len(meta['documentos_incluidos'])}")
 

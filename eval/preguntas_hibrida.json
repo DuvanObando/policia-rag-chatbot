@@ -1,0 +1,26 @@
+[
+  {
+    "id": "p14",
+    "tipo": "sigla_o_termino_tecnico",
+    "pregunta": "¿Cuántos smdlv cuesta una multa tipo 4?",
+    "articulo_esperado": "art-180",
+    "despues_del_token_512": false,
+    "nota": "«smdlv» (salarios mínimos diarios legales vigentes) solo aparece en el artículo 180, en la lista de multas generales."
+  },
+  {
+    "id": "p15",
+    "tipo": "porcentaje_o_plazo",
+    "pregunta": "¿Qué debe ocurrir en 24 horas con una apelación contra la orden de policía?",
+    "articulo_esperado": "art-222",
+    "despues_del_token_512": false,
+    "nota": "«veinticuatro (24) horas» solo aparece en el artículo 222, parágrafo 1: la apelación se remite al Inspector de Policía."
+  },
+  {
+    "id": "p16",
+    "tipo": "termino_legal_especifico",
+    "pregunta": "¿Qué tiene que ver la Ley 1566 de 2012 con las medidas correctivas?",
+    "articulo_esperado": "art-140",
+    "despues_del_token_512": true,
+    "nota": "«Ley 1566 de 2012» solo aparece en el artículo 140 (tabla del parágrafo 2, numeral 7: remisión a centros de atención en drogadicción)."
+  }
+]

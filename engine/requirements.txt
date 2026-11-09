@@ -10,3 +10,4 @@ numpy
 pandas
 google-genai
 pypdf
+snowballstemmer
