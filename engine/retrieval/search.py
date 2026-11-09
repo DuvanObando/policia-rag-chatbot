@@ -59,6 +59,29 @@ def precargar(estrategia: str = "articulo") -> None:
     _indice(estrategia)
 
 
+@lru_cache(maxsize=None)
+def _articulos_del_corpus(estrategia: str) -> dict:
+    """Artículos completos del corpus con que se construyó el índice, por id (se carga una vez)."""
+    ruta = Path(_indice(estrategia)[1]["corpus"])
+    return {a["id"]: a for a in json.loads(ruta.read_text(encoding="utf-8"))}
+
+
+def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict:
+    """Artículo completo al que pertenece un fragmento (para small-to-big).
+
+    Devuelve id, ubicacion (cadena), epigrafe, texto, vigencia y tema del artículo.
+    """
+    a = _articulos_del_corpus(estrategia)[id_articulo(id_fragmento)]
+    return {
+        "id": a["id"],
+        "ubicacion": formatear_ubicacion(a["ubicacion"]),
+        "epigrafe": a["epigrafe"],
+        "texto": a["texto"],
+        "vigencia": a["vigencia"],
+        "tema": a["tema"],
+    }
+
+
 def _parte(texto: Optional[str]) -> Optional[str]:
     """'Libro Segundo. De la libertad...' -> 'Libro Segundo' (lo que va antes del primer punto)."""
     return texto.split(".")[0].strip() if texto else None
