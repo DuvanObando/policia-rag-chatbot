@@ -165,9 +165,8 @@ El usuario dice «guaro», «boleta», «tombos»; la ley dice «bebidas alcohó
 
 [`engine/retrieval/expansion.py`](../engine/retrieval/expansion.py), `expandir(pregunta)`:
 
-1. Prepara la pregunta con la **misma función del índice** (`tokens_bm25`: minúsculas, sin tildes, sin stopwords, stemming o lematización). Por eso «drogas» encuentra «droga» y no hay que listar plurales.
-2. Busca en la pregunta cada término coloquial del glosario (también los de varias palabras, en orden: `multa de la policía`).
-3. Por cada término legal con alguna coincidencia, agrega a la consulta las palabras del término legal que **la pregunta todavía no tiene** (no se duplican).
+1. **Detecta** los coloquiales del glosario comparando **palabras completas normalizadas** (minúsculas y sin tildes, con la función `sin_tildes` de `texto_bm25.py`). Un coloquial de varias palabras (`multa de la policía`) debe aparecer completo y en ese orden. **No se comparan raíces del stemmer.**
+2. **Agrega** a la consulta las palabras del término legal, **preparadas con `tokens_bm25`** (igual que el texto del índice, para que coincidan con él), y solo las que la pregunta todavía no tiene (no se duplican).
 
 Ejemplo: «¿Me ponen boleta si me cogen tomando guaro en el parque?» agrega `beb alcohol` (bebidas alcohólicas), `orden comparend` (orden de comparendo) y `espaci public` (espacio público).
 
@@ -175,12 +174,21 @@ Reglas:
 
 - **Solo BM25.** Se aplica a la consulta léxica de los modos `lexico` e `hibrido`, **nunca a la consulta semántica**: el modelo de embeddings ya entiende «guaro», y agregarle palabras solo desviaría su significado.
 - **Activable:** `BUSQUEDA_EXPANSION` en el `.env` (`1` activa por defecto; `0`, `false`, `no` u `off` la desactivan). `/health` → `busqueda_expansion` muestra si está activa y cuántas entradas tiene el glosario.
+- **Consecuencia de comparar palabras completas:** las variantes (plural, género) hay que listarlas en el glosario (`perro` y `perros`). Es el precio de no confundir palabras.
+
+### Corrección: por qué no se comparan raíces
+
+La primera versión detectaba los coloquiales con la misma preparación de texto de BM25 (stemming), para que «drogas» encontrara «droga» sin listar plurales. El stemmer Snowball reduce **«caso» y «casa» a la misma raíz, `cas`**: la pregunta «¿Qué pasa si no hago *caso* cuando un agente me da una indicación?» activó el coloquial `casa` (→ «domicilio») y la pregunta p13 **empeoró** (puesto 1 → 2). También `castigue` se tomaba por `castigo`, y `agente` agregaba «autoridades de policía». Por eso:
+
+- La detección pasó a **palabras completas** (arriba).
+- Se quitó **`agente`** (y su plural `agentes`) del glosario semilla: es un término demasiado genérico. El archivo ahora dice que se eviten términos así (`agente`, `policía`, y `casa` suelta si genera ruido).
 
 ## El glosario (`engine/glossary/sinonimos.json`)
 
 ```json
 {
   "_provisional": "...",
+  "_evitar": "...",
   "bebidas alcohólicas": ["trago", "tragos", "licor", "guaro", "alcohol", "cerveza"],
   "orden de comparendo": ["comparendo", "boleta", "papeleta", "multa de la policía"]
 }
@@ -189,6 +197,7 @@ Reglas:
 - Formato: `{"termino_legal": ["coloquial1", "coloquial2", ...]}`. El término legal va **como aparece en el Código** (así lo encuentra BM25). Las claves que empiezan con `_` se ignoran.
 - Hoy tiene **18 entradas semilla** sacadas del corpus de muestra.
 - **Es PROVISIONAL**: lo escribió el motor RAG solo para probar el mecanismo. **Santiago Castro lo reemplaza con el glosario de la Fase 2** (mismo formato); el archivo lo dice en su primera clave.
+- Evitar términos genéricos (clave `_evitar`): `agente` y `policía` aparecen en casi cualquier pregunta; un coloquial debe señalar una sola cosa del Código.
 
 ## Verificación de consistencia del índice
 
@@ -200,7 +209,7 @@ Se probó modificando una copia del archivo del índice para simular el desajust
 
 ## Evaluación: híbrido con y sin expansión
 
-`eval/comparar_expansion.py`. **19 preguntas**: las 16 de la evaluación anterior más **3 muy coloquiales**, escritas antes de evaluar y sin ajustarlas después:
+`eval/comparar_expansion.py`. **19 preguntas** (no se modificaron al corregir): las 16 de la evaluación anterior más **3 muy coloquiales**, escritas antes de evaluar:
 
 | # | Pregunta | Esperado |
 |---|---|---|
@@ -208,54 +217,56 @@ Se probó modificando una copia del archivo del índice para simular el desajust
 | p18 | Mi perro es un pitbull y se me escapó a la calle, ¿me cobran mucho? | 124 |
 | p19 | Los tombos se metieron a mi apartamento sin papel, ¿eso se puede? | 163 |
 
-Modo híbrido, con clasificador:
+Modo híbrido, con clasificador. Se muestran la primera versión (por raíces, con `agente`) y la **versión corregida** (palabras completas, sin `agente`):
 
 | Preguntas | Expansión | Acierto@1 | Acierto@3 | MRR |
 |---|---|---|---|---|
-| 19 (todas) | sin | 0.84 | 1.00 | 0.912 |
-| | **con** | 0.84 | 1.00 | **0.921** |
-| 16 de la evaluación anterior | sin | **0.88** | 1.00 | **0.927** |
-| | con | 0.81 | 1.00 | 0.906 |
+| **19 (todas)** | sin | 0.84 | 1.00 | 0.912 |
+| | con, primera versión | 0.84 | 1.00 | 0.921 |
+| | **con, corregida** | **0.89** | 1.00 | **0.947** |
+| 16 de la evaluación anterior | sin | 0.88 | 1.00 | 0.927 |
+| | con, primera versión | 0.81 | 1.00 | 0.906 |
+| | **con, corregida** | 0.88 | 1.00 | **0.938** |
 | 3 muy coloquiales (p17–p19) | sin | 0.67 | 1.00 | 0.833 |
-| | **con** | **1.00** | 1.00 | **1.000** |
+| | con, primera versión | 1.00 | 1.00 | 1.000 |
+| | **con, corregida** | **1.00** | 1.00 | **1.000** |
 | *Informativo: modo léxico, 19* | sin | 0.79 | 0.89 | 0.855 |
-| | con | **0.89** | 0.89 | **0.912** |
-| *Informativo: modo léxico, 3 coloquiales* | sin | 0.33 | 0.67 | 0.583 |
-| | con | **1.00** | **1.00** | **1.000** |
+| | con, primera versión | 0.89 | 0.89 | 0.912 |
+| | **con, corregida** | **0.89** | **0.95** | **0.921** |
 
-### En qué preguntas cambió el resultado (híbrido) y por qué
+### Posición del artículo esperado (híbrido): solo las que cambian
 
-Cambiaron tres de las 19:
+| # | Esperado | Sin expansión | Primera versión | **Corregida** |
+|---|---|---|---|---|
+| p06 | 173 | 3 | 2 | **2** |
+| p13 | 222 | 1 | 2 (empeoró) | **1** (recuperada) |
+| p17 | 140 | 2 | 1 | **1** |
 
-- **p17 (boleta + guaro + parque): puesto 2 → 1.** La expansión agregó `bebidas alcohólicas`, `orden de comparendo` y `espacio público`; el artículo 140 (que habla de consumir bebidas alcohólicas en parques) pasó adelante del 124. Es el caso para el que sirve.
-- **p06 (otras sanciones además de la multa): puesto 3 → 2.** `sanción` → `medidas correctivas` agregó `med correct` y el 173 (que trata justamente de las medidas correctivas) subió.
-- **p13 (no hago caso a un agente): puesto 1 → 2. EMPEORÓ.** Dos causas, ambas de la expansión: (1) `agente` → `autoridades de policía` agregó `autor polic`, que favorece al artículo 198; (2) peor, **`caso` activó el coloquial `casa`** (→ `domicilio`) porque el stemmer Snowball reduce las dos palabras a `cas`. Es un falso positivo del stemming que una lematización con spaCy no tendría («caso» y «casa» son lemas distintos). El 163 (domicilio) pasó adelante del 222.
+Las otras 16 preguntas dan igual en las tres columnas. **Ninguna pregunta empeora frente a «sin expansión» con la versión corregida.**
 
-En las otras 16 preguntas el resultado no cambió, aunque la expansión agregó palabras en varias (p01, p02, p03, p05, p07, p08, p10, p12, p14, p18, p19): ya iban primero, o el artículo esperado no estaba en juego. En p18 y p19 no cambió nada porque la mitad semántica del híbrido ya las acertaba sin ayuda; en modo léxico puro sí hay diferencia (0.33 → 1.00 en las tres coloquiales).
+- **p17 (boleta + guaro + parque): 2 → 1.** La expansión agrega `bebidas alcohólicas`, `orden de comparendo` y `espacio público`; el artículo 140 pasa adelante del 124.
+- **p06 (otras sanciones además de la multa): 3 → 2.** `sanciones` → `medidas correctivas` agrega `med correct` y sube el 173.
+- **p13: de vuelta al puesto 1.** Ya no se activa `casa` por `caso`, ni `agente`; la expansión no agrega nada a esa pregunta.
 
-### Preguntas fuera de dominio (LLM real, híbrido, expansión activa)
+Qué coincidencias dejaron de ocurrir con la corrección (ninguna cambiaba una posición): `castigue` → `castigo` (p02, que era una coincidencia por raíz), `sin permiso de un juez` ≠ `sin permiso del juez` (p05: la frase del glosario no coincide palabra por palabra), `agente` (p08, p13) y `casa` (p13). En p05 sigue activándose `apartamento` → `domicilio`.
 
-| Pregunta | Palabras agregadas | `fuera_de_dominio` | Tiempo |
-|---|---|---|---|
-| ¿Cuánto cuesta renovar el pase de conducción? | ninguna | **True** | 3.3 s |
-| ¿Cuál es la tarifa del impuesto predial en Bogotá? | ninguna | **True** | 1.2 s |
-| *(control)* ¿Me ponen boleta si me cogen tomando guaro en el parque? | `bebidas alcohólicas`, `orden de comparendo`, `espacio público` | False; cita Art. 140, num. 7 y par. 2 | 1.6 s |
+### Preguntas fuera de dominio (LLM real, híbrido)
 
-Las dos preguntas fuera de dominio no tocan ningún término del glosario, así que la expansión no cambia lo que se recupera para ellas.
+Se comprobaron con el LLM real con la primera versión: «pase de conducción» e «impuesto predial» siguieron en `fuera_de_dominio: True`, sin ninguna palabra agregada. Con la versión corregida la expansión tampoco agrega ninguna palabra a esas dos preguntas (se comprobó la expansión; lo recuperado es idéntico), así que no se repitió la llamada al LLM.
 
 ## Conclusión sobre la expansión
 
-- **Ayuda cuando el usuario usa jerga** que solo el léxico necesita (p17; y, en modo léxico, las tres coloquiales: 0.33 → 1.00).
-- **En modo híbrido la ganancia neta es pequeña y no es concluyente:** Acierto@1 igual (0.84), MRR +0.009. Gana p17 y p06 y pierde p13.
-- Se mantiene **activa por defecto** (como se pidió), pero es la primera opción que conviene desactivar (`BUSQUEDA_EXPANSION=0`) si aparecen regresiones.
+- **Con la corrección, la expansión es una mejora pequeña pero sin regresiones en esta muestra:** Acierto@1 de 0.84 a 0.89 y MRR de 0.912 a 0.947 en 19 preguntas; ninguna pregunta empeora. Ayuda sobre todo con jerga (p17; en modo léxico puro, las tres coloquiales pasan de 0.33 a 1.00).
+- Sigue **activa por defecto**; se desactiva con `BUSQUEDA_EXPANSION=0`.
 
 ### Límites de esta evaluación
 
-1. **Muestra mínima y parcialmente circular.** Las tres preguntas coloquiales se escribieron con jerga (`guaro`, `boleta`, `tombos`, `pitbull`) que está en el glosario semilla, y el glosario salió de los mismos 10 artículos. Es una prueba de que **el mecanismo funciona**, no de que cubra la jerga real. («sin papel», en p19, quedó fuera del glosario a propósito y no se detecta.) Una pregunta mueve 5 puntos de Acierto@1.
-2. **Un falso positivo dañó una pregunta** (p13) por el stemmer. Con spaCy (no probado en este equipo) los lemas de «caso» y «casa» serían distintos.
-3. **Términos genéricos como `agente` o `casa`** en el glosario agregan palabras en preguntas donde no hacen falta. El glosario de la Fase 2 debería revisarse con ese criterio.
+1. **Muestra mínima y parcialmente circular.** Las tres preguntas coloquiales usan jerga que está en el glosario semilla (`guaro`, `boleta`, `tombos`, `pitbull`), y el glosario salió de los mismos 10 artículos: es una prueba de que **el mecanismo funciona**, no de que cubra la jerga real. («sin papel», en p19, quedó fuera a propósito y no se detecta.) En híbrido, solo p17 cambia el Acierto@1: **+1 pregunta de 19** (5 puntos), no concluyente.
+2. **La corrección se hizo mirando una pregunta de la evaluación (p13)**, así que esa pregunta ya no es una prueba independiente. La corrección en sí es de diseño (palabras completas) y no depende de p13, pero los números de la versión corregida están algo favorecidos.
+3. **Con palabras completas se pierden variantes no listadas** (`calles`, `uniformados`, `patrulleros`): el glosario de la Fase 2 debe incluirlas.
 4. **El glosario es provisional**: las conclusiones cambian cuando Santiago Castro entregue el definitivo.
 5. **Las palabras agregadas pesan igual que las de la pregunta** (no hay peso menor para lo expandido).
+6. Todo se midió con **stemming (Snowball), no lematización**, porque spaCy está bloqueado en este equipo.
 
 ### Cómo reproducir
 

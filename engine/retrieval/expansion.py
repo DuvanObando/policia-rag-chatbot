@@ -13,21 +13,26 @@ Reglas:
   - Solo se aplica a la consulta de BM25 (modos `lexico` e `hibrido`). NUNCA a la consulta
     semántica: el modelo de embeddings ya entiende «guaro» y no necesita ayuda; agregarle
     términos solo desviaría el significado.
-  - Se compara con la MISMA preparación de texto del índice (preprocess/texto_bm25.py:
-    minúsculas, sin tildes, sin stopwords, lematizado o stemmer). Así «drogas» encuentra
-    «droga» y no hay que listar plurales.
-  - Solo se agregan palabras que la pregunta todavía no tiene (no se duplican).
+  - DETECCIÓN por PALABRAS COMPLETAS normalizadas (minúsculas, sin tildes; la normalización es
+    `sin_tildes` de preprocess/texto_bm25.py), NO por raíces del stemmer. Con raíces, «caso» y
+    «casa» (ambas «cas») se confundían. Un coloquial de varias palabras ('multa de la policía')
+    debe aparecer completo y en ese orden. Consecuencia: las variantes (plural, género) hay que
+    listarlas en el glosario («perro», «perros»).
+  - AGREGADO: las palabras del término LEGAL sí pasan por la preparación de texto de BM25
+    (tokens_bm25: sin stopwords, stemming o lematización), igual que el texto del índice, para
+    que coincidan con él. Solo se agregan las que la pregunta todavía no tiene.
   - Se activa o desactiva con BUSQUEDA_EXPANSION en el .env (activa por defecto).
 
 El glosario es PROVISIONAL: Santiago Castro lo reemplaza con el de la Fase 2 (mismo formato).
 """
 import json
 import os
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
-from preprocess.texto_bm25 import metodo_disponible, tokens_bm25
+from preprocess.texto_bm25 import metodo_disponible, sin_tildes, tokens_bm25
 
 RUTA_GLOSARIO = Path(__file__).resolve().parents[1] / "glossary" / "sinonimos.json"
 
@@ -37,17 +42,25 @@ def expansion_activa() -> bool:
     return os.getenv("BUSQUEDA_EXPANSION", "1").strip().lower() not in ("0", "false", "no", "off", "inactiva", "desactivada")
 
 
+def palabras(texto: str) -> tuple:
+    """Palabras completas normalizadas: minúsculas y sin tildes. 'Los TOMBOS, ya' -> ('los','tombos','ya')."""
+    return tuple(re.findall(r"\w+", sin_tildes(texto.lower())))
+
+
 @lru_cache(maxsize=None)
 def _glosario(metodo: str) -> list:
-    """[(término legal, sus tokens, [(coloquial, sus tokens)])], preparado con el método `metodo`."""
+    """[(término legal, sus tokens BM25, [(coloquial, sus palabras completas)])].
+
+    `metodo` solo afecta a los tokens del término legal (que se agregan a la consulta BM25).
+    """
     datos = json.loads(RUTA_GLOSARIO.read_text(encoding="utf-8"))
     entradas = []
     for legal, coloquiales in datos.items():
         if legal.startswith("_") or not isinstance(coloquiales, list):
             continue
         tokens_legal = tuple(tokens_bm25(legal, metodo))
-        coloq = [(c, tuple(tokens_bm25(c, metodo))) for c in coloquiales]
-        coloq = [(c, t) for c, t in coloq if t]  # un coloquial hecho solo de stopwords no sirve
+        coloq = [(c, palabras(c)) for c in coloquiales]
+        coloq = [(c, w) for c, w in coloq if w]
         if tokens_legal and coloq:
             entradas.append((legal, tokens_legal, coloq))
     return entradas
@@ -63,9 +76,9 @@ def info() -> dict:
     return {"activa": expansion_activa(), "entradas": len(_glosario(metodo_disponible()))}
 
 
-def _contiene(tokens: List[str], sub: tuple) -> bool:
+def _contiene(palabras_pregunta: tuple, sub: tuple) -> bool:
     n = len(sub)
-    return any(tuple(tokens[i:i + n]) == sub for i in range(len(tokens) - n + 1))
+    return any(palabras_pregunta[i:i + n] == sub for i in range(len(palabras_pregunta) - n + 1))
 
 
 def expandir_detalle(pregunta: str, metodo: Optional[str] = None) -> dict:
@@ -78,10 +91,11 @@ def expandir_detalle(pregunta: str, metodo: Optional[str] = None) -> dict:
     metodo = metodo or metodo_disponible()
     base = tokens_bm25(pregunta, metodo)
     presentes = set(base)
+    texto = palabras(pregunta)
     agregados, coincidencias = [], []
     for legal, tokens_legal, coloquiales in _glosario(metodo):
-        for coloquial, tokens_col in coloquiales:
-            if _contiene(base, tokens_col):
+        for coloquial, palabras_col in coloquiales:
+            if _contiene(texto, palabras_col):
                 nuevos = [t for t in tokens_legal if t not in presentes and t not in agregados]
                 if nuevos:
                     agregados.extend(nuevos)
