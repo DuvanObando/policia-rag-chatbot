@@ -2,7 +2,7 @@
 
 Lee del .env de la raíz del repo:
     LLM_PROVEEDOR         (p. ej. gemini)
-    LLM_MODELO            modelo principal (p. ej. gemini-3.8-flash)
+    LLM_MODELO            modelo principal (p. ej. gemini-3.5-flash-lite)
     LLM_MODELO_RESPALDO   modelo de respaldo, opcional (p. ej. gemini-3.6-flash)
     GEMINI_API_KEY        clave del proveedor; nunca se versiona
 
@@ -17,6 +17,9 @@ Comportamiento (presupuesto total PRESUPUESTO_S, ~21 s en el peor caso):
      pero solo si queda tiempo para el respaldo.
   3. Si vuelve a fallar: pasa al modelo de respaldo con el tiempo que quede.
   4. Un 429 (límite de peticiones) se reintenta con espera creciente mientras alcance el presupuesto.
+  Memoria de caídos: si un modelo falla con 503/504/timeout se marca como caído durante
+  CAIDO_TTL_S; mientras tanto se salta directo al otro, sin gastar el intento. Si ambos
+  están marcados, se intenta igual. Una respuesta correcta quita la marca.
   Gemini exige un plazo mínimo de 10 s por llamada, así que cada llamada dura al menos
   MIN_LLAMADA_S; por eso, en el peor caso caben dos llamadas (principal + respaldo).
   Los reintentos internos de la librería están desactivados: todo se ve en los mensajes [llm].
@@ -45,6 +48,7 @@ CAP_PRINCIPAL_S = 10.0   # límite de la primera llamada al modelo principal
 CAP_REINTENTO_S = 10.0   # límite del reintento al modelo principal
 ESPERA_503_S = 1.0       # espera corta antes del reintento
 ESPERA_429_S = 2.0       # 2, 4, 8... s ante un 429
+CAIDO_TTL_S = 180.0      # cuánto se recuerda que un modelo está caído (503/504/timeout)
 
 
 class LimiteDePeticiones(Exception):
@@ -69,6 +73,26 @@ class RespuestaLLM:
 
 def _log(msg: str) -> None:
     print(f"[llm] {msg}", flush=True)
+
+
+# Estado en memoria del proceso: modelo -> instante (monotonic) hasta el que se considera caído.
+_caidos: dict = {}
+# Conteo de llamadas por modelo, para diagnóstico: modelo -> {"ok": n, "fallo": n}
+estadisticas: dict = {}
+
+
+def _contar(modelo: str, ok: bool) -> None:
+    e = estadisticas.setdefault(modelo, {"ok": 0, "fallo": 0})
+    e["ok" if ok else "fallo"] += 1
+
+
+def _marcar_caido(modelo: str) -> None:
+    _caidos[modelo] = time.monotonic() + CAIDO_TTL_S
+
+
+def _segundos_caido(modelo: str) -> float:
+    """Segundos que faltan para olvidar la marca de caído (0 si no está caído)."""
+    return max(0.0, _caidos.get(modelo, 0.0) - time.monotonic())
 
 
 # ---------------------------------------------------------------- Gemini
@@ -160,22 +184,33 @@ def generar(sistema: str, usuario: str) -> RespuestaLLM:
     def restante() -> float:
         return limite - time.monotonic()
 
+    # Orden de modelos: los no caídos primero. Si todos están marcados, se intenta igual.
+    candidatos = [m for m in (principal, respaldo) if m]
+    orden = []
+    for m in candidatos:
+        faltan = _segundos_caido(m)
+        if faltan:
+            _log(f"{m} marcado como caído (faltan {faltan:.0f} s para reintentarlo): se salta")
+        else:
+            orden.append(m)
+    if not orden:
+        orden = candidatos
+
     # (modelo, tope de esta llamada en s o None = lo que quede, espera previa en s,
     #  tiempo que debe quedar para intentarlo)
-    pasos = [
-        (principal, CAP_PRINCIPAL_S, 0.0, MIN_LLAMADA_S),
-        # el reintento al principal solo se hace si todavía cabe el respaldo después
-        (principal, CAP_REINTENTO_S, ESPERA_503_S, MIN_LLAMADA_S * (2 if respaldo else 1)),
-    ]
-    if respaldo:
-        pasos.append((respaldo, None, 0.0, MIN_LLAMADA_S))
+    pasos = []
+    for i, m in enumerate(orden):
+        pasos.append((m, CAP_PRINCIPAL_S if i == 0 else None, 0.0, MIN_LLAMADA_S))
+        if i == 0:
+            # reintento corto al mismo modelo, solo si todavía cabe otro modelo después
+            pasos.append((m, CAP_REINTENTO_S, ESPERA_503_S, MIN_LLAMADA_S * (2 if len(orden) > 1 else 1)))
 
     ultimo_fallo = "sin intentos"
     for modelo, tope, espera, necesita in pasos:
         if restante() - espera < necesita:
             continue  # no alcanza el tiempo para este paso
-        if modelo != principal:
-            _log(f"{principal} no disponible ({ultimo_fallo}); pasando al modelo de respaldo {modelo}")
+        if modelo != orden[0]:
+            _log(f"{orden[0]} no disponible ({ultimo_fallo}); pasando a {modelo}")
         elif espera:
             _log(f"{modelo} no disponible ({ultimo_fallo}); reintento en {espera:g} s")
             time.sleep(espera)
@@ -189,9 +224,12 @@ def generar(sistema: str, usuario: str) -> RespuestaLLM:
             timeout = min(tope, restante()) if tope else restante()
             try:
                 texto = funcion(sistema, usuario, modelo, timeout)
+                _contar(modelo, ok=True)
+                _caidos.pop(modelo, None)
                 _log(f"respondió {modelo}" + (" (modelo de respaldo)" if modelo != principal else ""))
                 return RespuestaLLM(texto, modelo, proveedor, uso_respaldo=modelo != principal)
             except LimiteDePeticiones:
+                _contar(modelo, ok=False)
                 ultimo_fallo = "429 límite de peticiones"
                 if restante() - espera_429 < MIN_LLAMADA_S:
                     raise ErrorLLM(
@@ -203,6 +241,8 @@ def generar(sistema: str, usuario: str) -> RespuestaLLM:
                 time.sleep(espera_429)
                 espera_429 *= 2
             except ModeloNoDisponible as e:
+                _contar(modelo, ok=False)
+                _marcar_caido(modelo)
                 ultimo_fallo = f"{modelo}: {e}"
                 break  # siguiente paso (reintento o respaldo)
 

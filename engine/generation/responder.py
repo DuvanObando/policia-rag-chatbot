@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import List
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
-from generation.llm import ErrorLLM, generar  # noqa: E402
+from generation.llm import ErrorLLM, estadisticas, generar  # noqa: E402
 from generation.prompt import FRASE_NO_ENCONTRADO, SISTEMA, construir_mensaje  # noqa: E402
 from retrieval.search import articulo_completo, buscar, id_articulo, precargar  # noqa: E402
 
@@ -141,7 +141,9 @@ def main() -> None:
             _mostrar(p, responder(p, k=args.k, incluir_diagnostico=True))
         except ErrorLLM as e:
             print("=" * 80)
-            print(f"PREGUNTA: {p}\nERROR: {e}")
+            print(f"PREGUNTA: {p}\nERROR: {e}", flush=True)
+    print("\nLlamadas al LLM por modelo (ok / fallo): "
+          +(", ".join(f"{m}: {e['ok']} / {e['fallo']}" for m, e in estadisticas.items()) or "ninguna"), flush=True)
 
 
 if __name__ == "__main__":
