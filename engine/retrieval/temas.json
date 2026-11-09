@@ -5,10 +5,14 @@
     "'libro' y 'titulo' dicen a qué parte del Código corresponde el tema (informativo; se devuelven al clasificar).",
     "'palabras_clave': sin tildes ni mayúsculas da igual (se normalizan). Una palabra que termina en * coincide con cualquier terminación: 'mult*' encuentra multa, multas, multar, multado. Una frase de varias palabras pesa más (cada palabra suma 1).",
     "Incluye formas coloquiales (trago, rumba, perro...). Evita palabras que salen en casi todas las preguntas (policia, ley, codigo): no ayudan a distinguir temas.",
-    "'configuracion.empuje': cuánto se suma al score (coseno, que va de 0 a 1) de los candidatos del tema detectado. 0 desactiva el empuje. 'umbral_relativo': un tema también recibe empuje si su puntaje es al menos esta fracción del puntaje del mejor tema."
+    "'configuracion.empuje_por_modo': cuánto se suma al score de los candidatos del tema detectado, según el modo de búsqueda (el score tiene otra escala en cada modo; ver docs/busqueda_hibrida.md). 0 desactiva el empuje. 'umbral_relativo': un tema también recibe empuje si su puntaje es al menos esta fracción del puntaje del mejor tema."
   ],
   "configuracion": {
-    "empuje": 0.03,
+    "empuje_por_modo": {
+      "semantico": 0.03,
+      "lexico": 0.5,
+      "hibrido": 0.003
+    },
     "umbral_relativo": 0.5
   },
   "temas": [

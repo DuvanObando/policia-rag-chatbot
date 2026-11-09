@@ -12,7 +12,7 @@ El clasificador orienta la búsqueda hacia el tema (y el libro o título) al que
 4. **Empuja** (nunca filtra): suma `empuje × confianza` al score de los fragmentos del tema detectado, para cada tema con puntaje de al menos la mitad del mejor. Con un tema claro el empuje es completo (0.03); con dos temas parejos, cada uno recibe la mitad.
 5. **Artículo por número:** si la pregunta dice «artículo 163» o «art. 163» y ese artículo existe en el índice, va **primero** (varios, en el orden en que se piden). Si no existe, se ignora.
 
-`buscar(pregunta, k, estrategia, modo, clasificador=True)`: la firma no cambió salvo el parámetro opcional `clasificador`. Con `clasificador=False` el orden es solo por similitud semántica.
+`buscar(pregunta, k, estrategia, modo, clasificador=True)`: la firma no cambió salvo el parámetro opcional `clasificador`. Las cifras de este documento son del modo `semantico` (empuje 0.03); en `lexico` e `hibrido` el empuje equivalente es otro. Con `clasificador=False` el orden es solo por similitud semántica.
 
 Detalles a tener en cuenta:
 
@@ -27,7 +27,7 @@ Todo está en `engine/retrieval/temas.json`:
 - `tema`: debe ser **igual** al campo `tema` de los fragmentos del corpus; así se sabe qué artículos reciben el empuje.
 - `libro` y `titulo`: a qué parte del Código corresponde el tema (se devuelven al clasificar).
 - `palabras_clave`: con formas coloquiales (`trago`, `licor`, `rumba`, `perro`, `comparendo`...). Un `*` al final coincide con cualquier terminación (`multa*` → multa, multas, multar, multado). No hace falta poner tildes. Evita palabras que salen en casi todas las preguntas (policía, ley, código) y palabras que se solapan (`multa*` y `multar*` contarían dos veces).
-- `configuracion.empuje` (0 lo desactiva) y `configuracion.umbral_relativo`.
+- `configuracion.empuje_por_modo` (0 lo desactiva; un valor por modo de búsqueda, ver [busqueda_hibrida.md](busqueda_hibrida.md)) y `configuracion.umbral_relativo`.
 
 Los cambios se ven al reiniciar el motor.
 

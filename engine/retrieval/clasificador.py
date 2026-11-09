@@ -95,19 +95,24 @@ def clasificar(pregunta: str) -> dict:
             "libro": ganador["libro"], "titulo": ganador["titulo"], "temas": encontrados}
 
 
-def empujes(clasificacion: dict) -> Dict[str, float]:
+def empujes(clasificacion: dict, modo: str = "semantico") -> Dict[str, float]:
     """Cuánto sumar al score de los candidatos de cada tema: {nombre del tema: empuje}.
 
     Un tema recibe empuje = empuje_máximo × su confianza, si su puntaje es al menos
     `umbral_relativo` del mejor. Con un solo tema claro recibe el empuje completo; con dos
     temas parejos, cada uno recibe la mitad. Nunca es un filtro: solo suma al score.
+
+    El empuje máximo depende del modo de búsqueda (`empuje_por_modo` en temas.json), porque
+    el score tiene otra escala en cada modo (coseno, BM25 normalizado, RRF): el valor de cada
+    modo equivale al mismo "empujón relativo" que el modo semántico.
     """
     cfg = cargar()["configuracion"]
+    maximo = cfg["empuje_por_modo"].get(modo, 0)
     temas = clasificacion["temas"]
-    if not temas or not cfg["empuje"]:
+    if not temas or not maximo:
         return {}
     mejor = temas[0]["puntaje"]
-    return {e["tema"]: cfg["empuje"] * e["confianza"]
+    return {e["tema"]: maximo * e["confianza"]
             for e in temas if e["puntaje"] >= cfg["umbral_relativo"] * mejor}
 
 

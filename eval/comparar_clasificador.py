@@ -2,7 +2,7 @@
 
 Usa las preguntas de eval/preguntas_segmentacion.json (10) y de
 eval/preguntas_clasificador.json (3 nuevas: artículo por número, ambigua entre dos
-temas y sin tema claro). Estrategia de búsqueda: 'fragmentos'.
+temas y sin tema claro). Estrategia de búsqueda: 'fragmentos'; modo semántico.
 
 Para cada pregunta muestra el tema detectado y la posición del artículo esperado sin
 y con clasificador; calcula Acierto@1, Acierto@3 y MRR; explica en qué preguntas cambió
@@ -43,7 +43,7 @@ def metricas(posiciones):
 
 
 def correr(preguntas, con_clasificador):
-    return [buscar(p["pregunta"], k=K, estrategia=ESTRATEGIA, clasificador=con_clasificador) for p in preguntas]
+    return [buscar(p["pregunta"], k=K, estrategia=ESTRATEGIA, modo="semantico", clasificador=con_clasificador) for p in preguntas]
 
 
 def corto(texto, n):
@@ -55,7 +55,7 @@ def main() -> None:
     for a in ARCHIVOS:
         preguntas += json.loads((RAIZ / "eval" / a).read_text(encoding="utf-8"))
     precargar(ESTRATEGIA)
-    buscar("calentamiento", k=1, estrategia=ESTRATEGIA)
+    buscar("calentamiento", k=1, estrategia=ESTRATEGIA, modo="semantico")
 
     sin = correr(preguntas, False)
     con = correr(preguntas, True)
@@ -63,8 +63,8 @@ def main() -> None:
     pos_con = [posicion(p["articulo_esperado"], r) for p, r in zip(preguntas, con)]
     clas = [clf.clasificar(p["pregunta"]) for p in preguntas]
 
-    print(f"\nEmpuje configurado: {clf.cargar()['configuracion']['empuje']} | umbral relativo: "
-          f"{clf.cargar()['configuracion']['umbral_relativo']}")
+    print(f"\nEmpuje (modo semantico): {clf.cargar()['configuracion']['empuje_por_modo']['semantico']} | "
+          f"umbral relativo: {clf.cargar()['configuracion']['umbral_relativo']}")
     print("\nPOSICIÓN DEL ARTÍCULO ESPERADO (1 = primero, 0 = no aparece)")
     print(f"{'#':<4}{'Esper.':<7}{'sin':>4}{'con':>5}  {'':<3}{'Tema detectado':<42}{'conf.':>6}  Pregunta")
     for p, a, b, c in zip(preguntas, pos_sin, pos_con, clas):
@@ -100,7 +100,7 @@ def main() -> None:
         for t in clas[i]["temas"]:
             print(f"  tema detectado {t['tema']!r}: puntaje {t['puntaje']}, confianza {t['confianza']}, "
                   f"coincidencias {t['coincidencias']}")
-        print(f"  empuje aplicado: { {k: round(v, 3) for k, v in clf.empujes(clas[i]).items()} or 'ninguno' }")
+        print(f"  empuje aplicado: { {k: round(v, 3) for k, v in clf.empujes(clas[i], 'semantico').items()} or 'ninguno' }")
         print(f"  artículos pedidos por número: {clf.articulos_mencionados(p['pregunta']) or 'ninguno'}")
     if not cambios:
         print("  Ninguna pregunta cambió de posición.")
@@ -114,15 +114,15 @@ def main() -> None:
             print(f"  {p['id']}: esperado tema {te!r}; detectado {detectados or ['general']}")
 
     print("\nSENSIBILIDAD AL EMPUJE (solo informativo: el valor por defecto se fijó antes de evaluar)")
-    cfg = clf.cargar()["configuracion"]
-    original = cfg["empuje"]
+    cfg = clf.cargar()["configuracion"]["empuje_por_modo"]
+    original = cfg["semantico"]
     print(f"{'empuje':>8}{'Acierto@1':>11}{'Acierto@3':>11}{'MRR':>8}")
     for e in (0.0, 0.01, 0.02, 0.03, 0.05, 0.08, 0.12):
-        cfg["empuje"] = e
+        cfg["semantico"] = e
         ps = [posicion(p["articulo_esperado"], r) for p, r in zip(preguntas, correr(preguntas, True))]
         a1, a3, mrr = metricas(ps)
         print(f"{e:>8.2f}{a1:>11.2f}{a3:>11.2f}{mrr:>8.3f}")
-    cfg["empuje"] = original
+    cfg["semantico"] = original
 
 
 if __name__ == "__main__":

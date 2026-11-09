@@ -59,7 +59,7 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 | `ubicacion` | string | sí | Ubicación jerárquica (libro, título, capítulo, artículo) |
 | `epigrafe` | string | sí | Epígrafe del artículo |
 | `texto` | string | sí | Texto del fragmento |
-| `score` | number | sí | Puntaje de relevancia de la recuperación |
+| `score` | number | sí | Puntaje de relevancia de la recuperación, incluido el empuje del clasificador. **Su escala depende del modo de búsqueda** (`/health` → `busqueda_modo`): coseno en `semantico` (0 a 1), BM25 normalizado en `lexico` (0 a 1) y Reciprocal Rank Fusion en `hibrido` (~0.01 a 0.04). No se pueden comparar scores de modos distintos |
 | `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible`, `exequible_condicionado` o `no_verificada` (documentos complementarios subidos con `/upload_pdf/`) |
 | `tema` | string | no | Tema asignado al fragmento en el corpus |
 
@@ -92,6 +92,8 @@ Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede ate
   "error": null,
   "modelo_embeddings": "intfloat/multilingual-e5-base",
   "estrategia_busqueda": "fragmentos",
+  "busqueda_modo": "hibrido",
+  "rrf_k": 60,
   "fragmentos_en_indice": 30,
   "llm_proveedor": "gemini",
   "llm_principal": "gemini-3.5-flash-lite",
@@ -100,7 +102,7 @@ Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede ate
 }
 ```
 
-El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. Si falta la clave del LLM, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
+El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. `busqueda_modo` es el modo activo (`semantico`, `lexico` o `hibrido`, según `BUSQUEDA_MODO` en el `.env`) y `rrf_k` la constante de la fusión (solo en `hibrido`; `null` en los otros). Si falta la clave del LLM, si `BUSQUEDA_MODO` no existe o si falta el índice BM25, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
 
 ## Privacidad (Ley 1581 de 2012)
 

@@ -27,6 +27,14 @@ engine\.venv\Scripts\activate        # Linux/Mac: source engine/.venv/bin/activa
 pip install -r engine/requirements.txt
 ```
 
+Para la búsqueda léxica (BM25) se lematiza con spaCy. Descarga el modelo del español (una vez, con el entorno activado):
+
+```bash
+python -m spacy download es_core_news_sm
+```
+
+Si spaCy no se puede cargar (por ejemplo, Windows con «Control de aplicaciones» bloqueando una de sus extensiones), el motor usa **automáticamente** un stemmer de respaldo (Snowball) y funciona igual, con una preparación de texto algo más burda; el índice guarda cuál método se usó.
+
 La instalación es pesada (incluye PyTorch). La primera vez que se usa el modelo de embeddings, se descargan unos **1.1 GB** de Hugging Face (queda en caché); aparece un aviso sobre `HF_TOKEN` que se puede ignorar.
 
 **2. Variables de entorno (`.env`)**
@@ -35,7 +43,7 @@ La instalación es pesada (incluye PyTorch). La primera vez que se usa el modelo
 cp .env.example .env
 ```
 
-Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí.
+Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `hibrido` (recomendado y por defecto), `semantico` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md).
 
 **3. Construir los índices** (los índices no se versionan; hay que generarlos)
 
@@ -44,6 +52,7 @@ python engine/indexing/build_index.py --estrategia articulo
 python engine/indexing/build_index.py --estrategia fragmentos
 ```
 
+- Cada comando también construye el índice léxico BM25 (`bm25_tokens.json`). **Si actualizas desde una versión anterior, reconstruye los índices.**
 - `articulo`: un vector por artículo completo (el modelo corta lo que pase de 512 tokens).
 - `fragmentos`: trozos de 250 tokens con 50 de solapamiento (`--tamano`, `--solape`). **Es la estrategia que usa el motor.**
 - Se guardan en `engine/indexing/indexes/<estrategia>/`. Repite el comando cuando cambie el corpus.
