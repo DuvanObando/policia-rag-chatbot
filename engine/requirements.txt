@@ -11,3 +11,4 @@ pandas
 google-genai
 pypdf
 snowballstemmer
+pymupdf

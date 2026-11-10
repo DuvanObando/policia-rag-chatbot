@@ -15,6 +15,20 @@ docs/        Contrato de API, análisis, informe, segmentación
 
 Contrato de la API: [docs/api_contract.md](docs/api_contract.md)
 
+## Extraer el corpus documental
+
+Guarda los PDF de la Ley 1801, sus normas modificatorias y decretos en
+`corpus/documentos/`. Desde la raíz del repositorio, ejecuta:
+
+```powershell
+.\engine\.venv\Scripts\python.exe corpus\construir_corpus.py
+```
+
+El proceso deja los textos extraídos por página y el JSON segmentado en
+`corpus/procesados/`. Conserva las reformas como disposiciones separadas y no
+afirma que el resultado sea una consolidación legal vigente. Criterios, campos
+generados y revisión manual: [corpus/README_corpus.md](corpus/README_corpus.md).
+
 ## Motor RAG (engine/)
 
 Búsqueda semántica (FAISS + `intfloat/multilingual-e5-base`) sobre la ley, respuesta con Gemini y citas por artículo, numeral o parágrafo. Requiere **Python 3.10+**. Todos los comandos se ejecutan **desde la raíz del repo**, salvo `uvicorn`.

@@ -2,14 +2,25 @@
 
 Este documento tiene dos partes:
 
-1. **Segmentación jerárquica del texto** (libro, título, capítulo, artículo, parágrafo, numeral): Fase 1, responsable Wilder. *Pendiente.*
+1. **Segmentación jerárquica del texto** (documento y artículo): pipeline inicial en `corpus/extraer.py`, `corpus/limpiar.py` y `corpus/segmentar.py`. La segmentación de numerales y parágrafos y la consolidación jurídica siguen pendientes.
 2. **Segmentación para indexación** (cómo se parten los artículos antes de vectorizarlos): Fase 3, responsable Duvan. *Primera comparación hecha sobre el corpus de muestra.*
 
 ---
 
-## 1. Segmentación jerárquica (Fase 1) — pendiente
+## 1. Segmentación jerárquica del corpus
 
-*Wilder: documentar aquí las expresiones regulares, los criterios y los casos borde. Punto de partida: `engine/preprocess/extraer_senado.py` (base de referencia, no es el pipeline oficial).*
+El pipeline de `corpus/construir_corpus.py` extrae el texto página por página y
+separa los artículos de la Ley 1801. En las otras normas selecciona artículos
+con numeración consecutiva y añade al corpus únicamente los que contienen una
+referencia detectable a la Ley 1801. Cada disposición mantiene la norma y el
+artículo de origen; las reformas no se fusionan con el texto de 2016 ni se
+marcan como vigentes sin verificación. Los documentos sin referencia detectada
+se listan en `corpus/procesados/corpus_ley_1801_revision.json`.
+
+La detección de encabezados y de referencias es heurística. Esta etapa todavía
+no descompone numerales o parágrafos, ni establece la vigencia por aparte, ni
+produce una versión consolidada oficial. Revisar las fuentes y los casos del
+archivo de revisión antes de indexar o presentar respuestas jurídicas.
 
 ---
 
