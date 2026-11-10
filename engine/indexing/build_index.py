@@ -48,7 +48,21 @@ from indexing.embeddings import (  # noqa: E402
 )
 
 CARPETA_INDICES = Path(__file__).resolve().parent / "indexes"
-CAMPOS = ("id", "ubicacion", "epigrafe", "texto", "vigencia", "tema")
+CAMPOS = (
+    "id",
+    "ubicacion",
+    "epigrafe",
+    "texto",
+    "vigencia",
+    "tema",
+    "fuente",
+    "archivo_fuente",
+    "pagina_inicio",
+    "pagina_fin",
+    "paginas",
+    "ubicaciones_fuente",
+    "fuentes",
+)
 TAMANO_POR_DEFECTO = 250
 SOLAPE_POR_DEFECTO = 50
 
@@ -164,7 +178,7 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
         "documentos_incluidos": [d["id"] for d in documentos],
         "bm25": {"metodo": metodo, "descripcion": descripcion_metodo(metodo)},
         "n_fragmentos": len(fragmentos),
-        "fragmentos": [{c: f[c] for c in CAMPOS} for f in fragmentos],
+        "fragmentos": [{c: f.get(c) for c in CAMPOS} for f in fragmentos],
     }
     (destino / "metadatos.json").write_text(
         json.dumps(metadatos, ensure_ascii=False, indent=2), encoding="utf-8"

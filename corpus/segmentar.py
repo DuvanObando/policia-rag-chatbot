@@ -23,8 +23,36 @@ PATRON_REFERENCIA = re.compile(
 )
 
 
-def _texto_completo(documento):
-    return "\n\n".join(pagina["content"] for pagina in documento["paginas"])
+def _texto_y_paginas(documento):
+    partes = []
+    rangos_paginas = []
+    cursor = 0
+    for pagina in documento["paginas"]:
+        contenido = pagina["content"]
+        inicio = cursor
+        fin = inicio + len(contenido)
+        if contenido:
+            rangos_paginas.append((inicio, fin, pagina["page"]))
+        partes.append(contenido)
+        cursor = fin + 2
+    return "\n\n".join(partes), rangos_paginas
+
+
+def _ubicacion_paginas(rangos_paginas, inicio, fin):
+    paginas = [
+        numero
+        for inicio_pagina, fin_pagina, numero in rangos_paginas
+        if inicio_pagina < fin and fin_pagina > inicio
+    ]
+    if not paginas:
+        raise ValueError(
+            f"No se pudo determinar la página del texto entre offsets {inicio} y {fin}."
+        )
+    return {
+        "pagina_inicio": paginas[0],
+        "pagina_fin": paginas[-1],
+        "paginas": paginas,
+    }
 
 
 def _seleccionar_encabezados(texto, es_ley_base):
@@ -88,7 +116,7 @@ def _segmentar_documento(documento):
         and metadata["anio"] == 2016
         and metadata["clase_documento"] == "base"
     )
-    texto = _texto_completo(documento)
+    texto, rangos_paginas = _texto_y_paginas(documento)
     encabezados = _seleccionar_encabezados(texto, es_ley_base)
     provisiones = []
 
@@ -104,6 +132,7 @@ def _segmentar_documento(documento):
                 "numero": numero,
                 "texto": cuerpo,
                 "referencias_ley_1801": _referencias_ley_1801(cuerpo),
+                **_ubicacion_paginas(rangos_paginas, inicio, fin),
             }
         )
     return es_ley_base, provisiones
@@ -112,6 +141,12 @@ def _segmentar_documento(documento):
 def _registro(metadata, provision, es_ley_base):
     numero_fuente = provision["numero"]
     referencias = provision["referencias_ley_1801"]
+    ubicacion_fuente = {
+        "archivo": metadata["archivo_fuente"],
+        "pagina_inicio": provision["pagina_inicio"],
+        "pagina_fin": provision["pagina_fin"],
+        "paginas": provision["paginas"],
+    }
     if es_ley_base:
         return {
             "id": f"art-{numero_fuente.lower()}",
@@ -121,6 +156,11 @@ def _registro(metadata, provision, es_ley_base):
             "vigencia": "no_verificada",
             "tema": "texto fuente Ley 1801",
             "fuente": metadata["archivo"],
+            "archivo_fuente": metadata["archivo_fuente"],
+            "pagina_inicio": provision["pagina_inicio"],
+            "pagina_fin": provision["pagina_fin"],
+            "paginas": provision["paginas"],
+            "ubicaciones_fuente": [ubicacion_fuente],
             "norma": metadata["titulo"],
             "articulo_fuente": numero_fuente,
             "articulos_ley_1801": [numero_fuente],
@@ -144,6 +184,11 @@ def _registro(metadata, provision, es_ley_base):
         "vigencia": "no_verificada",
         "tema": f"disposición que {relacion} Ley 1801",
         "fuente": metadata["archivo"],
+        "archivo_fuente": metadata["archivo_fuente"],
+        "pagina_inicio": provision["pagina_inicio"],
+        "pagina_fin": provision["pagina_fin"],
+        "paginas": provision["paginas"],
+        "ubicaciones_fuente": [ubicacion_fuente],
         "norma": metadata["titulo"],
         "articulo_fuente": numero_fuente,
         "articulos_ley_1801": referencias,
@@ -215,6 +260,18 @@ def construir_corpus(input_dir=CARPETA_EXTRAIDOS, output_path=SALIDA_POR_DEFECTO
                 fuentes = existente.setdefault("fuentes", [existente["fuente"]])
                 if registro["fuente"] not in fuentes:
                     fuentes.append(registro["fuente"])
+                ubicaciones = existente.setdefault(
+                    "ubicaciones_fuente",
+                    [
+                        {
+                            "archivo": existente["archivo_fuente"],
+                            "pagina_inicio": existente["pagina_inicio"],
+                            "pagina_fin": existente["pagina_fin"],
+                            "paginas": existente["paginas"],
+                        }
+                    ],
+                )
+                ubicaciones.append(registro["ubicaciones_fuente"][0])
                 revision.append(
                     {
                         "archivo": metadata["archivo"],

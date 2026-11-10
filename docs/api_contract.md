@@ -28,7 +28,20 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
       "texto": "string",
       "score": 0.0,
       "vigencia": "vigente",
-      "tema": "string"
+      "tema": "string",
+      "fuente": "Ley_1801_de_2016.pdf",
+      "archivo_fuente": "documentos/leyes/Ley_1801_de_2016.pdf",
+      "pagina_inicio": 1,
+      "pagina_fin": 2,
+      "paginas": [1, 2],
+      "ubicaciones_fuente": [
+        {
+          "archivo": "documentos/leyes/Ley_1801_de_2016.pdf",
+          "pagina_inicio": 1,
+          "pagina_fin": 2,
+          "paginas": [1, 2]
+        }
+      ]
     }
   ],
   "fuera_de_dominio": false,
@@ -62,6 +75,12 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 | `score` | number | sí | Puntaje de relevancia de la recuperación, incluido el empuje del clasificador. **Su escala depende del modo de búsqueda** (`/health` → `busqueda_modo`): coseno en `semantico` (0 a 1), BM25 normalizado en `lexico` (0 a 1) y Reciprocal Rank Fusion en `hibrido` (~0.01 a 0.04). No se pueden comparar scores de modos distintos |
 | `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible`, `exequible_condicionado` o `no_verificada` (documentos complementarios subidos con `/upload_pdf/`) |
 | `tema` | string | no | Tema asignado al fragmento en el corpus |
+| `fuente` | string | no | Nombre del archivo PDF fuente |
+| `archivo_fuente` | string | no | Ruta del PDF relativa a `corpus/` |
+| `pagina_inicio`, `pagina_fin` | integer | no | Primera y última página física del PDF que contienen el texto |
+| `paginas` | array de integer | no | Páginas físicas exactas que contienen el texto, numeradas desde 1 |
+| `ubicaciones_fuente` | array de objetos | no | Ruta y páginas de origen; puede haber varias ubicaciones cuando se fusionaron copias idénticas |
+| `fuentes` | array de string | no | Nombres de los PDF con texto idéntico fusionado |
 
 ### Origen y uso de `vigencia` y `tema`
 
@@ -69,6 +88,8 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 - Sus valores **salen de los metadatos del corpus** (Fase 1); el motor los copia tal cual, sin calcularlos.
 - **El frontend debe mostrar la `vigencia` en el panel de fuentes** junto a cada fragmento, con una señal visible cuando no sea `vigente` (`modificado`, `inexequible` o `exequible_condicionado`).
 - El frontend puede mostrar el `tema` como etiqueta del fragmento.
+- El frontend puede mostrar `archivo_fuente` y `paginas` para permitir localizar el texto en el PDF. Las páginas son la numeración física del archivo, no necesariamente la numeración impresa en el documento.
+- Los campos de fuente y página se copian del corpus; en documentos subidos por `/upload_pdf/` pueden faltar.
 
 ## Errores de `POST /query`
 

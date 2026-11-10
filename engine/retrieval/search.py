@@ -120,6 +120,13 @@ def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict
         "texto": a["texto"],
         "vigencia": a["vigencia"],
         "tema": a["tema"],
+        "fuente": a.get("fuente"),
+        "archivo_fuente": a.get("archivo_fuente"),
+        "pagina_inicio": a.get("pagina_inicio"),
+        "pagina_fin": a.get("pagina_fin"),
+        "paginas": a.get("paginas"),
+        "ubicaciones_fuente": a.get("ubicaciones_fuente"),
+        "fuentes": a.get("fuentes"),
     }
 
 
@@ -283,6 +290,13 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Option
             "score": float(score),
             "vigencia": f["vigencia"],
             "tema": f["tema"],
+            "fuente": f.get("fuente"),
+            "archivo_fuente": f.get("archivo_fuente"),
+            "pagina_inicio": f.get("pagina_inicio"),
+            "pagina_fin": f.get("pagina_fin"),
+            "paginas": f.get("paginas"),
+            "ubicaciones_fuente": f.get("ubicaciones_fuente"),
+            "fuentes": f.get("fuentes"),
         })
     return resultados
 

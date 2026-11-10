@@ -23,6 +23,7 @@ PATRON_ARCHIVO = re.compile(
 
 
 def _metadatos_documento(pdf_path):
+    pdf_path = Path(pdf_path)
     match = PATRON_ARCHIVO.match(pdf_path.stem)
     if not match:
         raise ValueError(
@@ -33,6 +34,10 @@ def _metadatos_documento(pdf_path):
     tipo = match.group("tipo").lower()
     clase = (match.group("clase") or "Base").lower()
     prefijos = {"mod": "modificatoria", "adi": "adicionatoria", "base": "base"}
+    try:
+        archivo_fuente = pdf_path.resolve().relative_to(RAIZ_CORPUS.resolve()).as_posix()
+    except ValueError:
+        archivo_fuente = pdf_path.name
     return {
         "id": f"{tipo}-{match.group('numero')}-{match.group('anio')}-{clase}",
         "tipo_norma": tipo,
@@ -41,6 +46,7 @@ def _metadatos_documento(pdf_path):
         "clase_documento": prefijos[clase],
         "titulo": f"{match.group('tipo')} {match.group('numero')} de {match.group('anio')}",
         "archivo": pdf_path.name,
+        "archivo_fuente": archivo_fuente,
     }
 
 

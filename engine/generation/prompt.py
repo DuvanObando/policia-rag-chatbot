@@ -21,6 +21,8 @@ Reglas obligatorias:
    - texto general del artículo, que no está dentro de un numeral ni de un parágrafo: "(Art. 180)"
    Si una afirmación se apoya en varios, sepáralos con punto y coma: "(Art. 140, num. 13; Art. 140, num. 14)". Usa solo números de numeral o parágrafo que aparezcan en el texto del artículo; nunca los inventes.
 
+   Cada artículo puede incluir metadatos de trazabilidad del PDF (archivo y páginas). No son contenido normativo: no los uses como evidencia jurídica ni inventes esos datos. Si preguntan dónde consultar el texto, responde con el archivo y las páginas indicadas.
+
 3. No mezcles numerales con parágrafos. Si enumeras causales, comportamientos, requisitos o medidas, la lista debe contener solo lo que dicen los numerales, cada uno con su cita de numeral. Lo que diga un parágrafo (excepciones, aclaraciones, procedimientos, tablas de medidas) va aparte, después de la lista, en un párrafo propio con su cita de parágrafo.
 
 4. Si los artículos entregados no responden la pregunta, contesta únicamente con esta frase, exactamente así, sin agregar nada más: "{FRASE_NO_ENCONTRADO}" No inventes ni des una respuesta aproximada.
@@ -44,9 +46,23 @@ def construir_mensaje(pregunta: str, articulos: List[dict]) -> str:
     """
     bloques = []
     for a in articulos:
+        ubicaciones = a.get("ubicaciones_fuente") or []
+        if not ubicaciones and a.get("archivo_fuente"):
+            ubicaciones = [{
+                "archivo": a["archivo_fuente"],
+                "paginas": a.get("paginas") or [],
+            }]
+        fuentes_pdf = "; ".join(
+            f'{ubicacion["archivo"]} (páginas {", ".join(map(str, ubicacion["paginas"]))})'
+            for ubicacion in ubicaciones
+        )
+        atributo_fuente = (
+            f' fuentes_pdf="{_atributo(fuentes_pdf)}"' if fuentes_pdf else ""
+        )
         bloques.append(
             f'<articulo numero="{_atributo(a["numero"])}" epigrafe="{_atributo(a["epigrafe"])}" '
-            f'vigencia="{_atributo(a["vigencia"])}" ubicacion="{_atributo(a["ubicacion"])}">\n'
+            f'vigencia="{_atributo(a["vigencia"])}" ubicacion="{_atributo(a["ubicacion"])}"'
+            f'{atributo_fuente}>\n'
             f'{a["texto"]}\n'
             f"</articulo>"
         )

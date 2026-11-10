@@ -114,6 +114,13 @@ class Query(BaseModel):
         return v
 
 
+class UbicacionFuente(BaseModel):
+    archivo: str
+    pagina_inicio: int
+    pagina_fin: int
+    paginas: List[int]
+
+
 class Fragmento(BaseModel):
     id: str
     ubicacion: str
@@ -122,6 +129,13 @@ class Fragmento(BaseModel):
     score: float
     vigencia: Optional[str] = None
     tema: Optional[str] = None
+    fuente: Optional[str] = None
+    archivo_fuente: Optional[str] = None
+    pagina_inicio: Optional[int] = None
+    pagina_fin: Optional[int] = None
+    paginas: Optional[List[int]] = None
+    ubicaciones_fuente: Optional[List[UbicacionFuente]] = None
+    fuentes: Optional[List[str]] = None
 
 
 class Cita(BaseModel):

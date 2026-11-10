@@ -33,7 +33,7 @@ El proceso genera:
   texto separado por página.
 - `procesados/corpus_ley_1801.json`: registros segmentados con los campos que
   consume el indexador (`id`, `ubicacion`, `epigrafe`, `texto`, `vigencia` y
-  `tema`), además de metadatos de procedencia.
+  `tema`), archivo PDF de procedencia y sus páginas físicas de origen.
 - `procesados/corpus_ley_1801_revision.json`: documentos sin referencia explícita
   detectada, registros duplicados fusionados y archivos legados que requieren
   revisión manual.
@@ -78,6 +78,13 @@ manejo de citas para incluir la norma y el artículo fuente; este JSON conserva
 esa procedencia, pero no cambia por sí solo el comportamiento de citación de la
 API.
 
+Al regenerar el corpus, reconstruye también el índice para que el buscador y la
+respuesta de `/query` reciban los nuevos metadatos de fuente y páginas:
+
+```powershell
+.\engine\.venv\Scripts\python.exe engine\indexing\build_index.py --corpus corpus\procesados\corpus_ley_1801.json --estrategia fragmentos
+```
+
 ## Formato de cada registro
 
 | Campo | Descripción |
@@ -88,4 +95,8 @@ API.
 | `texto` | Texto extraído, limpiando encabezados repetidos y cortes de palabra de página. |
 | `vigencia` | `no_verificada`; no es un dictamen jurídico. |
 | `tema` | Clasificación básica por tipo de disposición. |
-| `fuente`, `fuentes` (si se fusionaron duplicados), `norma`, `articulo_fuente`, `articulos_ley_1801`, `tipo_disposicion` | Trazabilidad adicional. |
+| `fuente` | Nombre del archivo PDF fuente. |
+| `archivo_fuente` | Ruta relativa al directorio `corpus/`, por ejemplo `documentos/leyes/Ley_1801_de_2016.pdf`. |
+| `pagina_inicio`, `pagina_fin`, `paginas` | Páginas físicas, numeradas desde 1, que contienen el texto de la disposición. `paginas` lista cada página si el artículo ocupa varias. |
+| `ubicaciones_fuente` | Archivo y páginas de origen; puede incluir más de una ubicación si se fusionaron copias idénticas. |
+| `fuentes`, `norma`, `articulo_fuente`, `articulos_ley_1801`, `tipo_disposicion` | Trazabilidad adicional. |
