@@ -30,7 +30,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 
-from generation.llm import ErrorLLM, configuracion, precargar_cliente
+from generation.llm import ErrorLLM, configuracion, precargar_cliente, respaldo_externo
 from generation.responder import ESTRATEGIA, responder
 from indexing import uploads
 from indexing.embeddings import MODELO
@@ -195,6 +195,7 @@ async def error_interno(request: Request, exc: Exception):
 def health(request: Request):
     estado = request.app.state.motor
     proveedor, principal, respaldo = configuracion()
+    externo = respaldo_externo()
     idx = info_indice(ESTRATEGIA)
     return {
         "listo": estado["listo"],
@@ -209,6 +210,8 @@ def health(request: Request):
         "llm_proveedor": proveedor,
         "llm_principal": principal,
         "llm_respaldo": respaldo,
+        # Respaldo entre empresas (Groq): solo nombre de proveedor y modelo, nunca la clave.
+        "llm_respaldo_externo": {"proveedor": externo[0], "modelo": externo[1]} if externo else None,
         "tiempos_de_carga_s": estado["tiempos"],
     }
 
