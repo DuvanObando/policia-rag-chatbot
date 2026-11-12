@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Flujo de una consulta a /query",
+    "subtitle": "Tiempos medidos el 12/11 en el PC de desarrollo, con LLM_ORDEN=groq,gemini",
+    "output": "docs/diagramas/flujo-consulta.html",
+    "locale": "es",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/DuvanObando/policia-rag-chatbot.git",
+      "provider": "github",
+      "revision": "1259b13ec4d0b1ce24c5af42d0a26aed3847c8df"
+    }
+  },
+  "participants": [
+    {
+      "id": "cliente",
+      "type": "external",
+      "label": "Cliente",
+      "sublabel": "Swagger o curl"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API FastAPI",
+      "sublabel": "/query",
+      "sources": [
+        {
+          "path": "engine/api.py",
+          "line": 220,
+          "end_line": 242,
+          "label": "query()"
+        }
+      ]
+    },
+    {
+      "id": "busqueda",
+      "type": "backend",
+      "label": "Búsqueda",
+      "sublabel": "tema + E5 + FAISS",
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 231,
+          "end_line": 302,
+          "label": "buscar()"
+        }
+      ]
+    },
+    {
+      "id": "corpus",
+      "type": "database",
+      "label": "Corpus",
+      "sublabel": "cargador en memoria",
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 99,
+          "end_line": 132,
+          "label": "articulo_completo"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "backend",
+      "label": "Cadena de LLM",
+      "sublabel": "LLM_ORDEN",
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 325,
+          "end_line": 347,
+          "label": "generar()"
+        }
+      ]
+    },
+    {
+      "id": "groq",
+      "type": "cloud",
+      "label": "Groq",
+      "sublabel": "gpt-oss 120b/20b",
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 223,
+          "end_line": 262,
+          "label": "_generar_groq"
+        }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "cloud",
+      "label": "Gemini",
+      "sublabel": "3.5 / 3.6 flash",
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 146,
+          "end_line": 190,
+          "label": "_generar_gemini"
+        }
+      ]
+    },
+    {
+      "id": "citas",
+      "type": "backend",
+      "label": "Citas",
+      "sublabel": "extraer y validar",
+      "sources": [
+        {
+          "path": "engine/generation/citas.py",
+          "line": 36,
+          "end_line": 97,
+          "label": "extraer_citas"
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 206,
+      "to": 285,
+      "label": "Búsqueda ≈ 0,1–0,3 s"
+    },
+    {
+      "from": 295,
+      "to": 388,
+      "label": "Contexto"
+    },
+    {
+      "from": 396,
+      "to": 645,
+      "label": "LLM ≈ 1–5 s"
+    },
+    {
+      "from": 655,
+      "to": 740,
+      "label": "Citas < 0,1 s"
+    }
+  ],
+  "messages": [
+    {
+      "id": "pregunta",
+      "from": "cliente",
+      "to": "api",
+      "y": 172,
+      "label": "POST /query {pregunta}",
+      "variant": "emphasis"
+    },
+    {
+      "id": "buscar",
+      "from": "api",
+      "to": "busqueda",
+      "y": 222,
+      "label": "buscar(pregunta, k=3)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fragmentos",
+      "from": "busqueda",
+      "to": "api",
+      "y": 262,
+      "label": "3 fragmentos",
+      "variant": "return"
+    },
+    {
+      "id": "articulo",
+      "from": "api",
+      "to": "corpus",
+      "y": 312,
+      "label": "artículo completo",
+      "variant": "default",
+      "note": "small-to-big"
+    },
+    {
+      "id": "texto",
+      "from": "corpus",
+      "to": "api",
+      "y": 360,
+      "label": "texto con marcas",
+      "variant": "return"
+    },
+    {
+      "id": "prompt",
+      "from": "api",
+      "to": "llm",
+      "y": 416,
+      "label": "prompt con contexto",
+      "variant": "emphasis",
+      "note": "Groq primero en la demo"
+    },
+    {
+      "id": "groq",
+      "from": "llm",
+      "to": "groq",
+      "y": 456,
+      "label": "chat/completions",
+      "variant": "default"
+    },
+    {
+      "id": "respuesta-groq",
+      "from": "groq",
+      "to": "llm",
+      "y": 496,
+      "label": "respuesta",
+      "variant": "return",
+      "note": "429 o 5xx: 2.º modelo"
+    },
+    {
+      "id": "gemini",
+      "from": "llm",
+      "to": "gemini",
+      "y": 552,
+      "label": "solo si Groq falla",
+      "variant": "dashed"
+    },
+    {
+      "id": "respuesta-gemini",
+      "from": "gemini",
+      "to": "llm",
+      "y": 590,
+      "label": "respuesta",
+      "variant": "return"
+    },
+    {
+      "id": "texto-llm",
+      "from": "llm",
+      "to": "api",
+      "y": 628,
+      "label": "texto de la respuesta",
+      "variant": "return"
+    },
+    {
+      "id": "extraer",
+      "from": "api",
+      "to": "citas",
+      "y": 674,
+      "label": "extraer_citas()",
+      "variant": "default",
+      "note": "valida artículo y numeral"
+    },
+    {
+      "id": "citas-ok",
+      "from": "citas",
+      "to": "api",
+      "y": 712,
+      "label": "citas válidas",
+      "variant": "return"
+    },
+    {
+      "id": "final",
+      "from": "api",
+      "to": "cliente",
+      "y": 756,
+      "label": "200 respuesta + citas",
+      "variant": "return",
+      "note": "total típico 1,2–4,8 s"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "api",
+      "from": 172,
+      "to": 756,
+      "type": "backend"
+    },
+    {
+      "participant": "busqueda",
+      "from": 222,
+      "to": 262,
+      "type": "backend"
+    },
+    {
+      "participant": "corpus",
+      "from": 312,
+      "to": 360,
+      "type": "database"
+    },
+    {
+      "participant": "llm",
+      "from": 416,
+      "to": 628,
+      "type": "backend"
+    },
+    {
+      "participant": "groq",
+      "from": 456,
+      "to": 496,
+      "type": "cloud"
+    },
+    {
+      "participant": "gemini",
+      "from": 552,
+      "to": 590,
+      "type": "cloud"
+    },
+    {
+      "participant": "citas",
+      "from": 674,
+      "to": 712,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Tiempos medidos hoy (7 preguntas)",
+      "items": [
+        "Búsqueda: 0,1–0,3 s (2,2 s en 2 de 7 con la CPU ocupada)",
+        "LLM con Groq: 1,1–4,7 s (pico de 10,5 s por un 429)",
+        "Total típico: 1,2–4,8 s; peor caso medido: 12,8 s",
+        "Gemini, en la prueba anterior: 2,7–6,8 s, y más de 10 s con 503/504"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Entrada, arranque y pausas",
+      "items": [
+        "La pregunta admite como máximo 500 caracteres",
+        "Arranque en frío: 42–64 s (carga del motor: 12–17 s)",
+        "Dejar 10 s entre preguntas por los límites del plan gratuito"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Fuera de dominio",
+      "items": [
+        "El modelo responde con la frase fija «No encontré esa información…»",
+        "La API marca fuera_de_dominio = true y no devuelve citas",
+        "Si todos los proveedores fallan, /query responde 503"
+      ]
+    }
+  ]
+}

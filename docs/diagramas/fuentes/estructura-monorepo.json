@@ -1,0 +1,565 @@
+{
+  "schema_version": 1,
+  "diagram_type": "tree",
+  "meta": {
+    "title": "Estructura del monorepo",
+    "subtitle": "Solo carpetas y archivos versionados importantes. Cada nodo indica a quién pertenece: motor, corpus, análisis lingüístico o integración.",
+    "output": "docs/diagramas/estructura-monorepo.html",
+    "locale": "es",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/DuvanObando/policia-rag-chatbot.git",
+      "provider": "github",
+      "revision": "1259b13ec4d0b1ce24c5af42d0a26aed3847c8df"
+    },
+    "views": [
+      {
+        "id": "motor",
+        "label": "Motor",
+        "focus": [
+          "engine",
+          "e_api",
+          "e_idx",
+          "e_ret",
+          "e_gen",
+          "eval"
+        ],
+        "note": "API, búsqueda, generación y evaluación"
+      },
+      {
+        "id": "corpus",
+        "label": "Corpus",
+        "focus": [
+          "corpus",
+          "c_proc",
+          "c_real",
+          "c_anot",
+          "c_banco"
+        ],
+        "note": "Fase 1: texto de la ley y banco de preguntas"
+      },
+      {
+        "id": "analisis",
+        "label": "Análisis lingüístico",
+        "focus": [
+          "e_ana",
+          "a_est",
+          "d_ana"
+        ],
+        "note": "Santiago Castro: estadísticas y KWIC"
+      },
+      {
+        "id": "integracion",
+        "label": "Integración",
+        "focus": [
+          "backend",
+          "frontend",
+          "docs",
+          "env",
+          "readme"
+        ],
+        "note": "Proxy, contrato, guías y demo"
+      }
+    ]
+  },
+  "layout": {
+    "direction": "right"
+  },
+  "nodes": [
+    {
+      "id": "repo",
+      "label": "policia-rag-chatbot",
+      "sublabel": "Chatbot RAG sobre la Ley 1801 de 2016",
+      "sources": [
+        {
+          "path": "README.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "corpus",
+      "label": "corpus/",
+      "parent": "repo",
+      "sublabel": "CORPUS · Fase 1",
+      "sources": [
+        {
+          "path": "corpus/README_corpus.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "c_doc",
+      "label": "documentos/",
+      "parent": "corpus",
+      "sublabel": "CORPUS · PDF de la ley y reformas",
+      "sources": [
+        {
+          "path": "corpus/documentos/leyes/Ley_1801_de_2016.pdf"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "id": "c_proc",
+      "label": "procesados/",
+      "parent": "corpus",
+      "sublabel": "CORPUS · salida del pipeline",
+      "sources": [
+        {
+          "path": "corpus/procesados/corpus_ley_1801.json"
+        }
+      ]
+    },
+    {
+      "id": "c_real",
+      "label": "corpus_ley_1801.json",
+      "parent": "c_proc",
+      "sublabel": "CORPUS · corpus real, 249 artículos"
+    },
+    {
+      "id": "c_ext",
+      "label": "texto_extraido/",
+      "parent": "c_proc",
+      "sublabel": "CORPUS · texto por PDF",
+      "sources": [
+        {
+          "path": "corpus/procesados/texto_extraido/ley_1801_2016.json"
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "id": "c_muestra",
+      "label": "muestra/",
+      "parent": "corpus",
+      "sublabel": "CORPUS · 10 artículos (opcional)",
+      "sources": [
+        {
+          "path": "corpus/muestra/codigo_muestra.json"
+        }
+      ]
+    },
+    {
+      "id": "c_anot",
+      "label": "anotaciones_vigencia.json",
+      "parent": "corpus",
+      "sublabel": "CORPUS + MOTOR · expresiones inexequibles"
+    },
+    {
+      "id": "c_banco",
+      "label": "preguntas_ley_1801.json",
+      "parent": "corpus",
+      "sublabel": "CORPUS · banco de 50 preguntas"
+    },
+    {
+      "id": "c_pipe",
+      "label": "extraer · limpiar · segmentar",
+      "parent": "corpus",
+      "sublabel": "CORPUS · pipeline de la Fase 1",
+      "sources": [
+        {
+          "path": "corpus/segmentar.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "engine",
+      "label": "engine/",
+      "parent": "repo",
+      "sublabel": "MOTOR · API, búsqueda y generación",
+      "sources": [
+        {
+          "path": "engine/api.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "e_api",
+      "label": "api.py",
+      "parent": "engine",
+      "sublabel": "MOTOR · FastAPI: /health, /query, /upload_pdf/",
+      "sources": [
+        {
+          "path": "engine/api.py",
+          "line": 194,
+          "end_line": 246
+        }
+      ]
+    },
+    {
+      "id": "e_idx",
+      "label": "indexing/",
+      "parent": "engine",
+      "sublabel": "MOTOR · corpus → índices",
+      "sources": [
+        {
+          "path": "engine/indexing/build_index.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "e_build",
+      "label": "build_index.py",
+      "parent": "e_idx",
+      "sublabel": "MOTOR · construye FAISS y BM25"
+    },
+    {
+      "id": "e_carg",
+      "label": "cargador_corpus.py",
+      "parent": "e_idx",
+      "sublabel": "MOTOR · adapta el corpus de la Fase 1"
+    },
+    {
+      "id": "e_emb",
+      "label": "embeddings.py",
+      "parent": "e_idx",
+      "sublabel": "MOTOR · modelo E5"
+    },
+    {
+      "id": "e_up",
+      "label": "uploads.py",
+      "parent": "e_idx",
+      "sublabel": "MOTOR · PDF subidos"
+    },
+    {
+      "id": "e_idxs",
+      "label": "indexes/",
+      "parent": "e_idx",
+      "sublabel": "MOTOR · generado, no se versiona",
+      "sources": [
+        {
+          "path": "engine/indexing/build_index.py",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "id": "e_ret",
+      "label": "retrieval/",
+      "parent": "engine",
+      "sublabel": "MOTOR · búsqueda",
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "e_search",
+      "label": "search.py",
+      "parent": "e_ret",
+      "sublabel": "MOTOR · semántico, léxico, híbrido"
+    },
+    {
+      "id": "e_clas",
+      "label": "clasificador.py",
+      "parent": "e_ret",
+      "sublabel": "MOTOR · tema por palabras clave"
+    },
+    {
+      "id": "e_exp",
+      "label": "expansion.py",
+      "parent": "e_ret",
+      "sublabel": "MOTOR · glosario para BM25"
+    },
+    {
+      "id": "e_temas",
+      "label": "temas.json",
+      "parent": "e_ret",
+      "sublabel": "MOTOR · temas y palabras clave"
+    },
+    {
+      "id": "e_gen",
+      "label": "generation/",
+      "parent": "engine",
+      "sublabel": "MOTOR · respuesta con LLM",
+      "sources": [
+        {
+          "path": "engine/generation/responder.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "e_resp",
+      "label": "responder.py",
+      "parent": "e_gen",
+      "sublabel": "MOTOR · orquesta la consulta"
+    },
+    {
+      "id": "e_prompt",
+      "label": "prompt.py",
+      "parent": "e_gen",
+      "sublabel": "MOTOR · reglas del asistente"
+    },
+    {
+      "id": "e_llm",
+      "label": "llm.py",
+      "parent": "e_gen",
+      "sublabel": "MOTOR · Gemini y Groq, LLM_ORDEN"
+    },
+    {
+      "id": "e_citas",
+      "label": "citas.py",
+      "parent": "e_gen",
+      "sublabel": "MOTOR · extractor de citas"
+    },
+    {
+      "id": "e_pre",
+      "label": "preprocess/",
+      "parent": "engine",
+      "sublabel": "MOTOR · texto para BM25",
+      "sources": [
+        {
+          "path": "engine/preprocess/texto_bm25.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "e_glos",
+      "label": "glossary/sinonimos.json",
+      "parent": "engine",
+      "sublabel": "MOTOR · glosario provisional"
+    },
+    {
+      "id": "e_ana",
+      "label": "analysis/",
+      "parent": "engine",
+      "sublabel": "ANÁLISIS LINGÜÍSTICO · Santiago Castro",
+      "sources": [
+        {
+          "path": "engine/analysis/estadisticas.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "a_est",
+      "label": "estadisticas.py · frecuencias.py",
+      "parent": "e_ana",
+      "sublabel": "ANÁLISIS LINGÜÍSTICO · conteos y frecuencias",
+      "sources": [
+        {
+          "path": "engine/analysis/frecuencias.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "a_glos",
+      "label": "probar_glosario.py",
+      "parent": "e_ana",
+      "sublabel": "ANÁLISIS LINGÜÍSTICO · prueba del glosario"
+    },
+    {
+      "id": "e_req",
+      "label": "requirements.txt",
+      "parent": "engine",
+      "sublabel": "MOTOR · dependencias de Python"
+    },
+    {
+      "id": "eval",
+      "label": "eval/",
+      "parent": "repo",
+      "sublabel": "MOTOR · evaluación",
+      "sources": [
+        {
+          "path": "eval/run_eval.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "v_run",
+      "label": "run_eval.py",
+      "parent": "eval",
+      "sublabel": "MOTOR · mide acierto con el banco"
+    },
+    {
+      "id": "v_cmp",
+      "label": "comparar_*.py",
+      "parent": "eval",
+      "sublabel": "MOTOR · segmentación, clasificador, modos, expansión",
+      "sources": [
+        {
+          "path": "eval/comparar_modos.py",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "v_banco",
+      "label": "banco_preguntas.json",
+      "parent": "eval",
+      "sublabel": "MOTOR · preguntas de evaluación"
+    },
+    {
+      "id": "backend",
+      "label": "backend/",
+      "parent": "repo",
+      "sublabel": "INTEGRACIÓN · proxy Express :4000",
+      "sources": [
+        {
+          "path": "backend/src/server.js",
+          "line": 27,
+          "end_line": 52
+        }
+      ]
+    },
+    {
+      "id": "b_srv",
+      "label": "src/server.js",
+      "parent": "backend",
+      "sublabel": "INTEGRACIÓN · /query y /upload_pdf"
+    },
+    {
+      "id": "frontend",
+      "label": "frontend/",
+      "parent": "repo",
+      "sublabel": "INTEGRACIÓN · pendiente (placeholder)",
+      "sources": [
+        {
+          "path": "frontend/README.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "docs",
+      "label": "docs/",
+      "parent": "repo",
+      "sublabel": "INTEGRACIÓN · contrato y guías",
+      "sources": [
+        {
+          "path": "docs/api_contract.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "d_api",
+      "label": "api_contract.md",
+      "parent": "docs",
+      "sublabel": "INTEGRACIÓN · contrato de la API"
+    },
+    {
+      "id": "d_demo",
+      "label": "demo_entrega.md",
+      "parent": "docs",
+      "sublabel": "INTEGRACIÓN · guion de la demo"
+    },
+    {
+      "id": "d_busq",
+      "label": "busqueda_hibrida.md · clasificador.md",
+      "parent": "docs",
+      "sublabel": "MOTOR · documentación de búsqueda",
+      "sources": [
+        {
+          "path": "docs/busqueda_hibrida.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "d_ana",
+      "label": "analisis/",
+      "parent": "docs",
+      "sublabel": "ANÁLISIS LINGÜÍSTICO · estadísticas, KWIC y registro",
+      "sources": [
+        {
+          "path": "docs/analisis/registro_trabajo.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "d_guia",
+      "label": "guia-companeros/",
+      "parent": "docs",
+      "sublabel": "INTEGRACIÓN · guías por integrante",
+      "sources": [
+        {
+          "path": "docs/guia-companeros/README.md",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "d_diag",
+      "label": "diagramas/",
+      "parent": "docs",
+      "sublabel": "INTEGRACIÓN · estos diagramas",
+      "sources": [
+        {
+          "path": "docs/demo_entrega.md",
+          "line": 1
+        }
+      ],
+      "collapsed": true
+    },
+    {
+      "id": "env",
+      "label": ".env.example",
+      "parent": "repo",
+      "sublabel": "INTEGRACIÓN · variables (el .env no se versiona)",
+      "sources": [
+        {
+          "path": ".env.example",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "id": "readme",
+      "label": "README.md",
+      "parent": "repo",
+      "sublabel": "INTEGRACIÓN · instalación y uso",
+      "sources": [
+        {
+          "path": "README.md",
+          "line": 1
+        }
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Motor",
+      "items": [
+        "engine/ y eval/",
+        "Python, FastAPI, FAISS, BM25, Gemini y Groq"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Corpus",
+      "items": [
+        "corpus/ (Fase 1)",
+        "El motor lo lee con su cargador; no lo modifica"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Análisis lingüístico",
+      "items": [
+        "engine/analysis/ y docs/analisis/"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Integración",
+      "items": [
+        "backend/, frontend/, docs/, .env.example y README",
+        "Los índices (engine/indexing/indexes/) y el .env no se versionan"
+      ]
+    }
+  ]
+}

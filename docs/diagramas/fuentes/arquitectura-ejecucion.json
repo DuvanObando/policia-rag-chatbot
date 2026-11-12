@@ -1,0 +1,641 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Arquitectura en ejecución del chatbot RAG (Ley 1801 de 2016)",
+    "output": "docs/diagramas/arquitectura-ejecucion.html",
+    "locale": "es",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/DuvanObando/policia-rag-chatbot.git",
+      "provider": "github",
+      "revision": "1259b13ec4d0b1ce24c5af42d0a26aed3847c8df"
+    }
+  },
+  "components": [
+    {
+      "id": "cliente",
+      "type": "external",
+      "label": "Cliente",
+      "sublabel": "Swagger /docs, curl o frontend",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "Backend Express",
+      "sublabel": "proxy opcional :4000",
+      "pos": [
+        290,
+        130
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "backend/src/server.js",
+          "line": 27,
+          "end_line": 52,
+          "label": "proxy /query y /upload_pdf"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API FastAPI :8000",
+      "sublabel": "/health · /query · /upload_pdf/",
+      "pos": [
+        540,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/api.py",
+          "line": 194,
+          "end_line": 246,
+          "label": "endpoints"
+        }
+      ]
+    },
+    {
+      "id": "buscar",
+      "type": "backend",
+      "label": "Búsqueda",
+      "sublabel": "un fragmento por artículo",
+      "pos": [
+        790,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 231,
+          "end_line": 302,
+          "label": "buscar()"
+        }
+      ]
+    },
+    {
+      "id": "clasif",
+      "type": "backend",
+      "label": "Clasificador de tema",
+      "sublabel": "temas.json + «artículo N»",
+      "pos": [
+        600,
+        20
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/retrieval/clasificador.py",
+          "line": 65,
+          "end_line": 126,
+          "label": "clasificar y empujes"
+        }
+      ]
+    },
+    {
+      "id": "expan",
+      "type": "backend",
+      "label": "Expansión",
+      "sublabel": "glosario de sinónimos",
+      "pos": [
+        770,
+        20
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/retrieval/expansion.py",
+          "line": 84,
+          "end_line": 117,
+          "label": "consulta léxica"
+        }
+      ]
+    },
+    {
+      "id": "bm25",
+      "type": "database",
+      "label": "Índice BM25",
+      "sublabel": "bm25_tokens.json (léxico)",
+      "pos": [
+        940,
+        20
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 160,
+          "end_line": 170,
+          "label": "_bm25"
+        },
+        {
+          "path": "engine/indexing/build_index.py",
+          "line": 163,
+          "end_line": 170,
+          "label": "se construye aquí"
+        }
+      ]
+    },
+    {
+      "id": "faiss",
+      "type": "database",
+      "label": "Índice FAISS",
+      "sublabel": "E5 · 471 fragmentos (semántico)",
+      "pos": [
+        1110,
+        20
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 71,
+          "end_line": 83,
+          "label": "_indice"
+        },
+        {
+          "path": "engine/indexing/build_index.py",
+          "line": 139,
+          "end_line": 143,
+          "label": "guardar_indice"
+        }
+      ]
+    },
+    {
+      "id": "smallbig",
+      "type": "backend",
+      "label": "Small-to-big",
+      "sublabel": "artículo completo del fragmento",
+      "pos": [
+        1040,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/responder.py",
+          "line": 51,
+          "end_line": 59,
+          "label": "paso 2"
+        },
+        {
+          "path": "engine/retrieval/search.py",
+          "line": 105,
+          "end_line": 132,
+          "label": "articulo_completo"
+        }
+      ]
+    },
+    {
+      "id": "cargador",
+      "type": "backend",
+      "label": "Cargador del corpus",
+      "sublabel": "adapta el formato Fase 1",
+      "pos": [
+        1260,
+        260
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/indexing/cargador_corpus.py",
+          "line": 109,
+          "end_line": 152,
+          "label": "adaptar"
+        },
+        {
+          "path": "engine/indexing/cargador_corpus.py",
+          "line": 173,
+          "end_line": 207,
+          "label": "anotaciones y cargar"
+        }
+      ]
+    },
+    {
+      "id": "anot",
+      "type": "database",
+      "label": "Anotaciones de vigencia",
+      "sublabel": "[INEXEQUIBLE: …]",
+      "pos": [
+        1260,
+        100
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "corpus/anotaciones_vigencia.json"
+        }
+      ]
+    },
+    {
+      "id": "corpus",
+      "type": "database",
+      "label": "Corpus real",
+      "sublabel": "corpus_ley_1801.json · 249 art.",
+      "pos": [
+        1260,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "corpus/procesados/corpus_ley_1801.json"
+        }
+      ]
+    },
+    {
+      "id": "prompt",
+      "type": "backend",
+      "label": "Prompt",
+      "sublabel": "reglas + artículos + pregunta",
+      "pos": [
+        1040,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/prompt.py",
+          "line": 10,
+          "end_line": 37,
+          "label": "SISTEMA"
+        },
+        {
+          "path": "engine/generation/prompt.py",
+          "line": 44,
+          "end_line": 72,
+          "label": "construir_mensaje"
+        }
+      ]
+    },
+    {
+      "id": "llm",
+      "type": "backend",
+      "label": "Cadena de LLM",
+      "sublabel": "orden según LLM_ORDEN",
+      "pos": [
+        1040,
+        580
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 301,
+          "end_line": 347,
+          "label": "orden y generar"
+        }
+      ]
+    },
+    {
+      "id": "groq",
+      "type": "cloud",
+      "label": "Groq",
+      "sublabel": "gpt-oss-120b → gpt-oss-20b",
+      "pos": [
+        1260,
+        540
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 192,
+          "end_line": 262,
+          "label": "_generar_groq"
+        }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "cloud",
+      "label": "Gemini",
+      "sublabel": "3.5-flash-lite → 3.6-flash",
+      "pos": [
+        1260,
+        660
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/llm.py",
+          "line": 146,
+          "end_line": 190,
+          "label": "_generar_gemini"
+        }
+      ]
+    },
+    {
+      "id": "citas",
+      "type": "backend",
+      "label": "Extractor de citas",
+      "sublabel": "solo artículos del contexto",
+      "pos": [
+        540,
+        580
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/generation/responder.py",
+          "line": 61,
+          "end_line": 84,
+          "label": "validación"
+        },
+        {
+          "path": "engine/generation/citas.py",
+          "line": 36,
+          "end_line": 97,
+          "label": "extraer_citas"
+        }
+      ]
+    },
+    {
+      "id": "uploads",
+      "type": "backend",
+      "label": "Subida de PDF",
+      "sublabel": "guardar(): máx. 10 MB",
+      "pos": [
+        290,
+        420
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/indexing/uploads.py",
+          "line": 85,
+          "end_line": 124,
+          "label": "guardar"
+        }
+      ]
+    },
+    {
+      "id": "pdfs",
+      "type": "database",
+      "label": "PDF pendientes",
+      "sublabel": "corpus/uploads/ · sin indexar",
+      "pos": [
+        290,
+        580
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "sources": [
+        {
+          "path": "engine/indexing/uploads.py",
+          "line": 25,
+          "end_line": 31,
+          "label": "carpeta y registro"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Proveedores externos (internet)",
+      "wraps": [
+        "groq",
+        "gemini"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cliente-api",
+      "from": "cliente",
+      "to": "api",
+      "label": "POST /query",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "cliente-backend",
+      "from": "cliente",
+      "to": "backend",
+      "label": "opcional",
+      "variant": "dashed"
+    },
+    {
+      "id": "backend-api",
+      "from": "backend",
+      "to": "api",
+      "label": "proxy",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "api-buscar",
+      "from": "api",
+      "to": "buscar",
+      "label": "pregunta",
+      "variant": "emphasis"
+    },
+    {
+      "id": "buscar-clasif",
+      "from": "buscar",
+      "to": "clasif",
+      "label": "tema"
+    },
+    {
+      "id": "buscar-expan",
+      "from": "buscar",
+      "to": "expan",
+      "label": "léxico",
+      "variant": "dashed"
+    },
+    {
+      "id": "expan-bm25",
+      "from": "expan",
+      "to": "bm25",
+      "label": "tokens",
+      "variant": "dashed"
+    },
+    {
+      "id": "buscar-faiss",
+      "from": "buscar",
+      "to": "faiss",
+      "label": "vector"
+    },
+    {
+      "id": "buscar-smallbig",
+      "from": "buscar",
+      "to": "smallbig",
+      "label": "3 fragmentos",
+      "variant": "emphasis"
+    },
+    {
+      "id": "smallbig-cargador",
+      "from": "smallbig",
+      "to": "cargador",
+      "label": "artículo"
+    },
+    {
+      "id": "cargador-anot",
+      "from": "cargador",
+      "to": "anot",
+      "label": "lee"
+    },
+    {
+      "id": "cargador-corpus",
+      "from": "cargador",
+      "to": "corpus",
+      "label": "lee"
+    },
+    {
+      "id": "smallbig-prompt",
+      "from": "smallbig",
+      "to": "prompt",
+      "label": "contexto",
+      "variant": "emphasis"
+    },
+    {
+      "id": "prompt-llm",
+      "from": "prompt",
+      "to": "llm",
+      "variant": "emphasis"
+    },
+    {
+      "id": "llm-groq",
+      "from": "llm",
+      "to": "groq",
+      "label": "1.º en la demo"
+    },
+    {
+      "id": "llm-gemini",
+      "from": "llm",
+      "to": "gemini",
+      "label": "si falla",
+      "variant": "dashed"
+    },
+    {
+      "id": "llm-citas",
+      "from": "llm",
+      "to": "citas",
+      "label": "texto",
+      "variant": "emphasis"
+    },
+    {
+      "id": "citas-api",
+      "from": "citas",
+      "to": "api",
+      "label": "respuesta + citas",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-uploads",
+      "from": "api",
+      "to": "uploads",
+      "label": "PDF",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "uploads-pdfs",
+      "from": "uploads",
+      "to": "pdfs",
+      "label": "guarda",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Orden del LLM (LLM_ORDEN)",
+      "items": [
+        "En la demo: groq,gemini (Groq primero)",
+        "Sin LLM_ORDEN: Gemini primero y Groq de respaldo",
+        "Cada proveedor prueba su segundo modelo ante 429, 5xx o tiempo agotado",
+        "Modelos de Gemini: LLM_MODELO y LLM_MODELO_RESPALDO del .env",
+        "Si todos fallan, /query responde 503"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Búsqueda",
+      "items": [
+        "Modo por defecto: semántico (E5 + FAISS)",
+        "BM25 y la expansión solo actúan en modo léxico o híbrido (RRF)",
+        "El clasificador suma un empuje por tema; «artículo N» va primero"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Almacenamiento y límites",
+      "items": [
+        "Los índices se construyen aparte con build_index.py y no se versionan",
+        "Los PDF subidos no entran al buscador hasta reconstruir el índice",
+        "El Express y el frontend son opcionales: hoy la demo usa /docs"
+      ]
+    }
+  ]
+}
