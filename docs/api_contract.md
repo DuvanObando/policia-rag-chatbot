@@ -73,7 +73,7 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 | `epigrafe` | string | sí | Epígrafe del artículo |
 | `texto` | string | sí | Texto del fragmento |
 | `score` | number | sí | Puntaje de relevancia de la recuperación, incluido el empuje del clasificador. **Su escala depende del modo de búsqueda** (`/health` → `busqueda_modo`): coseno en `semantico` (0 a 1), BM25 normalizado en `lexico` (0 a 1) y Reciprocal Rank Fusion en `hibrido` (~0.01 a 0.04). No se pueden comparar scores de modos distintos |
-| `vigencia` | string | no | Estado de vigencia: `vigente`, `modificado`, `inexequible`, `exequible_condicionado` o `no_verificada` (documentos complementarios subidos con `/upload_pdf/`) |
+| `vigencia` | string | no | Estado de vigencia. Con la muestra: `vigente`, `modificado`, `inexequible`, `exequible_condicionado`; documentos subidos: `no_verificada`. **Con el corpus de la Fase 1** también: `vigente_modificado`, `vigente_condicionado`, `vigente_modificado_condicionado`, `vigente_con_inexequibilidad_parcial`, `vigente_modificado_con_inexequibilidad_parcial`. Regla para el frontend: **todo lo que no sea `vigente` lleva señal visible** |
 | `tema` | string | no | Tema asignado al fragmento en el corpus |
 | `fuente` | string | no | Nombre del archivo PDF fuente |
 | `archivo_fuente` | string | no | Ruta del PDF relativa a `corpus/` |
@@ -88,6 +88,7 @@ Referencia compartida del equipo (frontend ↔ backend ↔ motor).
 - Sus valores **salen de los metadatos del corpus** (Fase 1); el motor los copia tal cual, sin calcularlos.
 - **El frontend debe mostrar la `vigencia` en el panel de fuentes** junto a cada fragmento, con una señal visible cuando no sea `vigente` (`modificado`, `inexequible` o `exequible_condicionado`).
 - El frontend puede mostrar el `tema` como etiqueta del fragmento.
+- En `texto`, las expresiones declaradas inexequibles aparecen marcadas como `[INEXEQUIBLE: expresión]` (salen de `corpus/anotaciones_vigencia.json`). El frontend puede resaltarlas o tacharlas.
 - El frontend puede mostrar `archivo_fuente` y `paginas` para permitir localizar el texto en el PDF. Las páginas son la numeración física del archivo, no necesariamente la numeración impresa en el documento.
 - Los campos de fuente y página se copian del corpus; en documentos subidos por `/upload_pdf/` pueden faltar.
 

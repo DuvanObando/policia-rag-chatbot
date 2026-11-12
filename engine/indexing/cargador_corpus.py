@@ -27,6 +27,10 @@ Acepta dos formatos:
        - Campos extra (fuente, páginas, norma...) se conservan.
        - `vigencia` se conserva tal cual (más valores que el contrato original; ver
          docs/api_contract.md).
+
+En los dos formatos se aplican las ANOTACIONES DE VIGENCIA de corpus/anotaciones_vigencia.json:
+las expresiones declaradas inexequibles se marcan en el texto como [INEXEQUIBLE: expresión],
+dentro del numeral o parágrafo indicado, para que el modelo no las presente como vigentes.
 """
 import json
 import os
@@ -35,6 +39,7 @@ from pathlib import Path
 from typing import List
 
 ULTIMA_CARGA: dict = {}  # resumen de la última carga (para mostrarlo en build_index)
+RUTA_ANOTACIONES = Path(__file__).resolve().parents[2] / "corpus" / "anotaciones_vigencia.json"
 
 _ENCABEZADO = re.compile(r"\s*(LIBRO|T[ÍI]TULO|CAP[ÍI]TULO)\b", re.IGNORECASE)
 _ORDINAL = {"PRIMERO": "Primero", "SEGUNDO": "Segundo", "TERCERO": "Tercero", "CUARTO": "Cuarto", "QUINTO": "Quinto"}
@@ -147,11 +152,56 @@ def adaptar(registros: List[dict]) -> List[dict]:
     return salida
 
 
+def _tramo(texto: str, anotacion: dict):
+    """(inicio, fin) del numeral o parágrafo indicado dentro del texto; todo el texto si no se halla."""
+    if anotacion.get("numeral"):
+        n = re.escape(str(anotacion["numeral"]))
+        ini = re.search(rf"(?m)^\s*{n}\.\s", texto)
+        if ini:
+            fin = re.compile(r"(?m)^\s*(\d+\.\s|PAR[ÁA]GRAFO)").search(texto, ini.end())
+            return ini.start(), fin.start() if fin else len(texto)
+    if anotacion.get("paragrafo"):
+        p = str(anotacion["paragrafo"])
+        patron = r"PAR[ÁA]GRAFO\." if p == "único" else rf"PAR[ÁA]GRAFO\s*{re.escape(p)}o?\b"
+        ini = re.search(patron, texto, re.IGNORECASE)
+        if ini:
+            fin = re.compile(r"PAR[ÁA]GRAFO", re.IGNORECASE).search(texto, ini.end())
+            return ini.start(), fin.start() if fin else len(texto)
+    return 0, len(texto)
+
+
+def aplicar_anotaciones(registros: List[dict], ruta=RUTA_ANOTACIONES) -> List[dict]:
+    """Marca como [INEXEQUIBLE: ...] las expresiones de corpus/anotaciones_vigencia.json."""
+    resumen = {"anotaciones_aplicadas": 0, "anotaciones_no_encontradas": []}
+    if not Path(ruta).exists():
+        ULTIMA_CARGA.update(resumen)
+        return registros
+    anotaciones = json.loads(Path(ruta).read_text(encoding="utf-8")).get("anotaciones", [])
+    por_id = {r["id"]: r for r in registros}
+    for a in anotaciones:
+        r = por_id.get(a["articulo"])
+        if r is None:
+            continue  # el artículo no está en este corpus (p. ej. la muestra de 10)
+        etiqueta = str(a.get("estado", "inexequible")).upper()
+        for expresion in a["expresiones"]:
+            ini, fin = _tramo(r["texto"], a)
+            # Los saltos de línea del corpus no importan: cualquier espacio entre palabras.
+            patron = re.compile(r"\s+".join(map(re.escape, expresion.split())), re.IGNORECASE)
+            m = patron.search(r["texto"], ini, fin)
+            if not m:
+                resumen["anotaciones_no_encontradas"].append(f"{a['articulo']}: {expresion}")
+                continue
+            r["texto"] = r["texto"][:m.start()] + f"[{etiqueta}: {m.group(0)}]" + r["texto"][m.end():]
+            resumen["anotaciones_aplicadas"] += 1
+    ULTIMA_CARGA.update(resumen)
+    return registros
+
+
 def cargar(ruta) -> List[dict]:
     """Lee el corpus de `ruta` y lo devuelve en el esquema del motor."""
     registros = json.loads(Path(ruta).read_text(encoding="utf-8"))
     if _es_formato_fase1(registros):
-        return adaptar(registros)
+        return aplicar_anotaciones(adaptar(registros))
     ULTIMA_CARGA.clear()
     ULTIMA_CARGA.update(registros_en_archivo=len(registros), formato="muestra", registros_cargados=len(registros))
-    return registros
+    return aplicar_anotaciones([dict(r) for r in registros])

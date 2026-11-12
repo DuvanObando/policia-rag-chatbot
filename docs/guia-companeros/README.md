@@ -62,7 +62,7 @@ Errores (todos con `{"error": "mensaje en español"}`): **422** entrada inválid
 
 ### Modo de búsqueda por defecto
 
-**Híbrido + clasificador temático + expansión con glosario.** Se cambia en el `.env` con `BUSQUEDA_MODO` (`hibrido`, `semantico` o `lexico`) y `BUSQUEDA_EXPANSION` (`1` o `0`). Detalle: [`docs/busqueda_hibrida.md`](../busqueda_hibrida.md) y [`docs/clasificador.md`](../clasificador.md).
+**Semántico + clasificador temático** (desde el 12/11, con el corpus real; antes era híbrido). Se cambia en el `.env` con `BUSQUEDA_MODO` (`semantico`, `hibrido` o `lexico`); la expansión con glosario (`BUSQUEDA_EXPANSION`) solo actúa en `hibrido` y `lexico`. El corpus se elige con `CORPUS_RUTA` (por defecto el de la Fase 1, `corpus/procesados/corpus_ley_1801.json`). Detalle: [`docs/busqueda_hibrida.md`](../busqueda_hibrida.md) y [`docs/clasificador.md`](../clasificador.md).
 
 ### Resultados de las evaluaciones
 
@@ -78,8 +78,8 @@ Todas con el **corpus de muestra de 10 artículos** y 13 a 19 preguntas escritas
 
 ### Limitaciones conocidas (léelas antes de contar con algo)
 
-- **Corpus provisional de 10 artículos** (`corpus/muestra/`). Será reemplazado por el de Wilder; todo hay que reevaluarlo.
-- **La vigencia es por artículo, no por numeral.** Hay numerales con apartes inexequibles que el motor no puede distinguir: hoy el chatbot, por ejemplo, cita el art. 140, num. 7 (consumo de bebidas alcohólicas en parques) aunque la fuente marca esos apartes como inexequibles. Solo puede arreglarse con el corpus (ver [wilder.md](wilder.md)).
+- **Corpus:** desde el 12/11 el motor usa el corpus de la Fase 1 (249 artículos), adaptado al cargar por `engine/indexing/cargador_corpus.py`. Las tablas de resultados de arriba son de la muestra de 10 artículos; las del corpus real están en [`docs/busqueda_hibrida.md`](../busqueda_hibrida.md).
+- **La vigencia es por artículo, no por numeral.** Hay numerales con apartes inexequibles que el motor no puede distinguir: hoy el chatbot, por ejemplo, cita el art. 140, num. 7 (consumo de bebidas alcohólicas en parques) aunque la fuente marca esos apartes como inexequibles. Mientras tanto, las expresiones inexequibles conocidas se marcan como `[INEXEQUIBLE: ...]` con `corpus/anotaciones_vigencia.json` (hoy 6, del HTML del Senado; Wilder lo completa; ver [wilder.md](wilder.md)).
 - **BM25 usa stemming (Snowball), no lematización**, porque spaCy está bloqueado por Windows en el equipo de Duvan (ver [santiago-castro.md](santiago-castro.md)). La rama de spaCy del código **nunca se ha ejecutado**.
 - **Glosario de sinónimos y `temas.json` provisionales**, escritos para los 10 artículos de muestra.
 - **Documentos subidos por `/upload_pdf/`:** al indexarlos se recuperan, pero todavía no se citan bien en las respuestas.

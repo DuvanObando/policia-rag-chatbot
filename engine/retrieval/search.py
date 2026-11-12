@@ -43,7 +43,7 @@ ORDINALES = {"PRIMERO": "I", "SEGUNDO": "II", "TERCERO": "III", "CUARTO": "IV", 
 #                comparten alguna palabra con la pregunta
 #   "hibrido"    Reciprocal Rank Fusion de los dos rankings: suma de 1/(k + posición); ~0.01 a 0.03
 MODOS = ("semantico", "lexico", "hibrido")
-MODO_POR_DEFECTO = "hibrido"  # si no hay BUSQUEDA_MODO en el .env (recomendado: ver docs/busqueda_hibrida.md)
+MODO_POR_DEFECTO = "semantico"  # si no hay BUSQUEDA_MODO en el .env. Con el corpus real (249 art.) gana el semántico: ver docs/busqueda_hibrida.md
 
 
 def modo_por_defecto() -> str:
