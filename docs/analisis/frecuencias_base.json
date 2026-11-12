@@ -1,0 +1,924 @@
+{
+  "alcance": "solo texto base Ley 1801",
+  "modelo": "es_core_news_sm-3.8.0",
+  "registros": 249,
+  "palabras": 53443,
+  "top_lemas": [
+    [
+      "actividad",
+      490
+    ],
+    [
+      "publico",
+      450
+    ],
+    [
+      "policia",
+      389
+    ],
+    [
+      "numeral",
+      361
+    ],
+    [
+      "multa",
+      353
+    ],
+    [
+      "autoridad",
+      302
+    ],
+    [
+      "medida",
+      296
+    ],
+    [
+      "comportamiento",
+      290
+    ],
+    [
+      "general",
+      284
+    ],
+    [
+      "paragrafo",
+      280
+    ],
+    [
+      "tipo",
+      264
+    ],
+    [
+      "2",
+      249
+    ],
+    [
+      "4",
+      245
+    ],
+    [
+      "1",
+      230
+    ],
+    [
+      "ley",
+      228
+    ],
+    [
+      "convivencia",
+      225
+    ],
+    [
+      "persona",
+      219
+    ],
+    [
+      "3",
+      205
+    ],
+    [
+      "nacional",
+      203
+    ],
+    [
+      "suspension",
+      203
+    ],
+    [
+      "lugar",
+      182
+    ],
+    [
+      "bien",
+      146
+    ],
+    [
+      "correctivo",
+      137
+    ],
+    [
+      "temporal",
+      137
+    ],
+    [
+      "aglomeracion",
+      134
+    ],
+    [
+      "articulo",
+      133
+    ],
+    [
+      "presente",
+      132
+    ],
+    [
+      "complejo",
+      132
+    ],
+    [
+      "especial",
+      131
+    ],
+    [
+      "siguiente",
+      128
+    ],
+    [
+      "constitucional",
+      126
+    ],
+    [
+      "deber",
+      120
+    ],
+    [
+      "norma",
+      119
+    ],
+    [
+      "sentencia",
+      118
+    ],
+    [
+      "corte",
+      118
+    ],
+    [
+      "establecido",
+      111
+    ],
+    [
+      "seguridad",
+      107
+    ],
+    [
+      "5",
+      106
+    ],
+    [
+      "caso",
+      105
+    ],
+    [
+      "derecho",
+      104
+    ]
+  ],
+  "top_bigramas": [
+    [
+      "multa general",
+      237
+    ],
+    [
+      "general tipo",
+      228
+    ],
+    [
+      "medida correctivo",
+      137
+    ],
+    [
+      "tipo 4",
+      123
+    ],
+    [
+      "suspension temporal",
+      115
+    ],
+    [
+      "corte constitucional",
+      114
+    ],
+    [
+      "involucrar aglomeracion",
+      98
+    ],
+    [
+      "publico complejo",
+      93
+    ],
+    [
+      "actividad numeral",
+      84
+    ],
+    [
+      "policia nacional",
+      75
+    ],
+    [
+      "espacio publico",
+      66
+    ],
+    [
+      "paragrafo 1",
+      66
+    ],
+    [
+      "paragrafo 2",
+      66
+    ],
+    [
+      "potencialmente peligroso",
+      64
+    ],
+    [
+      "comportamiento contrario",
+      59
+    ],
+    [
+      "presente articulo",
+      50
+    ],
+    [
+      "autoridad competente",
+      49
+    ],
+    [
+      "4 suspension",
+      49
+    ],
+    [
+      "programa comunitario",
+      47
+    ],
+    [
+      "multa especial",
+      47
+    ],
+    [
+      "actividad pedagogico",
+      46
+    ],
+    [
+      "suspension definitivo",
+      43
+    ],
+    [
+      "actividad economico",
+      43
+    ],
+    [
+      "nino nina",
+      42
+    ],
+    [
+      "siguiente medida",
+      41
+    ],
+    [
+      "numeral 2",
+      41
+    ],
+    [
+      "tipo 3",
+      41
+    ],
+    [
+      "numeral 1",
+      40
+    ],
+    [
+      "paragrafo 3",
+      40
+    ],
+    [
+      "gobierno nacional",
+      39
+    ]
+  ],
+  "top_trigramas": [
+    [
+      "multa general tipo",
+      228
+    ],
+    [
+      "autoridad de policia",
+      133
+    ],
+    [
+      "aglomeracion de publico",
+      128
+    ],
+    [
+      "general tipo 4",
+      121
+    ],
+    [
+      "temporal de actividad",
+      106
+    ],
+    [
+      "actividad que involucrar",
+      95
+    ],
+    [
+      "exequible mediante sentencia",
+      52
+    ],
+    [
+      "comunitario o actividad",
+      47
+    ],
+    [
+      "participacion en programa",
+      46
+    ],
+    [
+      "pedagogico de convivencia",
+      46
+    ],
+    [
+      "tipo 4 suspension",
+      46
+    ],
+    [
+      "4 suspension temporal",
+      43
+    ],
+    [
+      "general tipo 3",
+      40
+    ],
+    [
+      "abierto al publico",
+      37
+    ],
+    [
+      "distrital o municipal",
+      37
+    ],
+    [
+      "general tipo 2",
+      35
+    ],
+    [
+      "inexequible mediante sentencia",
+      34
+    ],
+    [
+      "organizador de actividad",
+      33
+    ],
+    [
+      "general tipo 1",
+      31
+    ],
+    [
+      "corte constitucional c-223",
+      30
+    ],
+    [
+      "c-223 de 2017",
+      30
+    ],
+    [
+      "especial por comportamiento",
+      30
+    ],
+    [
+      "canino potencialmente peligroso",
+      29
+    ],
+    [
+      "nina y adolescente",
+      28
+    ],
+    [
+      "comportamiento antes senalado",
+      28
+    ],
+    [
+      "senalado ser objeto",
+      28
+    ],
+    [
+      "tipo 4 numeral",
+      25
+    ],
+    [
+      "tipo 4 destruccion",
+      24
+    ],
+    [
+      "actividad de policia",
+      23
+    ],
+    [
+      "numeral 1 multa",
+      23
+    ]
+  ],
+  "terminos": {
+    "multa": {
+      "ocurrencias": 353,
+      "registros": 56
+    },
+    "comparendo": {
+      "ocurrencias": 22,
+      "registros": 7
+    },
+    "medida correctiva": {
+      "ocurrencias": 137,
+      "registros": 76
+    },
+    "espacio publico": {
+      "ocurrencias": 66,
+      "registros": 36
+    }
+  },
+  "colocaciones": {
+    "multa": {
+      "por_frecuencia": [
+        {
+          "palabra": "numeral",
+          "juntas": 309,
+          "frecuencia": 361,
+          "pmi": 7.02
+        },
+        {
+          "palabra": "tipo",
+          "juntas": 293,
+          "frecuencia": 264,
+          "pmi": 7.39
+        },
+        {
+          "palabra": "general",
+          "juntas": 242,
+          "frecuencia": 284,
+          "pmi": 7.01
+        },
+        {
+          "palabra": "actividad",
+          "juntas": 72,
+          "frecuencia": 490,
+          "pmi": 4.48
+        },
+        {
+          "palabra": "suspension",
+          "juntas": 56,
+          "frecuencia": 203,
+          "pmi": 5.38
+        },
+        {
+          "palabra": "especial",
+          "juntas": 51,
+          "frecuencia": 131,
+          "pmi": 5.88
+        },
+        {
+          "palabra": "destruccion",
+          "juntas": 36,
+          "frecuencia": 77,
+          "pmi": 6.15
+        },
+        {
+          "palabra": "comportamiento",
+          "juntas": 35,
+          "frecuencia": 290,
+          "pmi": 4.19
+        },
+        {
+          "palabra": "complejo",
+          "juntas": 29,
+          "frecuencia": 132,
+          "pmi": 5.06
+        },
+        {
+          "palabra": "publico",
+          "juntas": 29,
+          "frecuencia": 450,
+          "pmi": 3.29
+        },
+        {
+          "palabra": "convivencia",
+          "juntas": 16,
+          "frecuencia": 225,
+          "pmi": 3.43
+        },
+        {
+          "palabra": "paragrafo",
+          "juntas": 13,
+          "frecuencia": 280,
+          "pmi": 2.81
+        },
+        {
+          "palabra": "amonestacion",
+          "juntas": 13,
+          "frecuencia": 31,
+          "pmi": 5.99
+        },
+        {
+          "palabra": "infraccion",
+          "juntas": 13,
+          "frecuencia": 27,
+          "pmi": 6.19
+        },
+        {
+          "palabra": "aaplicar",
+          "juntas": 12,
+          "frecuencia": 20,
+          "pmi": 6.51
+        }
+      ],
+      "por_pmi": [
+        {
+          "palabra": "tipo",
+          "juntas": 293,
+          "frecuencia": 264,
+          "pmi": 7.39
+        },
+        {
+          "palabra": "numeral",
+          "juntas": 309,
+          "frecuencia": 361,
+          "pmi": 7.02
+        },
+        {
+          "palabra": "general",
+          "juntas": 242,
+          "frecuencia": 284,
+          "pmi": 7.01
+        },
+        {
+          "palabra": "visual",
+          "juntas": 5,
+          "frecuencia": 8,
+          "pmi": 6.56
+        },
+        {
+          "palabra": "compleja",
+          "juntas": 5,
+          "frecuencia": 8,
+          "pmi": 6.56
+        },
+        {
+          "palabra": "aaplicar",
+          "juntas": 12,
+          "frecuencia": 20,
+          "pmi": 6.51
+        },
+        {
+          "palabra": "pago",
+          "juntas": 11,
+          "frecuencia": 21,
+          "pmi": 6.31
+        },
+        {
+          "palabra": "infraccion",
+          "juntas": 13,
+          "frecuencia": 27,
+          "pmi": 6.19
+        },
+        {
+          "palabra": "destruccion",
+          "juntas": 36,
+          "frecuencia": 77,
+          "pmi": 6.15
+        },
+        {
+          "palabra": "concepto",
+          "juntas": 8,
+          "frecuencia": 18,
+          "pmi": 6.07
+        },
+        {
+          "palabra": "impuesto",
+          "juntas": 6,
+          "frecuencia": 14,
+          "pmi": 6.02
+        },
+        {
+          "palabra": "amonestacion",
+          "juntas": 13,
+          "frecuencia": 31,
+          "pmi": 5.99
+        },
+        {
+          "palabra": "especial",
+          "juntas": 51,
+          "frecuencia": 131,
+          "pmi": 5.88
+        },
+        {
+          "palabra": "decomiso",
+          "juntas": 6,
+          "frecuencia": 16,
+          "pmi": 5.83
+        },
+        {
+          "palabra": "imposicion",
+          "juntas": 11,
+          "frecuencia": 32,
+          "pmi": 5.7
+        }
+      ]
+    },
+    "comparendo": {
+      "por_frecuencia": [
+        {
+          "palabra": "orden",
+          "juntas": 13,
+          "frecuencia": 82,
+          "pmi": 8.59
+        }
+      ],
+      "por_pmi": [
+        {
+          "palabra": "orden",
+          "juntas": 13,
+          "frecuencia": 82,
+          "pmi": 8.59
+        }
+      ]
+    },
+    "medida correctiva": {
+      "por_frecuencia": [
+        {
+          "palabra": "aplicacion",
+          "juntas": 31,
+          "frecuencia": 84,
+          "pmi": 7.17
+        },
+        {
+          "palabra": "siguiente",
+          "juntas": 22,
+          "frecuencia": 142,
+          "pmi": 5.92
+        },
+        {
+          "palabra": "imponer",
+          "juntas": 20,
+          "frecuencia": 43,
+          "pmi": 7.5
+        },
+        {
+          "palabra": "aplicar",
+          "juntas": 19,
+          "frecuencia": 70,
+          "pmi": 6.73
+        },
+        {
+          "palabra": "medida",
+          "juntas": 15,
+          "frecuencia": 296,
+          "pmi": 4.31
+        },
+        {
+          "palabra": "correctiir",
+          "juntas": 15,
+          "frecuencia": 33,
+          "pmi": 7.47
+        },
+        {
+          "palabra": "policia",
+          "juntas": 14,
+          "frecuencia": 389,
+          "pmi": 3.81
+        },
+        {
+          "palabra": "comportamiento",
+          "juntas": 13,
+          "frecuencia": 290,
+          "pmi": 4.13
+        },
+        {
+          "palabra": "paragrafo",
+          "juntas": 12,
+          "frecuencia": 280,
+          "pmi": 4.06
+        },
+        {
+          "palabra": "lugar",
+          "juntas": 11,
+          "frecuencia": 182,
+          "pmi": 4.56
+        },
+        {
+          "palabra": "incumplimiento",
+          "juntas": 11,
+          "frecuencia": 23,
+          "pmi": 7.54
+        },
+        {
+          "palabra": "imposicion",
+          "juntas": 9,
+          "frecuencia": 32,
+          "pmi": 6.78
+        },
+        {
+          "palabra": "perjuicio",
+          "juntas": 8,
+          "frecuencia": 57,
+          "pmi": 5.77
+        },
+        {
+          "palabra": "aaplicar",
+          "juntas": 8,
+          "frecuencia": 20,
+          "pmi": 7.29
+        },
+        {
+          "palabra": "medio",
+          "juntas": 7,
+          "frecuencia": 116,
+          "pmi": 4.56
+        }
+      ],
+      "por_pmi": [
+        {
+          "palabra": "continuar",
+          "juntas": 6,
+          "frecuencia": 8,
+          "pmi": 8.19
+        },
+        {
+          "palabra": "incumplimiento",
+          "juntas": 11,
+          "frecuencia": 23,
+          "pmi": 7.54
+        },
+        {
+          "palabra": "imponer",
+          "juntas": 20,
+          "frecuencia": 43,
+          "pmi": 7.5
+        },
+        {
+          "palabra": "correctiir",
+          "juntas": 15,
+          "frecuencia": 33,
+          "pmi": 7.47
+        },
+        {
+          "palabra": "impuesto",
+          "juntas": 6,
+          "frecuencia": 14,
+          "pmi": 7.39
+        },
+        {
+          "palabra": "mencionado",
+          "juntas": 7,
+          "frecuencia": 17,
+          "pmi": 7.33
+        },
+        {
+          "palabra": "aaplicar",
+          "juntas": 8,
+          "frecuencia": 20,
+          "pmi": 7.29
+        },
+        {
+          "palabra": "aplicacion",
+          "juntas": 31,
+          "frecuencia": 84,
+          "pmi": 7.17
+        },
+        {
+          "palabra": "imposicion",
+          "juntas": 9,
+          "frecuencia": 32,
+          "pmi": 6.78
+        },
+        {
+          "palabra": "aplicar",
+          "juntas": 19,
+          "frecuencia": 70,
+          "pmi": 6.73
+        },
+        {
+          "palabra": "desarrollar",
+          "juntas": 6,
+          "frecuencia": 33,
+          "pmi": 6.15
+        },
+        {
+          "palabra": "siguiente",
+          "juntas": 22,
+          "frecuencia": 142,
+          "pmi": 5.92
+        },
+        {
+          "palabra": "perjuicio",
+          "juntas": 8,
+          "frecuencia": 57,
+          "pmi": 5.77
+        },
+        {
+          "palabra": "cumplimiento",
+          "juntas": 5,
+          "frecuencia": 48,
+          "pmi": 5.34
+        },
+        {
+          "palabra": "codigo",
+          "juntas": 7,
+          "frecuencia": 99,
+          "pmi": 4.79
+        }
+      ]
+    },
+    "espacio publico": {
+      "por_frecuencia": [
+        {
+          "palabra": "lugar",
+          "juntas": 13,
+          "frecuencia": 182,
+          "pmi": 5.85
+        },
+        {
+          "palabra": "abierto",
+          "juntas": 12,
+          "frecuencia": 39,
+          "pmi": 7.96
+        },
+        {
+          "palabra": "publico",
+          "juntas": 10,
+          "frecuencia": 450,
+          "pmi": 4.17
+        },
+        {
+          "palabra": "comun",
+          "juntas": 7,
+          "frecuencia": 12,
+          "pmi": 8.88
+        },
+        {
+          "palabra": "zona",
+          "juntas": 6,
+          "frecuencia": 31,
+          "pmi": 7.29
+        },
+        {
+          "palabra": "area",
+          "juntas": 5,
+          "frecuencia": 45,
+          "pmi": 6.49
+        },
+        {
+          "palabra": "privado",
+          "juntas": 5,
+          "frecuencia": 55,
+          "pmi": 6.2
+        },
+        {
+          "palabra": "via",
+          "juntas": 5,
+          "frecuencia": 28,
+          "pmi": 7.18
+        }
+      ],
+      "por_pmi": [
+        {
+          "palabra": "comun",
+          "juntas": 7,
+          "frecuencia": 12,
+          "pmi": 8.88
+        },
+        {
+          "palabra": "abierto",
+          "juntas": 12,
+          "frecuencia": 39,
+          "pmi": 7.96
+        },
+        {
+          "palabra": "zona",
+          "juntas": 6,
+          "frecuencia": 31,
+          "pmi": 7.29
+        },
+        {
+          "palabra": "via",
+          "juntas": 5,
+          "frecuencia": 28,
+          "pmi": 7.18
+        },
+        {
+          "palabra": "area",
+          "juntas": 5,
+          "frecuencia": 45,
+          "pmi": 6.49
+        },
+        {
+          "palabra": "privado",
+          "juntas": 5,
+          "frecuencia": 55,
+          "pmi": 6.2
+        },
+        {
+          "palabra": "lugar",
+          "juntas": 13,
+          "frecuencia": 182,
+          "pmi": 5.85
+        },
+        {
+          "palabra": "publico",
+          "juntas": 10,
+          "frecuencia": 450,
+          "pmi": 4.17
+        }
+      ]
+    }
+  }
+}

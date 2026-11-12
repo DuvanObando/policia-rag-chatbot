@@ -1,0 +1,254 @@
+{
+  "registros": 249,
+  "tokens": 53443,
+  "tipos_forma": 4884,
+  "tipos_lema": 3701,
+  "ttr_forma": 0.0914,
+  "ttr_lema": 0.0693,
+  "longitud_media_tokens": 214.6,
+  "longitud_mediana_tokens": 130,
+  "longitud_min": 22,
+  "longitud_max": 1347,
+  "pos": {
+    "NOUN": 13188,
+    "ADP": 10008,
+    "DET": 6972,
+    "ADJ": 5559,
+    "PROPN": 4560,
+    "VERB": 3692,
+    "CCONJ": 3001,
+    "NUM": 2182,
+    "PRON": 1950,
+    "ADV": 928,
+    "AUX": 852,
+    "SCONJ": 521,
+    "SYM": 23,
+    "PUNCT": 5,
+    "INTJ": 1,
+    "PART": 1
+  },
+  "ner": {
+    "MISC": 1832,
+    "LOC": 754,
+    "PER": 587,
+    "ORG": 334
+  },
+  "ner_top5_por_etiqueta": {
+    "LOC": [
+      [
+        "numeral",
+        129
+      ],
+      [
+        "la ley",
+        86
+      ],
+      [
+        "suspensión",
+        76
+      ],
+      [
+        "gobierno nacional",
+        21
+      ],
+      [
+        "art",
+        19
+      ]
+    ],
+    "MISC": [
+      [
+        "multa general",
+        117
+      ],
+      [
+        "parágrafo 1",
+        62
+      ],
+      [
+        "código",
+        61
+      ],
+      [
+        "sentencia de la corte constitucional",
+        57
+      ],
+      [
+        "parágrafo 2",
+        47
+      ]
+    ],
+    "PER": [
+      [
+        "policía",
+        230
+      ],
+      [
+        "destrucción",
+        38
+      ],
+      [
+        "suspensión",
+        35
+      ],
+      [
+        "participación",
+        18
+      ],
+      [
+        "artículo",
+        13
+      ]
+    ],
+    "ORG": [
+      [
+        "parágrafo",
+        49
+      ],
+      [
+        "comportamientos",
+        22
+      ],
+      [
+        "destrucción",
+        17
+      ],
+      [
+        "corregido por el art",
+        15
+      ],
+      [
+        "nota",
+        15
+      ]
+    ]
+  },
+  "montos_regex": 251,
+  "plazos_regex": 72,
+  "top_formas": [
+    [
+      "de",
+      4980
+    ],
+    [
+      "la",
+      2409
+    ],
+    [
+      "o",
+      1457
+    ],
+    [
+      "el",
+      1391
+    ],
+    [
+      "y",
+      1387
+    ],
+    [
+      "en",
+      1347
+    ],
+    [
+      "las",
+      1024
+    ],
+    [
+      "los",
+      1012
+    ],
+    [
+      "que",
+      928
+    ],
+    [
+      "a",
+      893
+    ],
+    [
+      "por",
+      607
+    ],
+    [
+      "del",
+      562
+    ],
+    [
+      "se",
+      513
+    ],
+    [
+      "para",
+      510
+    ],
+    [
+      "policía",
+      389
+    ]
+  ],
+  "top_lemas": [
+    [
+      "el",
+      5806
+    ],
+    [
+      "de",
+      4980
+    ],
+    [
+      "o",
+      1457
+    ],
+    [
+      "y",
+      1387
+    ],
+    [
+      "en",
+      1347
+    ],
+    [
+      "que",
+      928
+    ],
+    [
+      "a",
+      893
+    ],
+    [
+      "él",
+      792
+    ],
+    [
+      "por",
+      607
+    ],
+    [
+      "del",
+      562
+    ],
+    [
+      "para",
+      510
+    ],
+    [
+      "actividad",
+      490
+    ],
+    [
+      "público",
+      448
+    ],
+    [
+      "policía",
+      389
+    ],
+    [
+      "con",
+      373
+    ]
+  ],
+  "alcance": "solo texto base Ley 1801",
+  "modelo": "es_core_news_sm-3.8.0"
+}
