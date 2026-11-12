@@ -31,32 +31,36 @@ Este informe es la base del informe técnico final. Todo lo que dice sale del re
 ## 2. Arquitectura
 
 ```mermaid
-flowchart TD
-    PDF["PDF oficiales<br/>corpus/documentos/"] --> PIPE["Pipeline de corpus<br/>extraer · limpiar · segmentar"]
-    PIPE --> CORPUS[("corpus_ley_1801.json<br/>290 registros")]
-    ANOT[("anotaciones_vigencia.json")] --> CARG
-    CORPUS --> CARG["Cargador del corpus<br/>cargador_corpus.py"]
-    CARG --> BUILD["build_index.py<br/>fragmentos de 250 tokens"]
-    BUILD --> FAISS[("Índice FAISS<br/>E5, 471 fragmentos")]
-    BUILD --> BM25[("Índice BM25<br/>bm25_tokens.json")]
-
-    U["Usuario: pregunta"] --> API["API FastAPI<br/>POST /query"]
-    API --> BUS["Búsqueda: buscar()"]
-    CLAS["Clasificador temático<br/>+ artículo por número"] --> BUS
-    EXP["Expansión con glosario<br/>(solo BM25)"] --> BM25
-    BUS --> FAISS
-    BUS --> EXP
-    BUS --> SB["Small-to-big<br/>artículo completo"]
-    CARG --> SB
-    SB --> PR["Prompt<br/>reglas + artículos + pregunta"]
-    PR --> LLM{"Cadena de LLM<br/>según LLM_ORDEN"}
-    LLM --> GROQ["Groq<br/>gpt-oss-120b → gpt-oss-20b"]
-    LLM --> GEM["Gemini<br/>3.5-flash-lite → 3.6-flash"]
-    GROQ --> CIT["Extractor de citas<br/>valida artículo y numeral"]
-    GEM --> CIT
-    CIT --> API
-    API --> R["Respuesta JSON<br/>respuesta, citas, fragmentos,<br/>fuera_de_dominio"]
+flowchart TB
+    subgraph OFF["Construcción de los índices (se ejecuta aparte)"]
+        direction LR
+        PIPE["Pipeline de corpus<br/>PDF: extraer, limpiar, segmentar"] --> CORPUS[("corpus_ley_1801.json<br/>290 registros")]
+        CORPUS --> CARG["Cargador del corpus<br/>cargador_corpus.py"]
+        ANOT[("anotaciones_vigencia.json")] --> CARG
+        CARG --> BUILD["build_index.py<br/>fragmentos de 250 tokens"]
+        BUILD --> FAISS[("Índice FAISS<br/>E5, 471 fragmentos")]
+        BUILD --> BM25[("Índice BM25<br/>bm25_tokens.json")]
+    end
+    subgraph ON["Consulta (en tiempo real)"]
+        U["Usuario: pregunta"] --> API["API FastAPI<br/>POST /query"]
+        API --> BUS["Búsqueda<br/>buscar()"]
+        CLAS["Clasificador temático<br/>+ artículo por número"] --> BUS
+        EXP["Expansión con glosario<br/>solo BM25"] --> BUS
+        BUS --> SB["Small-to-big<br/>artículo completo"]
+        SB --> PR["Prompt<br/>reglas + artículos + pregunta"]
+        PR --> LLM{"Cadena de LLM<br/>según LLM_ORDEN"}
+        LLM --> GROQ["Groq<br/>gpt-oss-120b → gpt-oss-20b"]
+        LLM --> GEM["Gemini<br/>3.5-flash-lite → 3.6-flash"]
+        GROQ --> CIT["Extractor de citas<br/>valida artículo y numeral"]
+        GEM --> CIT
+        CIT --> R["API: respuesta JSON<br/>respuesta, citas, fragmentos,<br/>fuera_de_dominio"]
+    end
+    OFF ~~~ U
+    OFF -->|"índices FAISS y BM25"| BUS
+    OFF -->|"artículo completo"| SB
 ```
+
+El bloque superior se ejecuta una vez (y otra vez cuando cambia el corpus); el inferior, en cada pregunta.
 
 Hay versiones interactivas y verificadas contra el código en [`docs/diagramas/`](diagramas/README.md) (arquitectura, estructura del repositorio y flujo de una consulta).
 
@@ -278,8 +282,7 @@ Integrado en el commit `3cf1a21` (PR #4). Fuente de los datos: [`docs/analisis/r
 3. No mezclar numerales con parágrafos en una misma lista.
 4. Si los artículos no responden la pregunta, contestar solo con la frase fija «No encontré esa información en el Código…». La API detecta esa frase y marca `fuera_de_dominio: true`.
 5. Avisar la vigencia cuando el artículo no es `vigente`.
-
-   5b. Las expresiones marcadas `[INEXEQUIBLE: …]` ya no rigen: no presentarlas como vigentes.
+   - Regla 5b: las expresiones marcadas `[INEXEQUIBLE: …]` ya no rigen; no hay que presentarlas como vigentes.
 6. Escribir en lenguaje claro.
 7. No dar asesoría jurídica personalizada.
 
