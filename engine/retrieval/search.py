@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
-from indexing.embeddings import PREGUNTAS_DEMO, cargar_modelo, embeddings_preguntas  # noqa: E402
+from indexing.embeddings import PREGUNTAS_DEMO, cargar_corpus, cargar_modelo, embeddings_preguntas  # noqa: E402
 from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
 from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
 from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
@@ -43,7 +43,7 @@ ORDINALES = {"PRIMERO": "I", "SEGUNDO": "II", "TERCERO": "III", "CUARTO": "IV", 
 #                comparten alguna palabra con la pregunta
 #   "hibrido"    Reciprocal Rank Fusion de los dos rankings: suma de 1/(k + posición); ~0.01 a 0.03
 MODOS = ("semantico", "lexico", "hibrido")
-MODO_POR_DEFECTO = "hibrido"  # si no hay BUSQUEDA_MODO en el .env (recomendado: ver docs/busqueda_hibrida.md)
+MODO_POR_DEFECTO = "semantico"  # si no hay BUSQUEDA_MODO en el .env. Con el corpus real (249 art.) gana el semántico: ver docs/busqueda_hibrida.md
 
 
 def modo_por_defecto() -> str:
@@ -91,14 +91,15 @@ def precargar(estrategia: str = "articulo") -> None:
 def info_indice(estrategia: str = "articulo") -> dict:
     """Datos del índice cargado: estrategia, modelo de embeddings y número de fragmentos."""
     indice, meta = _indice(estrategia)
-    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal)}
+    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal),
+            "corpus": meta.get("corpus"), "carga_corpus": meta.get("carga_corpus")}
 
 
 @lru_cache(maxsize=None)
 def _articulos_del_corpus(estrategia: str) -> dict:
     """Artículos completos del corpus con que se construyó el índice, por id (se carga una vez)."""
     ruta = Path(_indice(estrategia)[1]["corpus"])
-    return {a["id"]: a for a in json.loads(ruta.read_text(encoding="utf-8"))}
+    return {a["id"]: a for a in cargar_corpus(ruta)}  # mismo cargador que el índice
 
 
 def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict:

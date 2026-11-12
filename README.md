@@ -59,6 +59,8 @@ cp .env.example .env
 
 Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `hibrido` (recomendado y por defecto), `semantico` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md). `BUSQUEDA_EXPANSION=1` (por defecto) activa la expansión de consultas con el glosario `engine/glossary/sinonimos.json` (provisional; solo afecta a la búsqueda léxica).
 
+**Corpus que se indexa:** `CORPUS_RUTA` en el `.env` (por defecto `corpus/procesados/corpus_ley_1801.json`, el corpus de la Fase 1; la muestra de 10 artículos sigue en `corpus/muestra/codigo_muestra.json`). El cargador `engine/indexing/cargador_corpus.py` adapta el formato de la Fase 1 al esquema del motor sin modificar el archivo. `CORPUS_INCLUIR_REFORMAS=1` indexa también los registros de las normas que modifican la ley.
+
 **3. Construir los índices** (los índices no se versionan; hay que generarlos)
 
 ```bash

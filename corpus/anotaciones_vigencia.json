@@ -1,0 +1,67 @@
+{
+  "_ayuda": [
+    "Expresiones de la Ley 1801 declaradas INEXEQUIBLES (o con otro estado) que el texto del corpus no marca.",
+    "El cargador del motor (engine/indexing/cargador_corpus.py) las busca en el texto del artículo, dentro del numeral o parágrafo indicado, y las marca como [INEXEQUIBLE: expresión]. El prompt le indica al modelo que no las presente como vigentes. NO se modifica el archivo del corpus.",
+    "Formato de cada anotación: articulo (id art-N), numeral o paragrafo (\"1\", \"único\", \"transitorio\") o inciso (\"general\" = fuera de numerales), expresiones (texto exacto; los saltos de línea del corpus no importan), estado (inexequible), sentencia (si se conoce), origen y revisado_a_mano.",
+    "Punto de partida: las 6 expresiones tachadas (<S>) del HTML de la Secretaría del Senado (consulta del 2026-11-09). Wilder: completar con las demás expresiones inexequibles o condicionadas de las sentencias de la Corte Constitucional y verificar las marcadas revisado_a_mano=false.",
+    "Después de editar este archivo hay que reconstruir los índices (build_index.py, estrategias articulo y fragmentos)."
+  ],
+  "anotaciones": [
+    {
+      "articulo": "art-117",
+      "inciso": "general",
+      "expresiones": [
+        "potencialmente peligrosos"
+      ],
+      "estado": "inexequible",
+      "sentencia": null,
+      "origen": "HTML del Senado (texto entre etiquetas <S>, tachado)",
+      "revisado_a_mano": false
+    },
+    {
+      "articulo": "art-134",
+      "numeral": "1",
+      "expresiones": [
+        "y privado"
+      ],
+      "estado": "inexequible",
+      "sentencia": null,
+      "origen": "HTML del Senado (texto entre etiquetas <S>, tachado)",
+      "revisado_a_mano": false
+    },
+    {
+      "articulo": "art-140",
+      "numeral": "7",
+      "expresiones": [
+        "bebidas alcohólicas",
+        "psicoactivas o"
+      ],
+      "estado": "inexequible",
+      "sentencia": "C-253 de 2019",
+      "origen": "HTML del Senado (texto entre etiquetas <S>, tachado)",
+      "revisado_a_mano": true
+    },
+    {
+      "articulo": "art-220",
+      "inciso": "general",
+      "expresiones": [
+        "a quién le corresponde probar que no está incurso en el comportamiento contrario a la convivencia correspondiente"
+      ],
+      "estado": "inexequible",
+      "sentencia": null,
+      "origen": "HTML del Senado (texto entre etiquetas <S>, tachado)",
+      "revisado_a_mano": false
+    },
+    {
+      "articulo": "art-237B",
+      "inciso": "general",
+      "expresiones": [
+        "prevención"
+      ],
+      "estado": "inexequible",
+      "sentencia": null,
+      "origen": "HTML del Senado (texto entre etiquetas <S>, tachado)",
+      "revisado_a_mano": false
+    }
+  ]
+}

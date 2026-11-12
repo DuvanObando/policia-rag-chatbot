@@ -74,6 +74,8 @@ Para que el chatbot cite con precisión (p. ej. «Art. 180, par.»), el corpus d
 
 ## Lo que ya dejé listo para ti
 
+- **`corpus/anotaciones_vigencia.json` (nuevo, 12/11):** lista de expresiones inexequibles por artículo y numeral. El cargador del motor las marca en el texto como `[INEXEQUIBLE: ...]` sin tocar tu corpus. Trae las 6 expresiones tachadas (`<S>`) del HTML del Senado (art. 117, 134 num. 1, 140 num. 7, 220 y 237B); la del art. 117 no se encontró en tu texto (probablemente cambió de redacción). **Complétalo** con las demás sentencias de la Corte y revisa las marcadas `revisado_a_mano: false`; después hay que reconstruir los índices.
+
 - **Un script de partida:** `engine/preprocess/extraer_senado.py`. Lee las 6 páginas HTML del Senado, quita las notas editoriales, detecta libro, título, capítulo y artículos (los 243) y calcula una vigencia aproximada por artículo. Ojo: **no descarga** las páginas (hay que bajarlas antes a una carpeta `senado/`; las 6 URLs están en `corpus/muestra/README.md`), y al final solo guarda 10 artículos fijos (`SEL`). Es una **base de referencia, no el pipeline oficial**: tú decides si lo amplías o lo rehaces. Uso: `python engine/preprocess/extraer_senado.py <carpeta> <salida.json> <marcas.json>`.
 - **El esquema de referencia:** `corpus/muestra/codigo_muestra.json` (10 artículos) y su `corpus/muestra/README.md` (fuente, criterio de vigencia y notas).
 - **Reglas del esquema actual** (mantenlas): `id` = `art-N`; `ubicacion` como **objeto** con `libro`, `titulo`, `capitulo`, `articulo`; `epigrafe` tal cual la fuente; `texto` sin notas editoriales; `vigencia`; `tema`.

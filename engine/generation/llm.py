@@ -127,20 +127,45 @@ def _tipos_de_red() -> tuple:
     return tuple(tiempo), tuple(red)
 
 
+def _config_razonamiento(types):
+    """LLM_RAZONAMIENTO del .env: minimal (por defecto), low, medium, high u off (no se envía)."""
+    nivel = os.getenv("LLM_RAZONAMIENTO", "minimal").strip().upper()
+    if nivel in ("", "OFF", "NINGUNO", "DEFECTO") or not hasattr(types, "ThinkingLevel"):
+        return None
+    return types.ThinkingConfig(thinking_level=getattr(types.ThinkingLevel, nivel, types.ThinkingLevel.MINIMAL))
+
+
 def _generar_gemini(sistema: str, usuario: str, modelo: str, timeout_s: float) -> str:
     from google.genai import errors, types
 
     tipos_timeout, tipos_red = _tipos_de_red()
+    # Razonamiento mínimo: en las pruebas bajó la latencia (9.7 s vs 14.4 s y 1.6 s vs 3.6 s con el
+    # mismo prompt). Si un modelo no lo acepta (error 400 que menciona "thinking"), se reintenta sin él.
+    razonamiento = _config_razonamiento(types)
 
     try:
-        r = _cliente_gemini().models.generate_content(
-            model=modelo,
-            contents=usuario,
-            config=types.GenerateContentConfig(
-                system_instruction=sistema,
-                http_options=types.HttpOptions(timeout=int(timeout_s * 1000)),
-            ),
-        )
+        try:
+            r = _cliente_gemini().models.generate_content(
+                model=modelo,
+                contents=usuario,
+                config=types.GenerateContentConfig(
+                    system_instruction=sistema,
+                    http_options=types.HttpOptions(timeout=int(timeout_s * 1000)),
+                    thinking_config=razonamiento,
+                ),
+            )
+        except errors.APIError as e:
+            if e.code == 400 and razonamiento is not None and "think" in str(e).lower():
+                r = _cliente_gemini().models.generate_content(
+                    model=modelo,
+                    contents=usuario,
+                    config=types.GenerateContentConfig(
+                        system_instruction=sistema,
+                        http_options=types.HttpOptions(timeout=int(timeout_s * 1000)),
+                    ),
+                )
+            else:
+                raise
     except errors.APIError as e:
         if e.code == 429:
             raise LimiteDePeticiones(str(e)) from e

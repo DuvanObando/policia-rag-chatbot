@@ -8,7 +8,9 @@ El motor tiene tres modos de búsqueda. El modo se elige con `BUSQUEDA_MODO` en 
 | `lexico` | BM25: compara las palabras de la pregunta con las del fragmento. Solo devuelve fragmentos que comparten alguna palabra. | No entiende sinónimos ni paráfrasis; con una pregunta sin palabras en común no devuelve nada. |
 | `hibrido` | Combina las dos listas con **Reciprocal Rank Fusion (RRF)**. | — (ver «Límites») |
 
-**Recomendado y por defecto: `hibrido`.**
+**Recomendado con la muestra de 10 artículos: `hibrido`.**
+
+> **Actualización (12/11, corpus real de la Fase 1, 249 artículos):** con el corpus real **el modo por defecto pasa a ser `semantico`**. Ver «Resultados con el corpus real» al final de la sección de modos. Las cifras de abajo son de la muestra de 10 artículos.
 
 > **Aviso:** todos los resultados son sobre el **corpus de muestra de 10 artículos (30 fragmentos)** y 16 preguntas. Son una primera señal, **no una conclusión**, y se repetirán con el corpus completo y el banco de 50+ preguntas.
 
@@ -152,6 +154,20 @@ python eval/calibrar_empuje.py          # empuje equivalente por modo
 python eval/comparar_modos.py           # resultados de este documento
 python engine/retrieval/search.py --modo lexico "¿Cuántos smdlv cuesta una multa tipo 4?"
 ```
+
+---
+
+## Resultados con el corpus real (12/11)
+
+Mismas 16 preguntas, todos con clasificador, sobre el corpus de la Fase 1 (249 artículos de la Ley 1801, 471 fragmentos):
+
+| Modo | Acierto@1 | Acierto@3 | MRR | Muestra (MRR) |
+|---|---|---|---|---|
+| **semantico** | **0.62** | **0.75** | **0.701** | 0.859 |
+| lexico | 0.31 | 0.69 | 0.512 | 0.906 |
+| hibrido | 0.56 | 0.69 | 0.650 | 0.927 |
+
+Con 249 artículos el orden se invierte: **gana el semántico**. BM25 trae artículos que solo comparten vocabulario jurídico común (con 10 artículos de temas muy distintos, casi cualquier palabra en común apuntaba al artículo correcto), y la fusión RRF empeora el buen orden semántico. El léxico y el híbrido siguen ganando con términos exactos (p16, «Ley 1566 de 2012»: semántico puesto 8, híbrido puesto 2). Por eso **el modo por defecto pasa a `semantico`** (`BUSQUEDA_MODO` en el `.env`); el híbrido queda como opción. La expansión con glosario solo actúa en `lexico` e `hibrido`.
 
 ---
 

@@ -1,0 +1,254 @@
+{
+  "registros": 290,
+  "tokens": 68654,
+  "tipos_forma": 4942,
+  "tipos_lema": 3756,
+  "ttr_forma": 0.072,
+  "ttr_lema": 0.0547,
+  "longitud_media_tokens": 236.7,
+  "longitud_mediana_tokens": 143.5,
+  "longitud_min": 22,
+  "longitud_max": 1352,
+  "pos": {
+    "NOUN": 16904,
+    "ADP": 12779,
+    "DET": 8864,
+    "ADJ": 7061,
+    "PROPN": 5859,
+    "VERB": 4762,
+    "CCONJ": 3859,
+    "NUM": 2989,
+    "PRON": 2544,
+    "ADV": 1219,
+    "AUX": 1081,
+    "SCONJ": 684,
+    "SYM": 41,
+    "PUNCT": 5,
+    "INTJ": 2,
+    "PART": 1
+  },
+  "ner": {
+    "MISC": 2294,
+    "LOC": 1059,
+    "PER": 744,
+    "ORG": 449
+  },
+  "ner_top5_por_etiqueta": {
+    "LOC": [
+      [
+        "numeral",
+        169
+      ],
+      [
+        "la ley",
+        138
+      ],
+      [
+        "suspensión",
+        105
+      ],
+      [
+        "gobierno nacional",
+        28
+      ],
+      [
+        "art",
+        25
+      ]
+    ],
+    "MISC": [
+      [
+        "multa general",
+        162
+      ],
+      [
+        "código",
+        74
+      ],
+      [
+        "parágrafo 1",
+        69
+      ],
+      [
+        "sentencia de la corte constitucional",
+        57
+      ],
+      [
+        "parágrafo 2",
+        53
+      ]
+    ],
+    "PER": [
+      [
+        "policía",
+        252
+      ],
+      [
+        "destrucción",
+        52
+      ],
+      [
+        "suspensión",
+        44
+      ],
+      [
+        "participación",
+        26
+      ],
+      [
+        "artículo",
+        21
+      ]
+    ],
+    "ORG": [
+      [
+        "parágrafo",
+        91
+      ],
+      [
+        "comportamientos",
+        33
+      ],
+      [
+        "aplicar",
+        24
+      ],
+      [
+        "destrucción",
+        24
+      ],
+      [
+        "corregido por el art",
+        15
+      ]
+    ]
+  },
+  "montos_regex": 356,
+  "plazos_regex": 95,
+  "top_formas": [
+    [
+      "de",
+      6331
+    ],
+    [
+      "la",
+      3079
+    ],
+    [
+      "o",
+      1899
+    ],
+    [
+      "el",
+      1803
+    ],
+    [
+      "en",
+      1755
+    ],
+    [
+      "y",
+      1754
+    ],
+    [
+      "las",
+      1298
+    ],
+    [
+      "los",
+      1263
+    ],
+    [
+      "que",
+      1186
+    ],
+    [
+      "a",
+      1169
+    ],
+    [
+      "por",
+      783
+    ],
+    [
+      "del",
+      752
+    ],
+    [
+      "se",
+      684
+    ],
+    [
+      "para",
+      631
+    ],
+    [
+      "numeral",
+      488
+    ]
+  ],
+  "top_lemas": [
+    [
+      "el",
+      7406
+    ],
+    [
+      "de",
+      6331
+    ],
+    [
+      "o",
+      1899
+    ],
+    [
+      "en",
+      1755
+    ],
+    [
+      "y",
+      1754
+    ],
+    [
+      "que",
+      1186
+    ],
+    [
+      "a",
+      1169
+    ],
+    [
+      "él",
+      1039
+    ],
+    [
+      "por",
+      783
+    ],
+    [
+      "del",
+      752
+    ],
+    [
+      "para",
+      631
+    ],
+    [
+      "actividad",
+      621
+    ],
+    [
+      "público",
+      546
+    ],
+    [
+      "multa",
+      510
+    ],
+    [
+      "numeral",
+      504
+    ]
+  ],
+  "alcance": "todo",
+  "modelo": "es_core_news_sm-3.8.0"
+}

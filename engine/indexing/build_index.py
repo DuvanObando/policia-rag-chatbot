@@ -38,6 +38,7 @@ import faiss
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from indexing import uploads  # noqa: E402
 from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible, tokens_bm25_lote  # noqa: E402
+from indexing.cargador_corpus import ULTIMA_CARGA  # noqa: E402
 from indexing.embeddings import (  # noqa: E402
     CORPUS_POR_DEFECTO,
     MODELO,
@@ -62,6 +63,8 @@ CAMPOS = (
     "paginas",
     "ubicaciones_fuente",
     "fuentes",
+    "ubicacion_texto",
+    "titulo_nombre",
 )
 TAMANO_POR_DEFECTO = 250
 SOLAPE_POR_DEFECTO = 50
@@ -102,7 +105,7 @@ def fragmentos_por_tamano(articulos, modelo, tamano=TAMANO_POR_DEFECTO, solape=S
     resultado = []
     for a in articulos:
         for i, trozo in enumerate(trozos_de_texto(a["texto"], modelo.tokenizer, tamano, solape), start=1):
-            f = {c: a[c] for c in CAMPOS}
+            f = {c: a.get(c) for c in CAMPOS}
             f["id"] = f"{a['id']}-f{i}"
             f["texto"] = trozo
             resultado.append(f)
@@ -174,6 +177,7 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
         "parametros": {"tamano": tamano, "solape": solape} if estrategia == "fragmentos" else {},
         "fecha_construccion": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "corpus": str(corpus),
+        "carga_corpus": dict(ULTIMA_CARGA),
         "dimension": int(vectores.shape[1]),
         "documentos_incluidos": [d["id"] for d in documentos],
         "bm25": {"metodo": metodo, "descripcion": descripcion_metodo(metodo)},
@@ -205,6 +209,7 @@ def main() -> None:
     if meta["parametros"]:
         print(f"  parámetros: {meta['parametros']}")
     print(f"  BM25: {meta['bm25']['descripcion']}")
+    print(f"  corpus: {meta['corpus']} | carga: {meta['carga_corpus']}")
     if args.incluir_uploads:
         print(f"  documentos subidos incluidos: {len(meta['documentos_incluidos'])}")
 
