@@ -30,7 +30,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 
-from generation.llm import ErrorLLM, configuracion, precargar_cliente, respaldo_externo
+from generation.llm import ErrorLLM, configuracion, orden_proveedores, precargar_cliente, respaldo_externo
 from generation.responder import ESTRATEGIA, responder
 from indexing import uploads
 from indexing.embeddings import MODELO
@@ -211,6 +211,7 @@ def health(request: Request):
         "llm_principal": principal,
         "llm_respaldo": respaldo,
         # Respaldo entre empresas (Groq): solo nombre de proveedor y modelo, nunca la clave.
+        "llm_orden": orden_proveedores(),  # LLM_ORDEN del .env (proveedores en el orden en que se prueban)
         "llm_respaldo_externo": {"proveedor": externo[0], "modelo": externo[1]} if externo else None,
         "tiempos_de_carga_s": estado["tiempos"],
     }

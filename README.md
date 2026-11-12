@@ -57,7 +57,9 @@ La instalación es pesada (incluye PyTorch). La primera vez que se usa el modelo
 cp .env.example .env
 ```
 
-Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `hibrido` (recomendado y por defecto), `semantico` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md). `BUSQUEDA_EXPANSION=1` (por defecto) activa la expansión de consultas con el glosario `engine/glossary/sinonimos.json` (provisional; solo afecta a la búsqueda léxica).
+Abre `.env` (en la **raíz** del repo, no en `engine/`) y completa `GEMINI_API_KEY=` con tu clave de [Google AI Studio](https://aistudio.google.com/) (plan gratuito). No pegues la clave en el chat ni la subas a git: `.env` está ignorado. `LLM_MODELO` y `LLM_MODELO_RESPALDO` ya traen valores; si un modelo da 503 con frecuencia, cámbialos ahí. `BUSQUEDA_MODO` elige el tipo de búsqueda: `semantico` (por defecto desde el 12/11, gana con el corpus real), `hibrido` o `lexico`; detalle en [docs/busqueda_hibrida.md](docs/busqueda_hibrida.md). `BUSQUEDA_EXPANSION=1` (por defecto) activa la expansión de consultas con el glosario `engine/glossary/sinonimos.json` (provisional; solo afecta a la búsqueda léxica).
+
+**Respaldo entre empresas (Groq) y orden de proveedores:** con `GROQ_API_KEY` (gratis en [console.groq.com](https://console.groq.com/)), si los dos modelos de Gemini fallan responde Groq (`LLM_GROQ_MODELO`, por defecto `openai/gpt-oss-120b,openai/gpt-oss-20b`). `LLM_ORDEN=groq,gemini` prueba Groq primero; `gemini,groq` o vacía, Gemini primero. `/health` muestra el orden activo (`llm_orden`).
 
 **Corpus que se indexa:** `CORPUS_RUTA` en el `.env` (por defecto `corpus/procesados/corpus_ley_1801.json`, el corpus de la Fase 1; la muestra de 10 artículos sigue en `corpus/muestra/codigo_muestra.json`). El cargador `engine/indexing/cargador_corpus.py` adapta el formato de la Fase 1 al esquema del motor sin modificar el archivo. `CORPUS_INCLUIR_REFORMAS=1` indexa también los registros de las normas que modifican la ley.
 
@@ -72,7 +74,7 @@ python engine/indexing/build_index.py --estrategia fragmentos
 - `articulo`: un vector por artículo completo (el modelo corta lo que pase de 512 tokens).
 - `fragmentos`: trozos de 250 tokens con 50 de solapamiento (`--tamano`, `--solape`). **Es la estrategia que usa el motor.**
 - Se guardan en `engine/indexing/indexes/<estrategia>/`. Repite el comando cuando cambie el corpus.
-- Corpus por defecto: `corpus/muestra/codigo_muestra.json` (10 artículos, **provisional**; ver `corpus/muestra/README.md`). Para otro corpus: `--corpus RUTA`.
+- Corpus por defecto: el de `CORPUS_RUTA` (corpus de la Fase 1, 249 artículos). Para otro corpus: `--corpus RUTA`. Construir `articulo` tarda unos 10 min y `fragmentos` unos 7 min en CPU.
 
 **4. Arrancar el motor** (desde `engine/`)
 
@@ -81,7 +83,7 @@ cd engine
 uvicorn api:app --port 8000
 ```
 
-Carga el modelo y los índices al arrancar (unos 10 a 15 s). Evita `--reload`: recarga el modelo en cada cambio de código. Comprueba que esté listo:
+Carga el modelo y los índices al arrancar (unos 20 s con el corpus real). Evita `--reload`: recarga el modelo en cada cambio de código. Comprueba que esté listo:
 
 ```bash
 curl http://localhost:8000/health
@@ -111,10 +113,9 @@ Repite `--incluir-uploads` en cada reconstrucción o los documentos salen del í
 
 **Limitaciones conocidas**
 
-- El corpus es una **muestra provisional de 10 artículos**; será reemplazado por el de la Fase 1.
-- La **vigencia es por artículo**, no por numeral: no se sabe qué partes de un artículo modificado son inexequibles. El motor avisa que conviene verificar en la fuente oficial.
+- La **vigencia es por artículo**, no por numeral. Las expresiones inexequibles conocidas se marcan como `[INEXEQUIBLE: ...]` con `corpus/anotaciones_vigencia.json` (hoy 5); el resto, el motor avisa que conviene verificar en la fuente oficial.
 - Los **documentos complementarios** subidos aún no se citan bien en las respuestas (el extractor de citas solo entiende «Art. N»).
-- El plan gratuito de Gemini a veces responde 503/504; el motor reintenta y pasa al modelo de respaldo, y si ambos fallan devuelve 503.
+- El plan gratuito de Gemini a veces responde 503/504 y el de Groq limita los tokens por minuto (429): el motor reintenta, pasa al modelo de respaldo y al otro proveedor, y si todos fallan devuelve 503. Deja unos segundos entre preguntas.
 
 ## Instalación (resto del proyecto)
 

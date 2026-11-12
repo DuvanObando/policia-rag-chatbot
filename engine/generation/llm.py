@@ -30,6 +30,9 @@ LLM_GROQ_MODELO (por defecto openai/gpt-oss-120b) y un plazo propio de GROQ_TIME
 Si los dos modelos de Gemini están marcados como caídos, se va directo a Groq sin gastar tiempo.
 Sin GROQ_API_KEY el comportamiento es el de antes. Peor caso total: PRESUPUESTO_S + GROQ_TIMEOUT_S.
 
+ORDEN DE PROVEEDORES: LLM_ORDEN=groq,gemini prueba Groq primero y Gemini después (o al revés con
+gemini,groq). Sin LLM_ORDEN: LLM_PROVEEDOR primero y Groq de respaldo, como siempre.
+
 Para agregar otro proveedor: escribir una función `_generar_x(sistema, usuario, modelo, timeout_s)
 -> str` que lance `LimiteDePeticiones` ante un 429 y `ModeloNoDisponible` ante 5xx o timeout,
 y registrarla en PROVEEDORES.
@@ -276,9 +279,9 @@ def precargar_cliente() -> None:
     """
     proveedor, _, _ = configuracion()
     PRECARGADORES[proveedor]()
-    externo = respaldo_externo()
-    if externo and externo[0] != proveedor:
-        PRECARGADORES[externo[0]]()
+    for p in orden_proveedores():
+        if p != proveedor:
+            PRECARGADORES[p]()
 
 
 def configuracion() -> tuple:
@@ -295,22 +298,61 @@ def configuracion() -> tuple:
     return proveedor, modelo, respaldo
 
 
-def generar(sistema: str, usuario: str) -> RespuestaLLM:
-    """Llama al LLM configurado (reintentos, modelo de respaldo y, si hay, Groq) y dice quién respondió."""
-    proveedor, principal, respaldo = configuracion()
+def orden_proveedores() -> list:
+    """Orden en que se prueban los proveedores.
+
+    LLM_ORDEN del .env (p. ej. "groq,gemini" o "gemini,groq"). Si no está definida: el de
+    LLM_PROVEEDOR primero y luego Groq, si hay GROQ_API_KEY (el comportamiento de siempre).
+    Groq se omite si falta GROQ_API_KEY; los nombres repetidos o desconocidos se ignoran.
+    """
+    proveedor, _, _ = configuracion()
     externo = respaldo_externo()
-    if externo and externo[0] == proveedor:
-        externo = None
-    try:
-        return _generar_cadena(sistema, usuario, proveedor, principal, respaldo, saltar_si_caidos=bool(externo))
-    except ErrorLLM as e:
-        if not externo:
-            raise
-        fallo_principal = str(e)
-    prov_ext, lista = externo
-    modelos_ext = [m.strip() for m in lista.split(",") if m.strip()]
-    _log(f"{proveedor} no respondió ({fallo_principal}); pasando a {prov_ext} ({', '.join(modelos_ext)})")
-    limite = time.monotonic() + _timeout_groq()  # plazo total para todo el respaldo externo
+    texto = os.getenv("LLM_ORDEN", "").strip().lower()
+    if texto:
+        pedidos = [p.strip() for p in texto.split(",") if p.strip()]
+    else:
+        pedidos = [proveedor] + ([externo[0]] if externo else [])
+    orden = []
+    for p in pedidos:
+        if p in orden or p not in (proveedor, "groq"):
+            continue
+        if p == "groq" and p != proveedor and not externo:
+            continue  # sin GROQ_API_KEY
+        orden.append(p)
+    return orden or [proveedor]
+
+
+def generar(sistema: str, usuario: str) -> RespuestaLLM:
+    """Prueba los proveedores en el orden de LLM_ORDEN (con reintentos y modelos de respaldo)."""
+    proveedor, principal, respaldo = configuracion()
+    orden = orden_proveedores()
+    fallos = []
+    for i, p in enumerate(orden):
+        hay_siguiente = i < len(orden) - 1
+        try:
+            if p == proveedor:
+                r = _generar_cadena(sistema, usuario, proveedor, principal, respaldo,
+                                    saltar_si_caidos=hay_siguiente)
+            else:
+                r = _generar_externo(sistema, usuario, p)
+        except ErrorLLM as e:
+            fallos.append(f"{p}: {e}")
+            if hay_siguiente:
+                _log(f"{p} no respondió ({e}); pasando a {orden[i + 1]}")
+            continue
+        if i > 0:
+            r.uso_respaldo = True
+        return r
+    raise ErrorLLM("Ningún proveedor respondió. " + " | ".join(fallos))
+
+
+def _generar_externo(sistema: str, usuario: str, prov_ext: str) -> RespuestaLLM:
+    """Groq: prueba sus modelos en orden (LLM_GROQ_MODELO) dentro de GROQ_TIMEOUT_S."""
+    externo = respaldo_externo()
+    if not externo:
+        raise ErrorLLM("Falta GROQ_API_KEY en el archivo .env de la raíz del repo.")
+    modelos_ext = [m.strip() for m in externo[1].split(",") if m.strip()]
+    limite = time.monotonic() + _timeout_groq()  # plazo total para todos los modelos de Groq
     fallo_ext = "sin intentos"
     for modelo_ext in modelos_ext:
         reintentado = False
@@ -334,9 +376,9 @@ def generar(sistema: str, usuario: str) -> RespuestaLLM:
                 fallo_ext = f"{modelo_ext}: {e}"
                 break
             _contar(modelo_ext, ok=True)
-            _log(f"respondió {modelo_ext} ({prov_ext}, respaldo entre empresas)")
-            return RespuestaLLM(texto, modelo_ext, prov_ext, uso_respaldo=True)
-    raise ErrorLLM(f"{prov_ext} también falló ({fallo_ext}). Antes: {fallo_principal}")
+            _log(f"respondió {modelo_ext} ({prov_ext})")
+            return RespuestaLLM(texto, modelo_ext, prov_ext, uso_respaldo=modelo_ext != modelos_ext[0])
+    raise ErrorLLM(f"falló {prov_ext} ({fallo_ext})")
 
 
 def _generar_cadena(sistema: str, usuario: str, proveedor: str, principal: str,
