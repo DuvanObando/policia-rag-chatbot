@@ -2,7 +2,7 @@
 
 El clasificador orienta la búsqueda hacia el tema (y el libro o título) al que parece pertenecer la pregunta. Es **por palabras clave**, determinista y sin costo: no llama a ningún modelo.
 
-> **Aviso:** todos los resultados de este documento son sobre el **corpus de muestra de 10 artículos** y 13 preguntas. Son una primera señal, **no una conclusión**, y se repetirán con el corpus completo (ver «Límites de esta evaluación»).
+> **Aviso:** los resultados de este documento son sobre el **corpus de muestra de 10 artículos** y 13 preguntas, salvo la sección «Resultados con el corpus real» (12/11). Son una primera señal, **no una conclusión** (ver «Límites de esta evaluación»).
 
 ## Cómo funciona
 
@@ -91,6 +91,46 @@ Posición del artículo esperado y tema detectado:
 | 0.02 a 0.12 | 0.77 | 0.92 | 0.865 |
 
 Con empuje 0 el resultado ya es 0.77 porque la regla del artículo por número sigue activa. A partir de 0.02 el resultado se estabiliza: en esta muestra ningún empuje hace que p06 llegue al primer lugar ni que otra pregunta empeore. No se eligió el 0.03 mirando esta tabla.
+
+## Resultados con el corpus real
+
+**Fecha:** 12/11/2026 · **Corpus:** `corpus/procesados/corpus_ley_1801.json` (249 artículos de la ley base, 471 fragmentos de 250 tokens con 50 de solapamiento) · **Índice:** construido el 12/11 con las anotaciones de vigencia, BM25 con Snowball · **Commit:** `f78023e`.
+
+Mismas 13 preguntas (`eval/preguntas_segmentacion.json` y `eval/preguntas_clasificador.json`), modo `semantico`, empuje 0,03.
+
+| Preguntas | Configuración | Acierto@1 | Acierto@3 | MRR |
+|---|---|---|---|---|
+| 13 | sin clasificador | 0,54 | 0,69 | 0,622 |
+| 13 | **con clasificador** | **0,62** | **0,77** | **0,699** |
+| 10 originales | sin clasificador | 0,60 | 0,80 | 0,708 |
+| 10 originales | con clasificador | 0,60 | 0,80 | 0,708 |
+
+Posición del artículo esperado (0 = no aparece entre los 10 primeros):
+
+| # | Esperado | Sin | Con | Tema detectado | Confianza |
+|---|---|---|---|---|---|
+| p01 | 140 | 1 | 1 | Consumo de sustancias en espacio público | 0,50 |
+| p02 | 124 | 2 | 2 | Animales potencialmente peligrosos | 1,00 |
+| p03 | 180 | 1 | 1 | Tipos de multa | 0,50 |
+| p04 | 139 | 1 | 1 | Espacio público | 1,00 |
+| p05 | 163 | 1 | 1 | Ingreso a domicilio | 1,00 |
+| p06 | 173 | 4 | 4 | Medidas correctivas | 0,50 |
+| p07 | 183 | 1 | 1 | No pago de multas | 0,50 |
+| p08 | 198 | 1 | 1 | Autoridades de policía | 1,00 |
+| p09 | 218 | 0 | 0 | general | 0,00 |
+| p10 | 222 | 3 | 3 | Proceso verbal inmediato | 0,80 |
+| p11 | 163 | 0 | **1** | general | 0,00 |
+| p12 | 124 | 1 | 1 | Tipos de multa | 0,33 |
+| p13 | 222 | 0 | 0 | general | 0,00 |
+
+**El clasificador por tema no tiene ningún efecto con el corpus real.**
+
+- Toda la mejora (+0,08 en Acierto@1, +0,08 en Acierto@3 y +0,077 en MRR) viene de **p11 (artículo por número)**: «¿Qué dice el artículo 163?» pasa de la posición 0 a la 1 porque la regla determinista lo pone primero. Las otras 12 preguntas quedan igual.
+- El campo `tema` de los 249 artículos base vale «texto fuente Ley 1801» y no coincide con ninguno de los 10 temas de `temas.json` (0 de 249), así que **ningún fragmento recibe el empuje**. La sensibilidad lo confirma: con empuje de 0 a 0,12 el resultado es idéntico (0,62 / 0,77 / 0,699).
+- La detección del tema funciona (devuelve un tema razonable en 10 de 13 preguntas), pero no se puede aprovechar hasta que el corpus tenga temas reales y `temas.json` use esos nombres.
+- En la muestra, el empuje movía p06 del puesto 4 al 2; con el corpus real, p06 se queda en 4. p09 y p13 no se encuentran, con o sin clasificador.
+
+**Qué hace falta:** que Wilder asigne un `tema` real a cada artículo y que Santiago Castro reorganice `temas.json` con esos mismos nombres (tarea ya asignada en las guías), y repetir esta comparación.
 
 ## Límites de esta evaluación
 

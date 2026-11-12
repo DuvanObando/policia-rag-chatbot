@@ -270,6 +270,44 @@ Qué coincidencias dejaron de ocurrir con la corrección (ninguna cambiaba una p
 
 Se comprobaron con el LLM real con la primera versión: «pase de conducción» e «impuesto predial» siguieron en `fuera_de_dominio: True`, sin ninguna palabra agregada. Con la versión corregida la expansión tampoco agrega ninguna palabra a esas dos preguntas (se comprobó la expansión; lo recuperado es idéntico), así que no se repitió la llamada al LLM.
 
+### Resultados con el corpus real
+
+**Fecha:** 12/11/2026 · **Corpus:** `corpus/procesados/corpus_ley_1801.json` (249 artículos de la ley base, 471 fragmentos de 250 tokens con 50 de solapamiento) · **Índice:** construido el 12/11 con las anotaciones de vigencia, BM25 con Snowball · **Commit:** `f78023e`. **Glosario:** el semilla de 18 entradas (el de Santiago Castro, de 49, todavía no está en el repositorio).
+
+Mismas 19 preguntas, modo híbrido, con clasificador (que con este corpus solo aporta el artículo por número).
+
+| Preguntas | Expansión | Acierto@1 | Acierto@3 | MRR |
+|---|---|---|---|---|
+| **19 (todas)** | sin | 0,47 | 0,63 | 0,597 |
+| | con | 0,47 | **0,68** | **0,610** |
+| 16 de la evaluación anterior | sin | **0,56** | 0,69 | **0,650** |
+| | con | 0,50 | 0,69 | 0,618 |
+| 3 muy coloquiales (p17–p19) | sin | 0,00 | 0,33 | 0,317 |
+| | con | **0,33** | **0,67** | **0,567** |
+| *Informativo: modo léxico, 19* | sin | 0,26 | 0,58 | 0,431 |
+| | con | 0,32 | 0,68 | 0,497 |
+| *Informativo: modo léxico, 16* | sin | 0,31 | 0,69 | 0,512 |
+| | con | 0,38 | 0,69 | 0,543 |
+| *Informativo: modo léxico, 3 coloquiales* | sin | 0,00 | 0,00 | 0,000 |
+| | con | 0,00 | 0,67 | 0,256 |
+
+Posición del artículo esperado (híbrido): solo las que cambian. Las otras 16 dan igual con y sin expansión.
+
+| # | Esperado | Sin expansión | Con expansión | Qué se agregó a la consulta |
+|---|---|---|---|---|
+| p12 | 124 | 1 | **2** (empeora) | «me cobran» → `mult`; «parque» → `espaci public`; «perro» → `canin` |
+| p17 | 140 | 4 | **2** | «guaro» → `beb alcohol`; «boleta» → `orden comparend`; «parque» → `espaci public` |
+| p19 | 163 | 2 | **1** | «apartamento» → `domicili`; «tombos» → `autor polic` |
+
+**Lectura.**
+
+- **Ayuda con la jerga, como en la muestra:** en las 3 preguntas coloquiales el Acierto@1 pasa de 0,00 a 0,33 y el Acierto@3 de 0,33 a 0,67 (p17 sube del puesto 4 al 2 y p19 del 2 al 1). En el modo léxico, el Acierto@3 de esas tres sube de 0,00 a 0,67.
+- **A diferencia de la muestra, hay una pregunta que empeora:** p12 («¿Cuánto me cobran si dejo a mi perro suelto en el parque?») baja del puesto 1 al 2. Agregar `mult`, `espaci public` y `canin` hace que el artículo 118 empate con el 124 en el híbrido (0,0306 contra 0,0306). Por eso, en las 16 preguntas originales, el MRR baja de 0,650 a 0,618 y el Acierto@1 de 0,56 a 0,50. **La conclusión de la muestra, «ninguna pregunta empeora», no se sostiene con el corpus real.**
+- El resultado global (19 preguntas) es casi neutro: el Acierto@1 no cambia (0,47), y el Acierto@3 y el MRR suben poco (0,63 → 0,68 y 0,597 → 0,610).
+- **No afecta al modo por defecto:** con `BUSQUEDA_MODO=semantico` la expansión no actúa. Solo cuenta si se elige `hibrido` o `lexico`.
+- Con el corpus real, p06, p09 y p13 no aparecen entre los 10 primeros en el modo híbrido (con o sin expansión).
+- Sigue siendo una prueba parcialmente circular (las 3 coloquiales usan jerga del glosario semilla). Hay que repetirla con el glosario definitivo de Santiago Castro.
+
 ## Conclusión sobre la expansión
 
 - **Con la corrección, la expansión es una mejora pequeña pero sin regresiones en esta muestra:** Acierto@1 de 0.84 a 0.89 y MRR de 0.912 a 0.947 en 19 preguntas; ninguna pregunta empeora. Ayuda sobre todo con jerga (p17; en modo léxico puro, las tres coloquiales pasan de 0.33 a 1.00).
