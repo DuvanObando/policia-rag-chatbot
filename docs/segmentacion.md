@@ -27,7 +27,7 @@ archivo de revisión antes de indexar o presentar respuestas jurídicas.
 
 ## 2. Segmentación para indexación (Fase 3)
 
-> **Aviso:** todos los resultados de esta sección son sobre el **corpus de muestra de 10 artículos** (`corpus/muestra/codigo_muestra.json`) y 10 preguntas. Son una primera señal, no una conclusión. **Se repetirán con el corpus completo** y el banco de 50+ preguntas.
+> **Aviso:** los resultados de las secciones de abajo, hasta «Conclusión provisional», son sobre el **corpus de muestra de 10 artículos** (`corpus/muestra/codigo_muestra.json`) y 10 preguntas: una primera señal, no una conclusión. **Se repitieron el 12/11 con el corpus real**: ver «Resultados con el corpus real». Falta el banco de 50+ preguntas.
 
 ### Modelo de embeddings: `intfloat/multilingual-e5-base`
 
@@ -133,6 +133,39 @@ Se elige `fragmentos` (250 tokens, 50 de solapamiento) como estrategia por defec
 3. Su debilidad (artículos cortos y genéricos) se puede mitigar más adelante con búsqueda híbrida (BM25), con el clasificador temático o dando el artículo completo al LLM.
 
 Esta decisión **se revisará** con el corpus completo y el banco de 50+ preguntas, probando también otros tamaños de trozo (por ejemplo 200 y 350 tokens) y de solapamiento.
+
+### Resultados con el corpus real
+
+**Fecha:** 12/11/2026 · **Corpus:** `corpus/procesados/corpus_ley_1801.json` (249 artículos de la ley base, 471 fragmentos de 250 tokens con 50 de solapamiento) · **Índice:** construido el 12/11 con las anotaciones de vigencia, BM25 con Snowball · **Commit:** `f78023e`.
+
+Mismas 10 preguntas de `eval/preguntas_segmentacion.json`, sin cambiarlas (se escribieron para la muestra de 10 artículos). Posición del artículo esperado (1 = primero, 0 = no aparece entre los 10 primeros):
+
+| # | Esperado | ¿Después de 512? | `articulo` | `fragmentos` |
+|---|---|---|---|---|
+| p01 | 140 | sí | 0 | 1 |
+| p02 | 124 | sí | 3 | 2 |
+| p03 | 180 | sí | 0 | 1 |
+| p04 | 139 | sí | 2 | 1 |
+| p05 | 163 | no | 1 | 1 |
+| p06 | 173 | no | 2 | 4 |
+| p07 | 183 | no | 1 | 1 |
+| p08 | 198 | no | 5 | 1 |
+| p09 | 218 | no | 0 | 0 |
+| p10 | 222 | no | 2 | 3 |
+
+| Estrategia | Vectores | Acierto@1 | Acierto@3 | MRR | ms por búsqueda |
+|---|---|---|---|---|---|
+| `articulo` | 249 | 0,20 | 0,60 | 0,403 | 153 |
+| `fragmentos` | 471 | **0,60** | **0,80** | **0,708** | 165 |
+
+| Preguntas | Estrategia | Acierto@1 | Acierto@3 | MRR |
+|---|---|---|---|---|
+| 4 con respuesta después del token 512 | `articulo` | 0,00 | 0,50 | 0,208 |
+| | `fragmentos` | **0,75** | **1,00** | **0,875** |
+| 6 con respuesta dentro de 512 tokens | `articulo` | 0,33 | 0,67 | 0,533 |
+| | `fragmentos` | **0,50** | 0,67 | **0,597** |
+
+**Qué cambió frente a la muestra.** Con 249 artículos la ventaja de `fragmentos` es mucho mayor: el MRR pasa de 0,792 frente a 0,850 en la muestra, a 0,403 frente a 0,708. En la muestra cada tema aparecía en un solo artículo y el vector del artículo cortado bastaba; con el corpus real hay muchos artículos parecidos, y el artículo completo, cortado a 512 tokens, deja fuera justo el contenido que se pregunta (p01 y p03 ni siquiera aparecen entre los 10 primeros con `articulo`). En las preguntas cuyo texto está dentro de los 512 tokens ya no hay ventaja de `articulo` en Acierto@3 (empatan en 0,67). La excepción es p06 (el artículo 173, lista de medidas), donde `articulo` sigue mejor (puesto 2 frente a 4), como en la muestra. **p09** no se encuentra con ninguna de las dos. Se confirma la decisión de usar `fragmentos`. Con 10 preguntas, una sola mueve 10 puntos: sigue sin ser una prueba estadística, y no se probaron otros tamaños de trozo.
 
 ### Cómo reproducir
 

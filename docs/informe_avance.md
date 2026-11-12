@@ -2,7 +2,7 @@
 
 **Proyecto:** `policia-rag-chatbot` · **Corte:** 12 de noviembre de 2026 (último commit revisado: `c3dbdc7`) · **Entrega final:** viernes 20 de noviembre de 2026.
 
-Este informe es la base del informe técnico final. Todo lo que dice sale del repositorio: el código, los documentos de `docs/`, los resultados de las evaluaciones y el historial de git. Cuando un dato no está guardado en el repositorio, aparece como **«pendiente de verificar»**.
+Este informe es la base del informe técnico final. Todo lo que dice sale del repositorio: el código, los documentos de `docs/`, los resultados de las evaluaciones y el historial de git. Cuando un dato no está guardado en el repositorio, aparece como **«pendiente de verificar»**; los datos que aportó el responsable del motor y que no quedan en el repo se señalan como tales.
 
 ---
 
@@ -208,7 +208,7 @@ Las carpetas `engine/generation/`, `engine/glossary/`, `engine/preprocess/`, `en
 | Modifica y adiciona | 8 |
 | Adiciona | 5 |
 
-**Fuente.** Por los encabezados que quita `limpiar.py`, los PDF vienen del Gestor Normativo (EVA) de la Función Pública. La **fecha de consulta** no está registrada en `corpus/README_corpus.md`: **pendiente de verificar**. Las anotaciones de vigencia sí registran su fuente: HTML de la Secretaría del Senado, consulta del 2026-11-09.
+**Fuente.** Por los encabezados que quita `limpiar.py`, los PDF vienen del Gestor Normativo (EVA) de la Función Pública. La **fecha de consulta** no está registrada en `corpus/README_corpus.md`: **pendiente de verificar** (la tiene que dar Wilder). Las anotaciones de vigencia sí registran su fuente: HTML de la Secretaría del Senado, consulta del 2026-11-09.
 
 Vigencia (una por registro): `vigente` 168, `efecto_integrado` 41, `vigente_modificado` 41, `inexequible` 30, `vigente_con_inexequibilidad_parcial` 4, `vigente_condicionado` 2, `vigente_modificado_condicionado` 2 y `vigente_modificado_con_inexequibilidad_parcial` 2. Cada registro guarda el PDF y las páginas de origen.
 
@@ -251,7 +251,7 @@ Integrado en el commit `3cf1a21` (PR #4). Fuente de los datos: [`docs/analisis/r
 
 **El límite de 512 tokens obliga a segmentar.** En la muestra de 10 artículos, 4 superaban el límite. El artículo 140 tiene 1.416 tokens: con un solo vector por artículo se pierden unos dos tercios, justo los numerales sobre sustancias en parques y la tabla de multas.
 
-**Comparación de segmentación** (`eval/comparar_segmentacion.py`): `articulo` (un vector por artículo) frente a `fragmentos` (trozos de 250 tokens con 50 de solapamiento). En la muestra ganó `fragmentos` en MRR (0,850 frente a 0,792) y en las 4 preguntas cuya respuesta estaba después del token 512 (4 de 4 frente a 3 de 4). Tablas en la sección 5.1. Se eligió `fragmentos`.
+**Comparación de segmentación** (`eval/comparar_segmentacion.py`): `articulo` (un vector por artículo) frente a `fragmentos` (trozos de 250 tokens con 50 de solapamiento). En la muestra ganó `fragmentos` en MRR (0,850 frente a 0,792) y en las 4 preguntas cuya respuesta estaba después del token 512 (4 de 4 frente a 3 de 4). Con el corpus real la diferencia es mucho mayor: MRR de 0,403 con `articulo` frente a 0,708 con `fragmentos`, y 4 de 4 preguntas con respuesta después del token 512 en los 3 primeros puestos con `fragmentos` frente a 2 de 4 con `articulo` (medido el 12/11; detalle en [`docs/segmentacion.md`](segmentacion.md)). Tablas en la sección 5.1. Se eligió `fragmentos`.
 
 **Small-to-big.** Los trozos se parten a veces a mitad de frase, así que la búsqueda usa trozos pero al LLM se le entrega el artículo completo de cada trozo ([`responder.py`](../engine/generation/responder.py), paso 2; `articulo_completo()` en `search.py`). Así se gana precisión al buscar sin perder contexto al responder.
 
@@ -261,7 +261,7 @@ Integrado en el commit `3cf1a21` (PR #4). Fuente de los datos: [`docs/analisis/r
 
 **Clasificador temático y artículo por número** ([`docs/clasificador.md`](clasificador.md)). El clasificador es por palabras clave ([`temas.json`](../engine/retrieval/temas.json), 10 temas), determinista y gratuito. **Empuja, no filtra**: suma 0,03 × confianza al score de los fragmentos del tema, para no perder un buen resultado si el tema se detecta mal. Si la pregunta dice «artículo 163», ese artículo va primero. En la muestra mejoró el MRR de 0,808 a 0,865, y casi toda la mejora de Acierto@1 vino de la regla del artículo por número.
 
-**Con el corpus real el empuje por tema no actúa.** El campo `tema` de los 249 artículos base vale «texto fuente Ley 1801», y ninguno coincide con los 10 temas de `temas.json` (0 de 249). Hoy solo funciona la regla del artículo por número. Para que el empuje funcione, el corpus debe traer temas reales y `temas.json` debe usar esos mismos nombres (Wilder y Santiago Castro).
+**Con el corpus real el empuje por tema no actúa.** El campo `tema` de los 249 artículos base vale «texto fuente Ley 1801», y ninguno coincide con los 10 temas de `temas.json` (0 de 249). Hoy solo funciona la regla del artículo por número. Medido el 12/11 ([`docs/clasificador.md`](clasificador.md)): con el clasificador el MRR pasa de 0,622 a 0,699, pero toda la mejora viene de una sola pregunta (p11, «artículo 163»), y con un empuje de 0 a 0,12 el resultado es idéntico. Para que el empuje funcione, el corpus debe traer temas reales y `temas.json` debe usar esos mismos nombres (Wilder y Santiago Castro).
 
 **BM25 + RRF y por qué el modo por defecto cambió** ([`docs/busqueda_hibrida.md`](busqueda_hibrida.md)):
 
@@ -269,7 +269,7 @@ Integrado en el commit `3cf1a21` (PR #4). Fuente de los datos: [`docs/analisis/r
 - **Muestra de 10 artículos:** ganó el híbrido (MRR 0,927 frente a 0,859 del semántico), y quedó como modo por defecto.
 - **Corpus real de 249 artículos:** el orden se invirtió. El semántico gana (MRR 0,701) y el híbrido queda en 0,650. Con muchos artículos, BM25 trae los que solo comparten vocabulario jurídico común, y la fusión empeora el buen orden semántico. Desde el 12/11 el modo por defecto es `semantico` (commit `919ffa1`). El híbrido queda como opción en `BUSQUEDA_MODO`.
 
-**Expansión con glosario y corrección del falso positivo.** La expansión agrega a la consulta BM25 las palabras del término legal cuando la pregunta usa jerga. La primera versión detectaba los coloquiales por raíces del stemmer, y Snowball reduce «caso» y «casa» a la misma raíz (`cas`): la pregunta «¿Qué pasa si no hago caso cuando un agente…?» activaba «casa» → domicilio, y además «agente», un término demasiado genérico. **Corrección** (commit `e365a7e`): detectar por palabras completas y quitar «agente» del glosario. Resultado en la muestra (híbrido, 19 preguntas): MRR de 0,912 sin expansión a 0,947 con la versión corregida, sin ninguna pregunta peor. Con el modo semántico por defecto, la expansión no actúa, porque solo afecta a BM25.
+**Expansión con glosario y corrección del falso positivo.** La expansión agrega a la consulta BM25 las palabras del término legal cuando la pregunta usa jerga. La primera versión detectaba los coloquiales por raíces del stemmer, y Snowball reduce «caso» y «casa» a la misma raíz (`cas`): la pregunta «¿Qué pasa si no hago caso cuando un agente…?» activaba «casa» → domicilio, y además «agente», un término demasiado genérico. **Corrección** (commit `e365a7e`): detectar por palabras completas y quitar «agente» del glosario. Resultado en la muestra (híbrido, 19 preguntas): MRR de 0,912 sin expansión a 0,947 con la versión corregida, sin ninguna pregunta peor. **Con el corpus real (12/11) el resultado es mixto** ([`docs/busqueda_hibrida.md`](busqueda_hibrida.md)): ayuda con la jerga (en las 3 preguntas coloquiales, el MRR pasa de 0,317 a 0,567), pero una pregunta que antes acertaba (p12, «mi perro suelto en el parque») baja del puesto 1 al 2, y en las 16 preguntas originales el MRR baja de 0,650 a 0,618. En las 19 el resultado es casi neutro (MRR de 0,597 a 0,610). La conclusión «ninguna pregunta empeora» solo vale para la muestra. Con el modo semántico por defecto, la expansión no actúa, porque solo afecta a BM25.
 
 **Prompt anti-alucinación** ([`prompt.py`](../engine/generation/prompt.py)). Reglas principales:
 
@@ -290,7 +290,7 @@ Integrado en el commit `3cf1a21` (PR #4). Fuente de los datos: [`docs/analisis/r
 | Commit | Cambio | Causa registrada |
 |---|---|---|
 | `7d81541` | Principal `gemini-3.8-flash`, respaldo `gemini-3.6-flash` | Primera versión |
-| `bbebf82` | Principal `gemini-3.5-flash-lite`; memoria de modelos caídos (180 s) | El commit no registra la causa del cambio. Agrega la memoria de caídos por 503/504/tiempo agotado: **pendiente de verificar** |
+| `bbebf82` | Principal `gemini-3.5-flash-lite`; memoria de modelos caídos (180 s) | El 9/11, `gemini-3.8-flash` falló en todas las llamadas de tres corridas de prueba, con errores 503 y 504 (saturación del plan gratuito); con `flash-lite` respondieron 5 de 5 preguntas. *Dato aportado por Duvan: el mensaje del commit no registra la causa.* El commit agrega la memoria de caídos por 503/504/tiempo agotado |
 | `919ffa1` | Razonamiento mínimo de Gemini (`LLM_RAZONAMIENTO=minimal`) | En `llm.py`: con el mismo prompt bajó de 14,4 a 9,7 s y de 3,6 a 1,6 s |
 | `05e1105` | **Groq** como respaldo entre empresas: `openai/gpt-oss-120b` y, si da 429, `openai/gpt-oss-20b` | Si los dos Gemini fallan (503/504, tiempo agotado, 429). El límite gratuito de tokens por minuto de Groq es por modelo |
 | `e66b696` | **`LLM_ORDEN`** configurable | Elegir qué proveedor va primero |
@@ -336,9 +336,10 @@ Para cada pregunta se sabe qué artículo debería aparecer, y se mira en qué p
 |---|---|---|---|---|
 | Muestra (10 artículos, 10 preguntas) | `articulo` | 0,70 | 0,90 | 0,792 |
 | | `fragmentos` | **0,80** | 0,80 | **0,850** |
-| Real (249 artículos) | ambas | pendiente de verificar | pendiente de verificar | pendiente de verificar |
+| **Real** (249 artículos, 471 fragmentos, 10 preguntas) | `articulo` | 0,20 | 0,60 | 0,403 |
+| | `fragmentos` | **0,60** | **0,80** | **0,708** |
 
-Las cifras con el corpus real se midieron el 12/11, pero no quedaron guardadas en el repositorio: **pendiente de verificar** (volver a correr el script y guardar el resultado).
+Con el corpus real, `articulo` solo acierta la mitad de las preguntas con respuesta después del token 512 en los 3 primeros puestos (MRR 0,208), mientras `fragmentos` acierta las 4 (MRR 0,875). Medido el 12/11/2026 (commit `f78023e`); detalle por pregunta en [`docs/segmentacion.md`](segmentacion.md).
 
 ### 5.2 Clasificador (`eval/comparar_clasificador.py`)
 
@@ -346,7 +347,10 @@ Las cifras con el corpus real se midieron el 12/11, pero no quedaron guardadas e
 |---|---|---|---|---|
 | Muestra (13 preguntas) | sin clasificador | 0,69 | 0,85 | 0,808 |
 | | con clasificador | **0,77** | **0,92** | **0,865** |
-| Real | con y sin | pendiente de verificar | pendiente de verificar | pendiente de verificar |
+| **Real** (13 preguntas) | sin clasificador | 0,54 | 0,69 | 0,622 |
+| | **con clasificador** | **0,62** | **0,77** | **0,699** |
+
+Medido el 12/11/2026. La mejora viene solo de p11 (artículo por número); el empuje por tema no actúa porque el campo `tema` del corpus no coincide con `temas.json`. Detalle en [`docs/clasificador.md`](clasificador.md).
 
 ### 5.3 Modos de búsqueda (`eval/comparar_modos.py`, con clasificador)
 
@@ -368,7 +372,14 @@ Tiempo por búsqueda en la muestra (mediana): semántico 140,6 ms, léxico 1,6 m
 | Muestra (19 preguntas) | sin | 0,84 | 1,00 | 0,912 |
 | | con, primera versión (por raíces) | 0,84 | 1,00 | 0,921 |
 | | **con, corregida (palabras completas)** | **0,89** | 1,00 | **0,947** |
-| Real | con y sin | pendiente de verificar | pendiente de verificar | pendiente de verificar |
+| **Real** (19 preguntas, híbrido) | sin | 0,47 | 0,63 | 0,597 |
+| | con | 0,47 | **0,68** | **0,610** |
+| Real, 16 preguntas originales | sin | **0,56** | 0,69 | **0,650** |
+| | con | 0,50 | 0,69 | 0,618 |
+| Real, 3 muy coloquiales | sin | 0,00 | 0,33 | 0,317 |
+| | con | **0,33** | **0,67** | **0,567** |
+
+Medido el 12/11/2026 con el glosario semilla de 18 entradas. Con el corpus real, la expansión ayuda con la jerga pero empeora una pregunta (p12); detalle en [`docs/busqueda_hibrida.md`](busqueda_hibrida.md).
 
 ### 5.5 Pruebas de las 7 preguntas por la API
 
@@ -408,7 +419,7 @@ Las preguntas de demostración son: licor en el parque (art. 140), ingreso a dom
 | **FAISS falla con rutas con tildes** (`…Beltrán…`) en Windows | Comentario en [`build_index.py`](../engine/indexing/build_index.py), `guardar_indice()`; regla 5 de [`guia-companeros/README.md`](guia-companeros/README.md) | El índice se serializa y se escribe con Python en lugar de `faiss.write_index`. |
 | **Codificación UTF-8 en Windows**: `curl` y PowerShell rompen los acentos de las preguntas | [`docs/guia-companeros/santiago-bulla.md`](guia-companeros/santiago-bulla.md) | Probar con Postman o con scripts que envíen UTF-8; los scripts leen y escriben con `encoding="utf-8"`. |
 | **Saturación de Gemini** (503, 504 por tiempo, 429 por límite) | `llm.py`; commits `bbebf82`, `919ffa1`, `05e1105`, `e66b696` | Reintento, modelo de respaldo, memoria de modelos caídos, razonamiento mínimo, Groq como segundo proveedor y `LLM_ORDEN`. Las evaluaciones corren con pausas de 8 a 10 s. |
-| **Push directo a `main`** sin pull request | Commits `db87f91` y `e0fc58e` (Wilder), en la línea principal de `main` y sin merge | Regla 4 de las guías: todo entra por PR. La protección de la rama en GitHub es configuración del sitio, no queda en el repositorio: **pendiente de verificar** en *Settings → Branches*. |
+| **Push directo a `main`** sin pull request | Commits `db87f91` y `e0fc58e` (Wilder), en la línea principal de `main` y sin merge | Regla 4 de las guías: todo entra por PR. Desde el 12/11 `main` está protegida en GitHub (configurada junto con el PR #7): pull request obligatorio, 0 aprobaciones, aplica a administradores y sin force-push. Se verificó con un push directo que GitHub rechazó con «Changes must be made through a pull request». Es una configuración del sitio, no un archivo del repositorio; los PR #8 y #9 ya entraron por esa regla. |
 | **Repositorio en OneDrive**: sincroniza y bloquea archivos del entorno virtual; arranque lento | Regla 1 de [`guia-companeros/README.md`](guia-companeros/README.md); arranque de 42 a 64 s en [`demo_entrega.md`](demo_entrega.md) | Trabajar el repositorio fuera de OneDrive (`C:\dev\…`). El equipo del líder sigue en OneDrive: para la demo, arrancar el motor antes. |
 | **`KeyError: 'fuentes'`** al construir el índice con el corpus real (solo algunos registros tienen ese campo) | Commit `88ffb76` | `build_index.py` lee los campos opcionales con `a.get()`. |
 | **El corpus de muestra se borró** con la subida del corpus real (el motor apuntaba a él por defecto) | Commit `88ffb76`; hallazgo 5 de [`registro_trabajo.md`](analisis/registro_trabajo.md) | Se restauró la muestra; el corpus se elige con `CORPUS_RUTA` y por defecto es el real. |
@@ -425,9 +436,9 @@ Las preguntas de demostración son: licor en el parque (art. 140), ingreso a dom
 **Limitaciones:**
 
 1. **Vigencia por artículo, no por numeral.** Fuera de las 6 expresiones anotadas, el motor solo puede advertir que se verifique en la fuente oficial.
-2. **El empuje del clasificador no actúa con el corpus real** (0 de 249 temas coinciden); solo funciona la búsqueda por número de artículo.
+2. **El empuje del clasificador no actúa con el corpus real** (0 de 249 temas coinciden); solo funciona la búsqueda por número de artículo. Con el corpus real, p09 y p13 no se encuentran con ningún método.
 3. **Las 41 reformas no se indexan** y el motor no sabe citar artículos de otras normas. El banco de Wilder tiene 40 preguntas sobre esas reformas, así que hoy casi todas fallarían por diseño.
-4. **Las evaluaciones son de muestras pequeñas** y casi todas sobre el corpus de muestra; con el corpus real solo hay una comparación registrada (modos de búsqueda).
+4. **Las evaluaciones son de muestras pequeñas** (10 a 19 preguntas, escritas para la muestra de 10 artículos). Con el corpus real ya están las cuatro comparaciones (segmentación, clasificador, modos y expansión), pero falta la evaluación con el banco de 50+ preguntas.
 5. **BM25 usa stemming, no lematización**, en el equipo del líder (spaCy bloqueado).
 6. **El glosario es la semilla provisional** de 18 términos, y la expansión no actúa en el modo semántico por defecto.
 7. **El historial de conversación se acepta, pero no se usa**: cada pregunta se responde sola.
@@ -462,7 +473,7 @@ Según las guías de [`docs/guia-companeros/`](guia-companeros/README.md) y el e
 | | B | Reorganizar `engine/retrieval/temas.json` con la estructura real de la ley y los temas del corpus. |
 | | B | Informe de análisis lingüístico en `docs/analisis/` y su sección del informe técnico. |
 | **Duvan** | A | Implementar `eval/run_eval.py` (Precisión@k, Recall@k, MRR, exactitud, fidelidad, cita) y llenar `eval/reporte.md` con análisis de errores. |
-| | A | Volver a correr y **guardar** las comparaciones con el corpus real (segmentación, clasificador, expansión), hoy pendientes de verificar. |
+| | A | Con el glosario definitivo y los temas reales del corpus, repetir las comparaciones del clasificador y de la expansión (hoy, con el corpus real, el clasificador no actúa y la expansión empeora p12). |
 | | A | Compilar el informe técnico (≤ 15 páginas) a partir de este documento. |
 | | B | Revisar RNF1 (peor caso de 12,8 s) y el tiempo de arranque. |
 | | C | Indexar y citar las normas reformatorias si el banco final las mantiene. |
