@@ -21,6 +21,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "engine"))
 from retrieval import clasificador as clf  # noqa: E402
+from indexing.embeddings import cargar_corpus  # noqa: E402
 from retrieval.search import buscar, id_articulo, precargar  # noqa: E402
 
 ESTRATEGIA = "fragmentos"
@@ -83,6 +84,7 @@ def main() -> None:
         a1, a3, mrr = metricas(ps)
         print(f"{nombre:<22}{a1:>10.2f}{a3:>11.2f}{mrr:>8.3f}")
 
+    temas_corpus = {a["id"]: a["tema"] for a in cargar_corpus()}  # tema de cada artículo del corpus en uso
     print("\nQUÉ CAMBIÓ Y POR QUÉ")
     cambios = 0
     for i, p in enumerate(preguntas):
@@ -91,9 +93,10 @@ def main() -> None:
         cambios += 1
         esperado = p["articulo_esperado"]
         top_sin, top_con = id_articulo(sin[i][0]["id"]), id_articulo(con[i][0]["id"])
-        tema_esperado = next(r["tema"] for r in sin[i] if id_articulo(r["id"]) == esperado)
-        sc_sin = next(r["score"] for r in sin[i] if id_articulo(r["id"]) == esperado)
-        sc_con = next(r["score"] for r in con[i] if id_articulo(r["id"]) == esperado)
+        tema_esperado = temas_corpus.get(esperado)
+        # Con un corpus grande el esperado puede quedar fuera de los K resultados.
+        sc_sin = next((r["score"] for r in sin[i] if id_articulo(r["id"]) == esperado), float("nan"))
+        sc_con = next((r["score"] for r in con[i] if id_articulo(r["id"]) == esperado), float("nan"))
         print(f"\n{p['id']} ({p.get('tipo', 'original')}): {p['pregunta']}")
         print(f"  esperado {esperado}: posición {pos_sin[i]} -> {pos_con[i]} | primero: {top_sin} -> {top_con}")
         print(f"  tema del artículo esperado: {tema_esperado!r}; score del esperado {sc_sin:.3f} -> {sc_con:.3f}")
@@ -106,9 +109,8 @@ def main() -> None:
         print("  Ninguna pregunta cambió de posición.")
 
     print("\nPREGUNTAS DONDE EL TEMA DETECTADO NO COINCIDE CON EL TEMA DEL ARTÍCULO ESPERADO")
-    temas_corpus = {id_articulo(r["id"]): r["tema"] for r in sin[0]}
     for p, c in zip(preguntas, clas):
-        te = temas_corpus[p["articulo_esperado"]]
+        te = temas_corpus.get(p["articulo_esperado"])
         detectados = [t["tema"] for t in c["temas"]]
         if te not in detectados:
             print(f"  {p['id']}: esperado tema {te!r}; detectado {detectados or ['general']}")

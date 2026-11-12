@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
-from indexing.embeddings import PREGUNTAS_DEMO, cargar_modelo, embeddings_preguntas  # noqa: E402
+from indexing.embeddings import PREGUNTAS_DEMO, cargar_corpus, cargar_modelo, embeddings_preguntas  # noqa: E402
 from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
 from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
 from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
@@ -91,14 +91,15 @@ def precargar(estrategia: str = "articulo") -> None:
 def info_indice(estrategia: str = "articulo") -> dict:
     """Datos del índice cargado: estrategia, modelo de embeddings y número de fragmentos."""
     indice, meta = _indice(estrategia)
-    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal)}
+    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal),
+            "corpus": meta.get("corpus"), "carga_corpus": meta.get("carga_corpus")}
 
 
 @lru_cache(maxsize=None)
 def _articulos_del_corpus(estrategia: str) -> dict:
     """Artículos completos del corpus con que se construyó el índice, por id (se carga una vez)."""
     ruta = Path(_indice(estrategia)[1]["corpus"])
-    return {a["id"]: a for a in json.loads(ruta.read_text(encoding="utf-8"))}
+    return {a["id"]: a for a in cargar_corpus(ruta)}  # mismo cargador que el índice
 
 
 def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict:

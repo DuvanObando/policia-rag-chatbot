@@ -205,6 +205,7 @@ def health(request: Request):
         "rrf_k": rrf_k() if estado["modo_busqueda"] == "hibrido" else None,
         "busqueda_expansion": expansion.info(),
         "fragmentos_en_indice": idx["fragmentos"],
+        "corpus": Path(idx["corpus"]).name if idx.get("corpus") else None,
         "llm_proveedor": proveedor,
         "llm_principal": principal,
         "llm_respaldo": respaldo,
