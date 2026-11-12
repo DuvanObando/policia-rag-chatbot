@@ -121,11 +121,12 @@ Estado del motor. Siempre responde 200 (la propiedad `listo` indica si puede ate
   "llm_proveedor": "gemini",
   "llm_principal": "gemini-3.5-flash-lite",
   "llm_respaldo": "gemini-3.6-flash",
+  "llm_respaldo_externo": { "proveedor": "groq", "modelo": "openai/gpt-oss-120b,openai/gpt-oss-20b" },
   "tiempos_de_carga_s": { "embeddings_e_indice_s": 8.1, "cliente_llm_s": 0.4, "total_s": 8.5 }
 }
 ```
 
-El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. `busqueda_modo` es el modo activo (`semantico`, `lexico` o `hibrido`, según `BUSQUEDA_MODO` en el `.env`), `rrf_k` la constante de la fusión (solo en `hibrido`; `null` en los otros) y `busqueda_expansion` indica si la expansión de consultas con glosario está activa (`BUSQUEDA_EXPANSION`) y cuántas entradas tiene el glosario. Si falta la clave del LLM, si `BUSQUEDA_MODO` no existe, si falta el índice BM25 o si se construyó con otro método de preparación de texto que el disponible ahora, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
+El modelo de embeddings, el índice y el cliente del LLM se cargan **al arrancar el servidor**, no en la primera pregunta. `busqueda_modo` es el modo activo (`semantico`, `lexico` o `hibrido`, según `BUSQUEDA_MODO` en el `.env`), `rrf_k` la constante de la fusión (solo en `hibrido`; `null` en los otros) y `busqueda_expansion` indica si la expansión de consultas con glosario está activa (`BUSQUEDA_EXPANSION`) y cuántas entradas tiene el glosario. `llm_respaldo_externo` es el proveedor de otra empresa que responde si los dos modelos de Gemini fallan (Groq, si hay `GROQ_API_KEY` en el `.env`; `null` si no). Si falta la clave del LLM, si `BUSQUEDA_MODO` no existe, si falta el índice BM25 o si se construyó con otro método de preparación de texto que el disponible ahora, `listo` es `false`, `error` explica por qué y `POST /query` responde 503.
 
 ## Privacidad (Ley 1581 de 2012)
 

@@ -25,7 +25,7 @@ Reglas obligatorias:
 
 3. No mezcles numerales con parágrafos. Si enumeras causales, comportamientos, requisitos o medidas, la lista debe contener solo lo que dicen los numerales, cada uno con su cita de numeral. Lo que diga un parágrafo (excepciones, aclaraciones, procedimientos, tablas de medidas) va aparte, después de la lista, en un párrafo propio con su cita de parágrafo.
 
-4. Si los artículos entregados no responden la pregunta, contesta únicamente con esta frase, exactamente así, sin agregar nada más: "{FRASE_NO_ENCONTRADO}" No inventes ni des una respuesta aproximada.
+4. Si los artículos entregados no responden la pregunta, contesta únicamente con esta frase, exactamente así, sin agregar nada más: "{FRASE_NO_ENCONTRADO}" No inventes ni des una respuesta aproximada. Pero si algún artículo sí trata el tema de la pregunta, aunque sea para decir que esa parte fue declarada inexequible o que fue modificada, NO uses esa frase: responde explicando lo que dicen los artículos (ver regla 5b).
 
 5. Cada artículo trae un atributo "vigencia". Si te apoyas en un artículo cuya vigencia no es "vigente" (por ejemplo "modificado", "inexequible" o "exequible_condicionado"), dilo explícitamente en la misma parte de la respuesta que se apoya en él (no solo al final), nombrando la vigencia y el numeral o parágrafo usado, y recomienda verificar ese numeral o parágrafo en la fuente oficial porque podría tener apartes modificados o declarados inexequibles. Ejemplo: "Ojo: el artículo 140 figura como modificado; verifica el numeral 7 en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles."
 

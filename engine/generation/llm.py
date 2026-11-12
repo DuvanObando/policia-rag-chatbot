@@ -24,10 +24,15 @@ Comportamiento (presupuesto total PRESUPUESTO_S, ~21 s en el peor caso):
   MIN_LLAMADA_S; por eso, en el peor caso caben dos llamadas (principal + respaldo).
   Los reintentos internos de la librería están desactivados: todo se ve en los mensajes [llm].
 
-Para agregar otro proveedor (p. ej. Groq): escribir una función
-`_generar_groq(sistema, usuario, modelo, timeout_s) -> str` que lance
-`LimiteDePeticiones` ante un 429 y `ModeloNoDisponible` ante 5xx o timeout,
-y registrarla en PROVEEDORES. El resto del código no cambia.
+RESPALDO ENTRE EMPRESAS (Groq). Si GROQ_API_KEY está en el .env y los modelos de Gemini fallan
+(503/504, sin respuesta a tiempo, 429 sin tiempo para esperar u otro error), responde Groq con
+LLM_GROQ_MODELO (por defecto openai/gpt-oss-120b) y un plazo propio de GROQ_TIMEOUT_S (15 s).
+Si los dos modelos de Gemini están marcados como caídos, se va directo a Groq sin gastar tiempo.
+Sin GROQ_API_KEY el comportamiento es el de antes. Peor caso total: PRESUPUESTO_S + GROQ_TIMEOUT_S.
+
+Para agregar otro proveedor: escribir una función `_generar_x(sistema, usuario, modelo, timeout_s)
+-> str` que lance `LimiteDePeticiones` ante un 429 y `ModeloNoDisponible` ante 5xx o timeout,
+y registrarla en PROVEEDORES.
 """
 import os
 import time
@@ -179,25 +184,101 @@ def _generar_gemini(sistema: str, usuario: str, modelo: str, timeout_s: float) -
     return (r.text or "").strip()
 
 
+# ---------------------------------------------------------------- Groq (respaldo entre empresas)
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+# Varios modelos separados por coma: el límite de tokens por minuto del plan gratuito es POR MODELO,
+# así que ante un 429 se pasa al siguiente.
+GROQ_MODELO_POR_DEFECTO = "openai/gpt-oss-120b,openai/gpt-oss-20b"
+GROQ_ESPERA_MAX_S = 2.0  # ante un 429 con retry-after <= esto, se espera y se reintenta el mismo modelo
+
+
+def respaldo_externo() -> Optional[tuple]:
+    """("groq", "modelo1,modelo2") si hay GROQ_API_KEY en el .env; None si no (sin respaldo entre empresas)."""
+    if not os.getenv("GROQ_API_KEY", "").strip():
+        return None
+    return "groq", os.getenv("LLM_GROQ_MODELO", "").strip() or GROQ_MODELO_POR_DEFECTO
+
+
+def _timeout_groq() -> float:
+    try:
+        return max(3.0, float(os.getenv("GROQ_TIMEOUT_S", "15")))
+    except ValueError:
+        return 15.0
+
+
+@lru_cache(maxsize=1)
+def _cliente_groq():
+    import httpx
+
+    clave = os.getenv("GROQ_API_KEY", "").strip()
+    if not clave:
+        raise ErrorLLM("Falta GROQ_API_KEY en el archivo .env de la raíz del repo.")
+    return httpx.Client(headers={"Authorization": f"Bearer {clave}"})
+
+
+def _generar_groq(sistema: str, usuario: str, modelo: str, timeout_s: float) -> str:
+    """Groq por su API compatible con OpenAI (chat/completions), con httpx (sin dependencias nuevas)."""
+    import httpx
+
+    cuerpo = {
+        "model": modelo,
+        "messages": [{"role": "system", "content": sistema}, {"role": "user", "content": usuario}],
+        "temperature": 0.2,
+        "max_completion_tokens": 2048,
+    }
+    if modelo.startswith("openai/gpt-oss"):
+        cuerpo["reasoning_effort"] = "low"  # modelo de razonamiento: esfuerzo bajo = menos latencia
+    try:
+        r = _cliente_groq().post(GROQ_URL, json=cuerpo, timeout=timeout_s)
+    except httpx.TimeoutException as e:
+        raise ModeloNoDisponible(f"sin respuesta en {timeout_s:.0f} s") from e
+    except httpx.TransportError as e:
+        raise ModeloNoDisponible(f"error de red ({type(e).__name__})") from e
+    if r.status_code == 429:
+        e = LimiteDePeticiones(f"429 (retry-after: {r.headers.get('retry-after', '?')} s)")
+        try:
+            e.retry_after = float(r.headers.get("retry-after", ""))
+        except ValueError:
+            e.retry_after = None
+        raise e
+    if r.status_code >= 500:
+        raise ModeloNoDisponible(str(r.status_code))
+    if r.status_code != 200:
+        try:
+            detalle = r.json().get("error", {}).get("message", "")
+        except ValueError:
+            detalle = ""
+        raise ErrorLLM(f"Groq respondió un error {r.status_code}: {detalle[:200]}")
+    texto = r.json()["choices"][0]["message"].get("content") or ""
+    # gpt-oss usa espacios finos/duros (U+202F, U+00A0) y guiones no separables (U+2011): caracteres normales.
+    return texto.translate({0x202F: " ", 0x00A0: " ", 0x2011: "-"}).strip()
+
+
 # ---------------------------------------------------------------- registro
 
 PROVEEDORES = {
     "gemini": _generar_gemini,
+    "groq": _generar_groq,
 }
 
 
 PRECARGADORES = {
     "gemini": _cliente_gemini,
+    "groq": _cliente_groq,
 }
 
 
 def precargar_cliente() -> None:
-    """Crea el cliente del proveedor por adelantado (p. ej. al arrancar la API).
+    """Crea el cliente del proveedor (y el del respaldo externo, si hay) por adelantado.
 
-    Lanza ErrorLLM si falta la clave. No hace ninguna llamada de red.
+    Lanza ErrorLLM si falta la clave del proveedor principal. No hace ninguna llamada de red.
     """
     proveedor, _, _ = configuracion()
     PRECARGADORES[proveedor]()
+    externo = respaldo_externo()
+    if externo and externo[0] != proveedor:
+        PRECARGADORES[externo[0]]()
 
 
 def configuracion() -> tuple:
@@ -215,8 +296,52 @@ def configuracion() -> tuple:
 
 
 def generar(sistema: str, usuario: str) -> RespuestaLLM:
-    """Llama al LLM configurado (con reintentos y respaldo) y dice qué modelo respondió."""
+    """Llama al LLM configurado (reintentos, modelo de respaldo y, si hay, Groq) y dice quién respondió."""
     proveedor, principal, respaldo = configuracion()
+    externo = respaldo_externo()
+    if externo and externo[0] == proveedor:
+        externo = None
+    try:
+        return _generar_cadena(sistema, usuario, proveedor, principal, respaldo, saltar_si_caidos=bool(externo))
+    except ErrorLLM as e:
+        if not externo:
+            raise
+        fallo_principal = str(e)
+    prov_ext, lista = externo
+    modelos_ext = [m.strip() for m in lista.split(",") if m.strip()]
+    _log(f"{proveedor} no respondió ({fallo_principal}); pasando a {prov_ext} ({', '.join(modelos_ext)})")
+    limite = time.monotonic() + _timeout_groq()  # plazo total para todo el respaldo externo
+    fallo_ext = "sin intentos"
+    for modelo_ext in modelos_ext:
+        reintentado = False
+        while limite - time.monotonic() > 1.0:
+            try:
+                texto = PROVEEDORES[prov_ext](sistema, usuario, modelo_ext, limite - time.monotonic())
+            except LimiteDePeticiones as e:
+                _contar(modelo_ext, ok=False)
+                fallo_ext = f"{modelo_ext}: límite de peticiones {e}"
+                espera = getattr(e, "retry_after", None)
+                if (not reintentado and espera is not None and espera <= GROQ_ESPERA_MAX_S
+                        and limite - time.monotonic() - espera > 3.0):
+                    _log(f"429 en {modelo_ext}; espero {espera:g} s y reintento")
+                    time.sleep(espera)
+                    reintentado = True
+                    continue
+                _log(f"429 en {modelo_ext}; paso al siguiente modelo de {prov_ext}")
+                break
+            except (ModeloNoDisponible, ErrorLLM) as e:
+                _contar(modelo_ext, ok=False)
+                fallo_ext = f"{modelo_ext}: {e}"
+                break
+            _contar(modelo_ext, ok=True)
+            _log(f"respondió {modelo_ext} ({prov_ext}, respaldo entre empresas)")
+            return RespuestaLLM(texto, modelo_ext, prov_ext, uso_respaldo=True)
+    raise ErrorLLM(f"{prov_ext} también falló ({fallo_ext}). Antes: {fallo_principal}")
+
+
+def _generar_cadena(sistema: str, usuario: str, proveedor: str, principal: str,
+                    respaldo: Optional[str], saltar_si_caidos: bool = False) -> RespuestaLLM:
+    """Modelo principal y de respaldo del mismo proveedor (ver docstring del módulo)."""
     funcion = PROVEEDORES[proveedor]
     limite = time.monotonic() + PRESUPUESTO_S
 
@@ -233,6 +358,8 @@ def generar(sistema: str, usuario: str) -> RespuestaLLM:
         else:
             orden.append(m)
     if not orden:
+        if saltar_si_caidos:  # hay respaldo en otra empresa: no gastar tiempo en modelos caídos
+            raise ErrorLLM(f"todos los modelos de {proveedor} marcados como caídos")
         orden = candidatos
 
     # (modelo, tope de esta llamada en s o None = lo que quede, espera previa en s,
