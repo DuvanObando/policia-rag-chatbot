@@ -8,7 +8,24 @@ Guion para mostrar el motor RAG sobre la Ley 1801 de 2016 (corpus de la Fase 1, 
 - **Si sale 503, espera 30 s y repite.**
 - Levanta el motor **unos 2 minutos antes** (sección 1) y déjalo corriendo.
 
-## 1. Arrancar el motor (hacerlo ANTES de la demo)
+## Arranque rápido (accesos directos del escritorio)
+
+En el escritorio hay dos accesos directos: **Iniciar demo Chatbot** y **Detener demo Chatbot**. Apuntan a [`iniciar_demo.bat`](../iniciar_demo.bat) y [`detener_demo.bat`](../detener_demo.bat), en la raíz del repo (también se pueden ejecutar con doble clic desde ahí).
+
+**Iniciar demo Chatbot** (doble clic; lánzalo unos 2 minutos antes):
+
+1. Comprueba que el puerto 8000 esté libre.
+2. Arranca el motor en **una ventana propia titulada «Motor Chatbot RAG»**, con el entorno virtual de `engine\`. **No cierres esa ventana durante la demo: si la cierras, el motor se apaga.**
+3. Muestra «Cargando motor, espera…» hasta que `/health` diga `"listo": true`. Tarda **unos 50 s** (49,9 s en la prueba del 12/11).
+4. Abre en Chrome **<http://localhost:8000/docs>** (Swagger) y la **página de diagramas** de GitHub Pages (<https://duvanobando.github.io/policia-rag-chatbot/diagramas/index.html>). La ventana de inicio se cierra sola.
+
+**Si el puerto 8000 está ocupado**, el script no falla: avisa con un mensaje claro (PID y programa que lo usa) y, si lo que está corriendo es el motor del chatbot, lo dice («ya hay un motor corriendo y listo»). Para reiniciarlo: **Detener** y luego **Iniciar**.
+
+**Detener demo Chatbot** (doble clic): cierra los procesos del motor (`uvicorn api:app`, incluida la ventana «Motor Chatbot RAG») y comprueba que el puerto 8000 quedó libre (unos 3 s). No toca otros programas ni otras terminales.
+
+**Requisitos:** el entorno virtual `engine\.venv` creado, el `.env` con las claves y Chrome (si no está, se usa el navegador predeterminado). En el `.env` de la demo: `LLM_ORDEN=groq,gemini` y `LLM_GROQ_MODELO=openai/gpt-oss-120b` (solo el modelo grande de Groq: ante un 429 el motor pasa a Gemini y no al modelo pequeño). Los accesos directos viven solo en el escritorio de Duvan (no se versionan): en otro PC, se crean apuntando a los dos `.bat`.
+
+## 1. Arrancar el motor a mano (alternativa a los accesos directos)
 
 El arranque **tarda entre 45 y 65 s** en el PC de Duvan (medido el 12/11: 42 a 64 s; en el ensayo, 56 s). Unos 40 s son solo importar PyTorch y sentence-transformers, porque el repo está dentro de OneDrive; la carga del motor en sí son unos 12 a 17 s. Por eso: **levántalo unos 2 minutos antes y déjalo corriendo**.
 
@@ -17,7 +34,7 @@ El arranque **tarda entre 45 y 65 s** en el PC de Duvan (medido el 12/11: 42 a 6
    ```bash
    engine\.venv\Scripts\activate
    ```
-3. Revisa el `.env` (en la raíz, nunca se sube a git): `GEMINI_API_KEY`, `GROQ_API_KEY`, `LLM_ORDEN` y `CORPUS_RUTA=corpus/procesados/corpus_ley_1801.json`.
+3. Revisa el `.env` (en la raíz, nunca se sube a git): `GEMINI_API_KEY`, `GROQ_API_KEY`, `LLM_ORDEN=groq,gemini`, `LLM_GROQ_MODELO=openai/gpt-oss-120b` y `CORPUS_RUTA=corpus/procesados/corpus_ley_1801.json`.
 4. Arranca (sin `--reload`):
    ```bash
    cd engine
@@ -68,8 +85,8 @@ Si sobra tiempo: «¿Cuál es la tarifa del impuesto predial en Bogotá?» (otra
 
 **Si algo sale distinto**
 
-- **La pregunta 1 responde «No encontré esa información…»** (y `fuera_de_dominio: true`): respondió el modelo pequeño de respaldo, `gpt-oss-20b`, porque el grande dio 429. Con ese modelo, esa pregunta sale mal. **Espera 30 s y repite.**
-- **La pregunta 4 no trae `par. 1` ni dice que no son sanciones:** es normal con el modelo pequeño. Lo estable es la definición del art. 172 y los fragmentos.
+- **La pregunta 1 responde «No encontré esa información…»** (y `fuera_de_dominio: true`): respondió el modelo pequeño `gpt-oss-20b`, con el que esa pregunta sale mal. Con `LLM_GROQ_MODELO=openai/gpt-oss-120b` en el `.env` ese modelo no se usa (ante un 429 responde Gemini), así que no debería pasar; si pasa, mira que `/health` muestre `llm_respaldo_externo` solo con el 120b, reinicia el motor, **espera 30 s y repite.**
+- **La pregunta 4 no trae `par. 1` ni dice que no son sanciones:** puede pasar, no está garantizado. Lo estable es la definición del art. 172 y los fragmentos.
 - **503 («servicio ocupado»):** todos los proveedores están limitados. Espera 30 s y repite.
 
 ## 4. Qué señalar en cada respuesta
@@ -83,7 +100,7 @@ Si sobra tiempo: «¿Cuál es la tarifa del impuesto predial en Bogotá?» (otra
 
 ## 5. Si un proveedor falla: cambiar `LLM_ORDEN`
 
-Proveedores: **Gemini** (principal y respaldo: `gemini-3.5-flash-lite`, `gemini-3.6-flash`) y **Groq** (`openai/gpt-oss-120b`, y `openai/gpt-oss-20b` si el primero da 429). Si uno falla, el motor pasa solo al siguiente; si aun así se atasca:
+Proveedores: **Gemini** (principal y respaldo: `gemini-3.5-flash-lite`, `gemini-3.6-flash`) y **Groq** (`openai/gpt-oss-120b`; por defecto, el código también prueba `openai/gpt-oss-20b` si el primero da 429, pero el `.env` de la demo fija `LLM_GROQ_MODELO=openai/gpt-oss-120b` para que ese caso pase a Gemini). Si uno falla, el motor pasa solo al siguiente; si aun así se atasca:
 
 | Situación | Cambio en `.env` (raíz) |
 |---|---|
@@ -100,12 +117,13 @@ Después **reinicia el motor** (Ctrl+C y volver a arrancar; ≈1 min) y confirma
 - **Por la API** (`LLM_ORDEN=groq,gemini`, 20 s entre preguntas, guion corregido): 5 de 5 con HTTP 200, todas con `gpt-oss-120b`, de 0,84 a 2,29 s. La fuera de dominio salió bien (`fuera_de_dominio: true`, sin citas).
 - **Por modelo de Groq, sin respaldo** (las 5 preguntas y la 4 repetida, 20 s entre cada una): `gpt-oss-120b` respondió las 6 como describe la sección 3. `gpt-oss-20b` respondió bien 5 de 6; **falló la pregunta 1** («No encontré…»). Las preguntas 2, 3, 4 y 5 salieron bien con los dos modelos.
 - **Prueba anterior** (`LLM_ORDEN=groq,gemini`, 10 s entre preguntas, 7 preguntas): todas HTTP 200; de 1,2 a 4,8 s, salvo una de 12,8 s por un 429 del primer modelo.
-- **Arranque en frío:** 56 s en el ensayo (42 a 64 s en las pruebas).
+- **Con solo `gpt-oss-120b` en Groq** (`LLM_GROQ_MODELO`, motor arrancado con el acceso directo): la pregunta 1 (licor en el parque) explica que es inexequible y cita `Art. 140, num. 7` (1,69 s), y la 5 (pase de conducción) sale fuera de dominio, sin citas (0,78 s).
+- **Arranque en frío:** de 50 a 56 s con los accesos directos y en el ensayo (42 a 64 s en las pruebas anteriores).
 
 ## 7. Limitaciones que conviene decir
 
 - La vigencia sigue siendo **por artículo**; solo 5 expresiones inexequibles están marcadas a mano.
-- El modelo pequeño de respaldo (`gpt-oss-20b`) es menos fiable que el grande: en la pregunta del art. 140 responde «No encontré…».
+- El modelo pequeño de Groq (`gpt-oss-20b`) es menos fiable que el grande: en la pregunta del art. 140 responde «No encontré…». Por eso la demo lo deja fuera con `LLM_GROQ_MODELO=openai/gpt-oss-120b`; el respaldo ante un 429 es entonces Gemini, que puede tardar más o dar 503.
 - No hay frontend ni backend Node conectado todavía: la demo es sobre la API del motor (`/docs`).
 - Los planes gratuitos pueden fallar: por eso existen dos proveedores y dos modelos en cada uno.
 

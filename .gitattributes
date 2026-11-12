@@ -1,0 +1,2 @@
+# Los scripts de Windows deben guardarse siempre con saltos de linea CRLF
+*.bat text eol=crlf
