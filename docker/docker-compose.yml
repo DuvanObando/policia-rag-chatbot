@@ -1,0 +1,30 @@
+# Motor RAG en Docker. Uso (desde la raíz del repo):
+#   docker compose -f docker/docker-compose.yml up -d --build
+# Las claves se leen del .env de la raíz; el backend y el frontend siguen corriendo con npm.
+name: policia-rag
+
+services:
+  motor:
+    build:
+      context: ..
+      dockerfile: docker/motor.Dockerfile
+    image: policia-rag-motor
+    container_name: policia-rag-motor
+    env_file:
+      - path: ../.env
+        required: false
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../engine:/app/engine            # código e índices (engine/indexing/indexes)
+      - ../corpus:/app/corpus            # corpus y PDFs subidos (corpus/uploads)
+      - hf_cache:/root/.cache/huggingface  # modelo de embeddings (~1.1 GB, se descarga una vez)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request,sys; sys.exit(0 if json.load(urllib.request.urlopen('http://localhost:8000/health'))['listo'] else 1)"]
+      interval: 15s
+      timeout: 5s
+      start_period: 120s
+    restart: unless-stopped
+
+volumes:
+  hf_cache:

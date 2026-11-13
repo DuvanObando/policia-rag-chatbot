@@ -1,0 +1,11 @@
+{
+    "motor": {
+        "stop": "docker compose -f docker/docker-compose.yml stop",
+        "levantar_motor": "docker compose -f docker/docker-compose.yml up -d",
+        "comprobar_motor": "curl.exe http://localhost:8000/health"
+    }, 
+    "backend_frontend": {
+        "start": "npm run dev",
+        "stop": "Ctrl + C"
+    }
+}
