@@ -1,8 +1,20 @@
 {
   "name": "policia-rag-frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "Interfaz de chat (React + Vite) del chatbot RAG sobre la Ley 1801 de 2016",
+  "type": "module",
   "scripts": {
-    "dev": "echo \"Frontend pendiente (placeholder)\""
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
   }
 }
