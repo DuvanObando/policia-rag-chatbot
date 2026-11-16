@@ -157,7 +157,10 @@ El motor ya puede **agregar una norma nueva** (por ejemplo la Ley 769 de 2002, C
 - Los textos del frontend dicen «Código Nacional de Policía»: cuando haya más de una norma, usa la lista de `normas` de `/health`.
 - `fragmentos[].norma` y `citas[].norma` ahora existen: muéstralos en el panel de fuentes cuando la norma no sea la Ley 1801.
 
-## Mensaje para WhatsApp (16/11)
+## Mensaje para enviar (WhatsApp, 16/11)
 
-> Santiago, ya está en `main` el reprocesamiento del corpus: se puede subir el PDF de una norma nueva (probé con la Ley 769, Código de Tránsito) y el motor la agrega sin reiniciarse. Para la interfaz son 3 llamadas: subir (`/upload_pdf/` con `norma`), lanzar (`POST /corpus/reprocesar` con el `id`) y consultar el estado cada 3-5 s hasta `listo`. Todo está en tu guía, sección «Nuevo (16/11)».
-> Dos cosas importantes: *el token de administrador lo agrega tu backend, nunca el frontend*, y deja la subida con timeout de 60 s (con PyMuPDF el PDF de tránsito sube en 0,4 s). También hay que reenviar `norma` y `fuente_url` y devolver el `id` en la respuesta de subida 🙏
+> Santiago, el motor ya está completo en `main`, con reprocesamiento de normas nuevas. Lo tuyo, con fecha límite *el miércoles 18 de noviembre* para tu PR a `main`:
+> 1) En el frontend, el flujo de 3 llamadas: subir el PDF, reprocesar y consultar el estado cada 3-5 s hasta `listo`.
+> 2) El token de administrador va *solo en el backend*, nunca en el frontend. El backend debe reenviar `norma` y `fuente_url`, devolver el `id` de la subida y dejar la subida con timeout de 60 s.
+> 3) Mostrar las normas cargadas desde `/health` (campo `normas`).
+> 4) Tu parte del informe técnico (integración y despliegue). Todo está en tu guía, sección «Nuevo (16/11)». Rama y PR 🙏

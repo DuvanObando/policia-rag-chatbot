@@ -2,6 +2,35 @@
 
 Esta carpeta es el punto de partida de **cada integrante**. Todo lo que necesitas para empezar sin preguntarle a nadie está aquí o enlazado desde aquí.
 
+## Estado al 16 de noviembre
+
+El **motor RAG está COMPLETO en `main`** (Duvan): búsqueda semántica con clasificador temático (y modos léxico e híbrido), respuestas con **citas por numeral y parágrafo** verificadas, detección de **fuera de dominio**, LLM con **respaldo Groq y Gemini**, **reprocesamiento de normas nuevas desde un PDF** sin reiniciar el motor (probado con la Ley 769 de 2002), lectura de PDF con **PyMuPDF** (la subida pasó de 63 s a 0,4 s) y regla del «artículo N» con varias normas.
+
+- Qué entregó Duvan, PR fusionados y qué falta de cada uno: [duvan.md](duvan.md).
+- Informe de avance: [`docs/informe_avance.md`](../informe_avance.md) (PDF en [`docs/entregas/informe_avance.pdf`](../entregas/informe_avance.pdf)).
+- Reprocesamiento de normas nuevas (flujo, endpoints, tiempos, límites): [`docs/reprocesamiento.md`](../reprocesamiento.md).
+- Diagramas del proyecto (GitHub Pages): <https://duvanobando.github.io/policia-rag-chatbot/diagramas/>.
+
+**Lo que sigue es de cada uno:** Wilder ([wilder.md](wilder.md)): `procesar_pdf.py`, vigencia, README del corpus y banco de preguntas. Santiago Castro ([santiago-castro.md](santiago-castro.md)): glosario, `temas.json` e informe. Santiago Bulla ([santiago-bulla.md](santiago-bulla.md)): frontend y backend del reprocesamiento, y su parte del informe. Lee la sección «Nuevo (16/11)» de tu guía.
+
+## Calendario de cierre
+
+| Fecha | Qué pasa |
+|---|---|
+| **Miércoles 18 de noviembre** | **Fecha límite para que cada uno suba su PR a `main`.** Lo que no esté ese día no entra a la integración |
+| **Jueves 19** | Integración y pruebas finales (Duvan): motor, corpus, frontend y **evaluación formal con el banco de preguntas** |
+| **Viernes 20** | **Entrega final y sustentación** |
+
+## Mensaje para el grupo (WhatsApp, 16/11)
+
+> ¡Equipo! El motor RAG ya está *listo en `main`*: búsqueda, citas por numeral, respaldo Groq/Gemini y hasta carga de normas nuevas desde un PDF (probé con la Ley 769 de tránsito).
+> Hagan `git pull` y lean la sección «Nuevo (16/11)» de su guía en `docs/guia-companeros/`: ahí está lo que le toca a cada uno.
+> *Fecha límite para subir su PR a `main`: miércoles 18 de noviembre.* El jueves 19 integro y hago las pruebas finales, y el viernes 20 es la entrega y la sustentación.
+> Recuerden: todo va por rama y PR, `main` está protegida (nadie hace push directo).
+> Los diagramas del proyecto están acá: https://duvanobando.github.io/policia-rag-chatbot/diagramas/ 🙏
+
+---
+
 ## Cómo usar esta carpeta
 
 1. **Lee este README completo** (10 minutos): qué hay hecho, cómo levantarlo y las reglas que valen para todos.
@@ -12,7 +41,7 @@ Esta carpeta es el punto de partida de **cada integrante**. Todo lo que necesita
 | Wilder | Corpus (Fase 1) y banco de preguntas | [wilder.md](wilder.md) |
 | Santiago Castro | Análisis lingüístico (Fase 2) | [santiago-castro.md](santiago-castro.md) |
 | Santiago Bulla | Backend, frontend e integración | [santiago-bulla.md](santiago-bulla.md) |
-| Duvan | Líder y motor RAG (entregado) | este README |
+| Duvan | Líder y motor RAG (entregado) | [duvan.md](duvan.md) |
 
 3. **Cronograma y requisitos del enunciado:** [PLAN_TRABAJO.md](PLAN_TRABAJO.md) (9 al 20 de noviembre de 2026; el día 1 es el lunes 9). Las guías personales copian de ahí tus fechas.
 4. Marca tus casillas `[x]` en tu guía cuando termines una tarea (en tu rama, con tu PR).
