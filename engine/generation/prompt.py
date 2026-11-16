@@ -1,13 +1,50 @@
-"""Prompt del sistema y armado del mensaje con los artículos de contexto."""
-from typing import List
+"""Prompt del sistema y armado del mensaje con los artículos de contexto.
 
-CODIGO = "Código Nacional de Seguridad y Convivencia Ciudadana (Ley 1801 de 2016)"
+El dominio son las NORMAS CARGADAS en el corpus (hoy la Ley 1801 de 2016 y las que se agreguen con
+el reprocesamiento). Por eso el prompt y la frase de «fuera de dominio» se arman con la lista de
+normas: sistema(normas) y frase_no_encontrado(normas).
+"""
+import sys
+from pathlib import Path
+from typing import List, Optional
 
-# Frase fija para "no está en el contexto". responder.py la usa para marcar
-# fuera_de_dominio, así que el modelo debe usarla textualmente.
-FRASE_NO_ENCONTRADO = f"No encontré esa información en el {CODIGO}."
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
+from indexing import normas as _normas  # noqa: E402
 
-SISTEMA = f"""Eres un asistente informativo sobre el {CODIGO} de Colombia.
+# Inicio fijo de la frase de «no está en el corpus». responder.py busca este inicio para marcar
+# fuera_de_dominio (el final cambia según las normas cargadas).
+INICIO_NO_ENCONTRADO = "No encontré esa información en"
+
+
+def _lista(normas: Optional[List[str]]) -> List[str]:
+    return _normas.ordenar(normas or [_normas.NORMA_BASE])
+
+
+def frase_no_encontrado(normas: Optional[List[str]] = None) -> str:
+    """'No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código ...).'"""
+    return f"{INICIO_NO_ENCONTRADO} las normas cargadas: " + "; ".join(_normas.describir(n) for n in _lista(normas)) + "."
+
+
+def _formato_citas(normas: List[str]) -> str:
+    otras = [n for n in normas if not _normas.es_base(n)]
+    texto = ""
+    if otras:
+        ejemplo = _normas.corta(otras[0])
+        texto = (f"\n   Si el artículo es de OTRA norma distinta de la Ley 1801 de 2016, antepón la norma en forma corta: "
+                 f"\"({ejemplo}, Art. 131, num. 2)\", \"({ejemplo}, Art. 131)\". Los artículos de la Ley 1801 se citan "
+                 f"sin norma, como en los ejemplos de arriba. El atributo \"norma\" de cada artículo dice a qué norma pertenece.")
+    return texto
+
+
+def sistema(normas: Optional[List[str]] = None) -> str:
+    """Prompt del sistema para las normas cargadas."""
+    lista = _lista(normas)
+    dominio = "; ".join(_normas.describir(n) for n in lista)
+    frase = frase_no_encontrado(lista)
+    return _PLANTILLA.format(dominio=dominio, frase=frase, formato_otras=_formato_citas(lista))
+
+
+_PLANTILLA = """Eres un asistente informativo sobre estas normas de Colombia, que son las únicas cargadas en el corpus: {dominio}.
 
 Reglas obligatorias:
 
@@ -19,13 +56,13 @@ Reglas obligatorias:
    - parágrafo sin número: "(Art. 183, par.)"
    - parágrafo transitorio: "(Art. 180, par. transitorio)"
    - texto general del artículo, que no está dentro de un numeral ni de un parágrafo: "(Art. 180)"
-   Si una afirmación se apoya en varios, sepáralos con punto y coma: "(Art. 140, num. 13; Art. 140, num. 14)". Usa solo números de numeral o parágrafo que aparezcan en el texto del artículo; nunca los inventes.
+   Si una afirmación se apoya en varios, sepáralos con punto y coma: "(Art. 140, num. 13; Art. 140, num. 14)". Usa solo números de numeral o parágrafo que aparezcan en el texto del artículo; nunca los inventes.{formato_otras}
 
    Cada artículo puede incluir metadatos de trazabilidad del PDF (archivo y páginas). No son contenido normativo: no los uses como evidencia jurídica ni inventes esos datos. Si preguntan dónde consultar el texto, responde con el archivo y las páginas indicadas.
 
 3. No mezcles numerales con parágrafos. Si enumeras causales, comportamientos, requisitos o medidas, la lista debe contener solo lo que dicen los numerales, cada uno con su cita de numeral. Lo que diga un parágrafo (excepciones, aclaraciones, procedimientos, tablas de medidas) va aparte, después de la lista, en un párrafo propio con su cita de parágrafo.
 
-4. Si los artículos entregados no responden la pregunta, contesta únicamente con esta frase, exactamente así, sin agregar nada más: "{FRASE_NO_ENCONTRADO}" No inventes ni des una respuesta aproximada. Pero si algún artículo sí trata el tema de la pregunta, aunque sea para decir que esa parte fue declarada inexequible o que fue modificada, NO uses esa frase: responde explicando lo que dicen los artículos (ver regla 5b).
+4. Si los artículos entregados no responden la pregunta, contesta únicamente con esta frase, exactamente así, sin agregar nada más: "{frase}" No inventes ni des una respuesta aproximada. Pero si algún artículo sí trata el tema de la pregunta, aunque sea para decir que esa parte fue declarada inexequible o que fue modificada, NO uses esa frase: responde explicando lo que dicen los artículos (ver regla 5b).
 
 5. Cada artículo trae un atributo "vigencia". Si te apoyas en un artículo cuya vigencia no es "vigente" (por ejemplo "modificado", "inexequible" o "exequible_condicionado"), dilo explícitamente en la misma parte de la respuesta que se apoya en él (no solo al final), nombrando la vigencia y el numeral o parágrafo usado, y recomienda verificar ese numeral o parágrafo en la fuente oficial porque podría tener apartes modificados o declarados inexequibles. Ejemplo: "Ojo: el artículo 140 figura como modificado; verifica el numeral 7 en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles."
 
@@ -33,8 +70,12 @@ Reglas obligatorias:
 
 6. Escribe en español claro, para un ciudadano sin formación jurídica: frases cortas, sin tecnicismos innecesarios. Puedes usar una lista corta si ayuda.
 
-7. Eres una herramienta informativa: no des asesoría jurídica personalizada, no le digas a la persona qué decisión tomar en su caso concreto ni le asegures un resultado. Si la pregunta pide eso, explica lo que dice el Código y sugiere consultar a un abogado o a la autoridad competente.
+7. Eres una herramienta informativa: no des asesoría jurídica personalizada, no le digas a la persona qué decisión tomar en su caso concreto ni le asegures un resultado. Si la pregunta pide eso, explica lo que dice la norma y sugiere consultar a un abogado o a la autoridad competente.
 """
+
+# Compatibilidad: prompt y frase con solo la norma base (Ley 1801).
+SISTEMA = sistema()
+FRASE_NO_ENCONTRADO = frase_no_encontrado()
 
 
 def _atributo(valor) -> str:
@@ -62,7 +103,8 @@ def construir_mensaje(pregunta: str, articulos: List[dict]) -> str:
             f' fuentes_pdf="{_atributo(fuentes_pdf)}"' if fuentes_pdf else ""
         )
         bloques.append(
-            f'<articulo numero="{_atributo(a["numero"])}" epigrafe="{_atributo(a["epigrafe"])}" '
+            f'<articulo norma="{_atributo(a.get("norma") or _normas.NORMA_BASE)}" '
+            f'numero="{_atributo(a["numero"])}" epigrafe="{_atributo(a["epigrafe"])}" '
             f'vigencia="{_atributo(a["vigencia"])}" ubicacion="{_atributo(a["ubicacion"])}"'
             f'{atributo_fuente}>\n'
             f'{a["texto"]}\n'

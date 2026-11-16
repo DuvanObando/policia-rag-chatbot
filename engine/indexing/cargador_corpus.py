@@ -198,10 +198,43 @@ def aplicar_anotaciones(registros: List[dict], ruta=RUTA_ANOTACIONES) -> List[di
 
 
 def cargar(ruta) -> List[dict]:
-    """Lee el corpus de `ruta` y lo devuelve en el esquema del motor."""
+    """Lee el corpus de `ruta` y lo devuelve en el esquema del motor.
+
+    Todo registro sin el campo "norma" se toma como de la norma base (Ley 1801 de 2016), con
+    sus ids de siempre (art-140).
+    """
+    from indexing.normas import NORMA_BASE
+
     registros = json.loads(Path(ruta).read_text(encoding="utf-8"))
     if _es_formato_fase1(registros):
-        return aplicar_anotaciones(adaptar(registros))
-    ULTIMA_CARGA.clear()
-    ULTIMA_CARGA.update(registros_en_archivo=len(registros), formato="muestra", registros_cargados=len(registros))
-    return aplicar_anotaciones([dict(r) for r in registros])
+        salida = aplicar_anotaciones(adaptar(registros))
+    else:
+        ULTIMA_CARGA.clear()
+        ULTIMA_CARGA.update(registros_en_archivo=len(registros), formato="muestra", registros_cargados=len(registros))
+        salida = aplicar_anotaciones([dict(r) for r in registros])
+    for r in salida:
+        r["norma"] = r.get("norma") or NORMA_BASE
+    return salida
+
+
+def cargar_norma(ruta) -> List[dict]:
+    """Corpus de una norma adicional (lo produce corpus/pipeline/procesar_pdf.py).
+
+    Ya viene en el esquema del motor; aquí solo se pasan "pdf" y "pagina" a los campos de
+    trazabilidad que usa la API (archivo_fuente, pagina_inicio, paginas). No toca ULTIMA_CARGA.
+    """
+    return adaptar_norma(json.loads(Path(ruta).read_text(encoding="utf-8")))
+
+
+def adaptar_norma(registros: List[dict]) -> List[dict]:
+    """Registros de procesar_pdf() -> esquema del motor (pdf/pagina -> archivo_fuente/paginas)."""
+    salida = []
+    for r in registros:
+        a = dict(r)
+        if a.get("pdf") and not a.get("archivo_fuente"):
+            a["archivo_fuente"] = a["pdf"]
+        if a.get("pagina") and not a.get("paginas"):
+            a["pagina_inicio"] = a["pagina"]
+            a["paginas"] = [a["pagina"]]
+        salida.append(a)
+    return salida

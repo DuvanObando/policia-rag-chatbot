@@ -113,9 +113,51 @@ El motor corre en `http://localhost:8000`. Tu backend lo llama; el frontend solo
 - Si el puerto 8000 está ocupado, cambia el del motor y `MOTOR_URL`.
 - Pregúntame lo que no esté claro; pero primero revisa `docs/api_contract.md`.
 
-## Mensaje para enviar
+## Nuevo (16/11): subir una norma nueva y reprocesar el corpus
 
-> Santiago, el motor del chatbot ya está listo en `main` y funcionando (`/health`, `/query` y `/upload_pdf/`): puedes conectar tu backend y tu frontend al motor real desde hoy, no hace falta esperar al día 6.
-> Tu guía con fechas, el contrato y lo que debe mostrar el panel de fuentes está en `docs/guia-companeros/santiago-bulla.md` (lee primero el README de esa carpeta).
-> Ojo con tres cosas: **no muestres el score como porcentaje**, habilita el chat solo cuando `/health` diga `listo: true`, y limita las subidas a **10 MB** en el backend.
-> Saca tu clave gratis de Gemini en AI Studio y trabaja el repo fuera de OneDrive 🙏
+El motor ya puede **agregar una norma nueva** (por ejemplo la Ley 769 de 2002, Código Nacional de Tránsito) **sin reiniciarse y sin dejar de responder**. Desde la interfaz son **tres llamadas**. Contrato completo: [`docs/api_contract.md`](../api_contract.md), sección «Corpus: reprocesamiento»; flujo y tiempos: [`docs/reprocesamiento.md`](../reprocesamiento.md).
+
+### Las tres llamadas
+
+1. **Subir el PDF** (igual que hoy, más dos campos opcionales):
+   `POST /upload_pdf/` `multipart/form-data` con `file`, `norma` (`"Ley 769 de 2002"`: tipo, número y año) y `fuente_url` (URL oficial).
+   La respuesta trae **`id`**: guárdalo. Subir **no** cambia las consultas (RF4).
+2. **Lanzar el reprocesamiento** (solo un administrador):
+   `POST /corpus/reprocesar` con cuerpo JSON `{"id": "<id del paso 1>"}` (y `norma` si no se dio al subir) y la cabecera **`X-Admin-Token`**.
+   Respuesta **202** con `trabajo_id`.
+3. **Consultar el estado cada 3 a 5 s** hasta `listo` o `error`:
+   `GET /corpus/reprocesar/{trabajo_id}` → `estado` (`en_cola`, `extrayendo`, `indexando`, `listo`, `error`), `progreso` (0-100), `articulos_procesados`, `error`.
+   Muestra una barra con `progreso` y el estado en español. Al llegar a `listo`, refresca `/health` (cambia `normas`).
+
+`GET /corpus/documentos` lista las normas cargadas y los documentos subidos (con su estado): sirve para una pantalla de administración.
+
+### Códigos que debe manejar la interfaz
+
+| Código | Cuándo | Qué mostrar |
+|---|---|---|
+| 202 | Trabajo lanzado | Empezar a consultar el estado |
+| 401 | Falta el token o no es válido | «No tienes permiso de administrador» |
+| 404 | El `id` del documento o el `trabajo_id` no existe (los trabajos viven en memoria: si el motor se reinicia, se pierden) | «No se encontró el documento / trabajo» |
+| 409 | Ya hay un trabajo en curso (viene `trabajo_activo`) | «Ya hay un reprocesamiento en curso» y seguir ese trabajo |
+| 422 | Falta la norma, tiene mal formato o es la Ley 1801 | El mensaje `detail` del motor |
+| 503 | El motor no tiene `ADMIN_TOKEN` configurado | «El reprocesamiento no está habilitado» |
+
+### El token: nunca en el frontend
+
+- El token es el `ADMIN_TOKEN` del `.env` del motor. **No lo pongas en variables `VITE_*`**: todo lo que va en el frontend lo puede leer cualquiera en el navegador.
+- Lo correcto: el **backend** expone sus propias rutas (`POST /corpus/reprocesar`, `GET /corpus/reprocesar/:id`, `GET /corpus/documentos`) y **agrega la cabecera** `X-Admin-Token` leyendo `ADMIN_TOKEN` de su `.env`. El frontend nunca ve el token.
+- Como el backend agrega el token por su cuenta, protege esas rutas del backend: por ejemplo, que el usuario escriba una clave de administrador en la pantalla y el backend la compare con la suya antes de reenviar. Para la demo basta con que la ruta exista solo en el backend y no en la vista pública.
+
+### Cambios que necesita tu backend (hoy)
+
+- `models/motorModel.js` → `subirPdf` solo manda `file`: **reenvía también `norma` y `fuente_url`** si vienen.
+- `views/documentoView` quita el `id`: **devuélvelo**, el frontend lo necesita para el paso 2.
+- `views/estadoView` no pasa `normas`: **agrégalo** para mostrar qué normas están cargadas.
+- **Timeout:** `MOTOR_TIMEOUT_MS` es 30 s, y subir el PDF de la Ley 769 (56 páginas) tardó **63 s** en el motor (pypdf es lento con ese PDF). Sube el timeout de la ruta de subida a **120 s** (las demás pueden seguir en 30 s).
+- Los textos del frontend dicen «Código Nacional de Policía»: cuando haya más de una norma, usa la lista de `normas` de `/health`.
+- `fragmentos[].norma` y `citas[].norma` ahora existen: muéstralos en el panel de fuentes cuando la norma no sea la Ley 1801.
+
+## Mensaje para WhatsApp (16/11)
+
+> Santiago, ya está en `main` el reprocesamiento del corpus: se puede subir el PDF de una norma nueva (probé con la Ley 769, Código de Tránsito) y el motor la agrega sin reiniciarse. Para la interfaz son 3 llamadas: subir (`/upload_pdf/` con `norma`), lanzar (`POST /corpus/reprocesar` con el `id`) y consultar el estado cada 3-5 s hasta `listo`. Todo está en tu guía, sección «Nuevo (16/11)».
+> Dos cosas importantes: **el token de administrador lo agrega tu backend, nunca el frontend**, y sube el timeout de la subida a 120 s (el PDF de tránsito tardó 63 s). También hay que reenviar `norma` y `fuente_url` y devolver el `id` en la respuesta de subida 🙏

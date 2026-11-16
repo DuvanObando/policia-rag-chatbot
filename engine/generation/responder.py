@@ -23,9 +23,10 @@ from typing import List
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
 from generation.citas import existe_en_articulo, extraer_citas, texto_cita  # noqa: E402
 from generation.llm import ErrorLLM, estadisticas, generar  # noqa: E402
-from generation.prompt import FRASE_NO_ENCONTRADO, SISTEMA, construir_mensaje  # noqa: E402
+from generation.prompt import INICIO_NO_ENCONTRADO, construir_mensaje, sistema  # noqa: E402
+from indexing import normas as normas_mod  # noqa: E402
 from retrieval.clasificador import clasificar  # noqa: E402
-from retrieval.search import articulo_completo, buscar, id_articulo, precargar  # noqa: E402
+from retrieval.search import articulo_para_contexto, buscar, id_articulo, normas_cargadas, precargar  # noqa: E402
 
 ESTRATEGIA = "fragmentos"
 
@@ -38,7 +39,19 @@ PREGUNTAS_DEMO = [
 ]
 
 def numero_articulo(id_art: str) -> str:
-    return id_art.replace("art-", "")
+    """'art-140' -> '140'; 'ley769-art-131' -> '131'."""
+    return normas_mod.numero_de_id(id_art)
+
+
+def _norma_de_cita(cita: dict, textos: dict) -> tuple:
+    """Clave de norma de una cita. Si la cita no dice la norma: la única del contexto que tiene ese
+    número de artículo; si hay varias o ninguna, la Ley 1801 (norma base)."""
+    if cita["norma"]:
+        return cita["norma"]
+    candidatas = [k for (k, n) in textos if n == cita["articulo"]]
+    if len(candidatas) == 1:
+        return candidatas[0]
+    return normas_mod.clave(normas_mod.NORMA_BASE)
 
 
 def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> dict:
@@ -54,39 +67,56 @@ def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> d
         art = id_articulo(f["id"])
         if art not in vistos:
             vistos.add(art)
-            a = articulo_completo(f["id"], ESTRATEGIA)
+            a = articulo_para_contexto(f["id"], ESTRATEGIA)  # completo, o un extracto si es enorme
             articulos.append({**a, "numero": numero_articulo(a["id"])})
 
-    # 3. Prompt + LLM.
+    # 3. Prompt + LLM. El dominio son las normas cargadas en el índice vigente.
+    lista_normas = [n["norma"] for n in normas_cargadas(ESTRATEGIA)]
+    nombres = {normas_mod.clave(n): n for n in lista_normas}
     t1 = time.perf_counter()
-    llm = generar(SISTEMA, construir_mensaje(pregunta, articulos))
+    llm = generar(sistema(lista_normas), construir_mensaje(pregunta, articulos))
     respuesta = llm.texto
     t_llm = time.perf_counter() - t1
 
     # 4. Citas: solo se aceptan artículos que estaban en el contexto, y solo los
     #    numerales/parágrafos que existen en el texto de ese artículo.
-    textos = {a["numero"]: a["texto"] for a in articulos}
-    fuera_de_dominio = FRASE_NO_ENCONTRADO.rstrip(".").lower() in respuesta.lower()
+    # textos por (norma, número): con varias normas, el mismo número puede existir en más de una.
+    textos = {(normas_mod.clave(a.get("norma")), a["numero"]): a["texto"] for a in articulos}
+    menciona_no_encontrado = INICIO_NO_ENCONTRADO.lower() in respuesta.lower()
     citas, descartadas, inexistentes, articulos_ok = [], [], [], []
     for c in extraer_citas(respuesta):
-        if c["articulo"] not in textos:
-            descartadas.append(texto_cita(c))  # artículo que no estaba en el contexto
+        k = _norma_de_cita(c, textos)
+        es_base = k == normas_mod.clave(normas_mod.NORMA_BASE)
+        nombre = nombres.get(k) or (normas_mod.NORMA_BASE if es_base else normas_mod.corta(" ".join(k)))
+        legible = texto_cita(c, None if es_base else normas_mod.corta(nombre))
+        if (k, c["articulo"]) not in textos:
+            descartadas.append(legible)  # artículo (de esa norma) que no estaba en el contexto
             continue
-        if c["articulo"] not in articulos_ok:
-            articulos_ok.append(c["articulo"])
-        if not existe_en_articulo(c, textos[c["articulo"]]):
-            inexistentes.append(texto_cita(c))  # numeral o parágrafo que el artículo no tiene
+        etiqueta = f"Artículo {c['articulo']}" if es_base else f"{nombre}, Artículo {c['articulo']}"
+        if etiqueta not in articulos_ok:
+            articulos_ok.append(etiqueta)
+        if not existe_en_articulo(c, textos[(k, c["articulo"])]):
+            inexistentes.append(legible)  # numeral o parágrafo que el artículo no tiene
             continue
+        if any(x["texto"] == legible for x in citas):
+            continue  # la misma cita repetida en la respuesta
         citas.append({
             "articulo": f"Artículo {c['articulo']}",
             "numeral": c["numeral"],
             "paragrafo": c["paragrafo"],
-            "texto": texto_cita(c),
+            "texto": legible,
+            "norma": nombre,
         })
+
+    # Fuera de dominio si la respuesta EMPIEZA con la frase, o si la menciona y no trae ninguna cita
+    # válida. A veces el modelo responde bien (con citas) y agrega la frase al final para una parte
+    # de la pregunta que no está en el corpus: eso no es una respuesta fuera de dominio.
+    empieza = respuesta.lstrip(" *_#>\n").lower().startswith(INICIO_NO_ENCONTRADO.lower())
+    fuera_de_dominio = empieza or (menciona_no_encontrado and not citas)
 
     resultado = {
         "respuesta": respuesta,
-        "articulos_citados": [] if fuera_de_dominio else [f"Artículo {n}" for n in articulos_ok],
+        "articulos_citados": [] if fuera_de_dominio else articulos_ok,
         "fragmentos": fragmentos,
         "fuera_de_dominio": fuera_de_dominio,
         "citas": [] if fuera_de_dominio else citas,
