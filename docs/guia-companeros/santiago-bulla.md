@@ -153,11 +153,11 @@ El motor ya puede **agregar una norma nueva** (por ejemplo la Ley 769 de 2002, C
 - `models/motorModel.js` → `subirPdf` solo manda `file`: **reenvía también `norma` y `fuente_url`** si vienen.
 - `views/documentoView` quita el `id`: **devuélvelo**, el frontend lo necesita para el paso 2.
 - `views/estadoView` no pasa `normas`: **agrégalo** para mostrar qué normas están cargadas.
-- **Timeout:** `MOTOR_TIMEOUT_MS` es 30 s, y subir el PDF de la Ley 769 (56 páginas) tardó **63 s** en el motor (pypdf es lento con ese PDF). Sube el timeout de la ruta de subida a **120 s** (las demás pueden seguir en 30 s).
+- **Timeout:** `MOTOR_TIMEOUT_MS` es 30 s. Con PyMuPDF (ya está en `engine/requirements.txt`, así que lo trae la imagen de Docker) subir el PDF de la Ley 769 (56 páginas) tarda **0,4 s**, y 30 s alcanza. Sin PyMuPDF (un entorno viejo del motor) tardó 63 s: por prudencia, deja la ruta de subida con **60 s** y las demás en 30 s.
 - Los textos del frontend dicen «Código Nacional de Policía»: cuando haya más de una norma, usa la lista de `normas` de `/health`.
 - `fragmentos[].norma` y `citas[].norma` ahora existen: muéstralos en el panel de fuentes cuando la norma no sea la Ley 1801.
 
 ## Mensaje para WhatsApp (16/11)
 
 > Santiago, ya está en `main` el reprocesamiento del corpus: se puede subir el PDF de una norma nueva (probé con la Ley 769, Código de Tránsito) y el motor la agrega sin reiniciarse. Para la interfaz son 3 llamadas: subir (`/upload_pdf/` con `norma`), lanzar (`POST /corpus/reprocesar` con el `id`) y consultar el estado cada 3-5 s hasta `listo`. Todo está en tu guía, sección «Nuevo (16/11)».
-> Dos cosas importantes: **el token de administrador lo agrega tu backend, nunca el frontend**, y sube el timeout de la subida a 120 s (el PDF de tránsito tardó 63 s). También hay que reenviar `norma` y `fuente_url` y devolver el `id` en la respuesta de subida 🙏
+> Dos cosas importantes: *el token de administrador lo agrega tu backend, nunca el frontend*, y deja la subida con timeout de 60 s (con PyMuPDF el PDF de tránsito sube en 0,4 s). También hay que reenviar `norma` y `fuente_url` y devolver el `id` en la respuesta de subida 🙏

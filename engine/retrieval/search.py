@@ -334,6 +334,51 @@ def _puntajes_base(pregunta: str, estrategia: str, modo: str, version: Optional[
     return [(s, frs[i]) for i, s in base]
 
 
+def _pedidos_por_numero(pregunta: str, v: "Version") -> tuple:
+    """Artículos que la pregunta pide por número («artículo 131»), con varias normas cargadas.
+
+    Devuelve (pedidos, otras):
+      - pedidos: ids de artículo, en el orden en que se pidieron.
+      - otras: [{"numero", "norma", "otras": [...]}] cuando la pregunta NO nombra la norma y más de
+        una norma cargada tiene ese número: se usa la de mayor prioridad (NORMA_PRINCIPAL, por defecto
+        la Ley 1801 de 2016) y `otras` son las demás.
+    Si la pregunta nombra la norma («artículo 131 de la Ley 769», «del Código de Tránsito»), el número
+    es de esa norma. Si nombra una norma que no está cargada, no se prioriza ningún artículo.
+    """
+    numeros = articulos_mencionados(pregunta)
+    if not numeros:
+        return [], []
+    existentes = {id_articulo(f["id"]) for f in v.meta["fragmentos"]}
+    cargadas = {normas.clave(x["norma"]): x["norma"] for x in v.normas()}
+    menciones = normas.mencionadas(pregunta)
+    nombradas = [cargadas[c] for c in menciones if c in cargadas]
+    if menciones and not nombradas:
+        return [], []
+    orden = normas.por_prioridad(list(cargadas.values()))
+    pedidos, otras = [], []
+    for n in numeros:
+        if nombradas:
+            for norma in nombradas:
+                ida = normas.id_articulo(norma, n)
+                if ida in existentes and ida not in pedidos:
+                    pedidos.append(ida)
+            continue
+        con = [x for x in orden if normas.id_articulo(x, n) in existentes]
+        if con:
+            ida = normas.id_articulo(con[0], n)
+            if ida not in pedidos:
+                pedidos.append(ida)
+            if len(con) > 1:
+                otras.append({"numero": n, "norma": con[0], "otras": con[1:]})
+    return pedidos, otras
+
+
+def otras_normas_con_articulo(pregunta: str, estrategia: str = "fragmentos") -> List[dict]:
+    """Si la pregunta pide «artículo N» sin decir la norma y otras normas cargadas también tienen un
+    artículo N: [{"numero": "163", "norma": "Ley 1801 de 2016", "otras": ["Ley 769 de 2002"]}]."""
+    return _pedidos_por_numero(pregunta, _version(estrategia))[1]
+
+
 def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Optional[str] = None,
            clasificador: bool = True) -> List[dict]:
     """Devuelve los k fragmentos más relevantes, de mayor a menor score.
@@ -368,17 +413,11 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Option
         if empuje:
             candidatos = [(sc + empuje.get(f["tema"], 0.0), f) for sc, f in candidatos]
             candidatos.sort(key=lambda c: -c[0])
-        existentes = {id_articulo(f["id"]) for f in meta["fragmentos"]}
-        # "artículo 131 de la Ley 769": si la pregunta nombra una norma cargada, el número es de esa
-        # norma; si no nombra ninguna, es de la Ley 1801 (como siempre).
-        cargadas = {normas.clave(x["norma"]): x["norma"] for x in v.normas()}
-        nombradas = [cargadas[c] for c in normas.mencionadas(pregunta) if c in cargadas] or [normas.NORMA_BASE]
-        pedidos = []
-        for n in articulos_mencionados(pregunta):
-            for norma in nombradas:
-                ida = normas.id_articulo(norma, n)
-                if ida in existentes and ida not in pedidos:
-                    pedidos.append(ida)
+        pedidos, otras = _pedidos_por_numero(pregunta, v)
+        # Si la pregunta no dijo la norma, los artículos con ese mismo número de las demás normas no
+        # se mezclan en la respuesta: el responder solo avisa que existen (ver otras_normas_con_articulo).
+        excluir = {normas.id_articulo(o, x["numero"]) for x in otras for o in x["otras"]}
+        candidatos = [c for c in candidatos if id_articulo(c[1]["id"]) not in excluir]
 
     # Un solo fragmento por artículo: el de mayor score.
     mejores, vistos = [], set()

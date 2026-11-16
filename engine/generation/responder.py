@@ -26,7 +26,9 @@ from generation.llm import ErrorLLM, estadisticas, generar  # noqa: E402
 from generation.prompt import INICIO_NO_ENCONTRADO, construir_mensaje, sistema  # noqa: E402
 from indexing import normas as normas_mod  # noqa: E402
 from retrieval.clasificador import clasificar  # noqa: E402
-from retrieval.search import articulo_para_contexto, buscar, id_articulo, normas_cargadas, precargar  # noqa: E402
+from retrieval.search import (  # noqa: E402
+    articulo_para_contexto, buscar, id_articulo, normas_cargadas, otras_normas_con_articulo, precargar,
+)
 
 ESTRATEGIA = "fragmentos"
 
@@ -52,6 +54,21 @@ def _norma_de_cita(cita: dict, textos: dict) -> tuple:
     if len(candidatas) == 1:
         return candidatas[0]
     return normas_mod.clave(normas_mod.NORMA_BASE)
+
+
+def _nota_otras_normas(pregunta: str) -> str:
+    """Aviso para «artículo N» sin norma cuando otras normas cargadas también tienen ese número."""
+    partes = []
+    for x in otras_normas_con_articulo(pregunta, ESTRATEGIA):
+        otras = [normas_mod.corta(o) for o in x["otras"]]
+        lista = otras[0] if len(otras) == 1 else ", ".join(otras[:-1]) + " y " + otras[-1]
+        verbo = "también tiene" if len(otras) == 1 else "también tienen"
+        ejemplo = f"«artículo {x['numero']} de la {normas_mod.corta(x['otras'][0])}»"
+        partes.append(
+            f"No indicaste la norma del artículo {x['numero']}, así que respondí con la {x['norma']}. "
+            f"La {lista} {verbo} un artículo {x['numero']}; si te refieres a esa norma, pregunta {ejemplo}."
+        )
+    return ("\n\n" + " ".join(partes)) if partes else ""
 
 
 def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> dict:
@@ -114,8 +131,13 @@ def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> d
     empieza = respuesta.lstrip(" *_#>\n").lower().startswith(INICIO_NO_ENCONTRADO.lower())
     fuera_de_dominio = empieza or (menciona_no_encontrado and not citas)
 
+    # «Artículo N» sin decir la norma: se respondió con la de mayor prioridad (NORMA_PRINCIPAL, por
+    # defecto la Ley 1801) y se avisa, con un texto fijo (no del LLM), que otra norma cargada también
+    # tiene un artículo N. Va después de extraer las citas: no cuenta como cita.
+    nota = "" if fuera_de_dominio else _nota_otras_normas(pregunta)
+
     resultado = {
-        "respuesta": respuesta,
+        "respuesta": respuesta + nota,
         "articulos_citados": [] if fuera_de_dominio else articulos_ok,
         "fragmentos": fragmentos,
         "fuera_de_dominio": fuera_de_dominio,

@@ -132,6 +132,8 @@ El motor ya puede **agregar normas nuevas al corpus sin reconstruir todo** (por 
 
 3. Si el PDF no sirve (escaneado, vacío, sin artículos), lanza `ValueError` con un mensaje claro en español.
 
+Para leer el PDF puedes usar [`engine/indexing/pdf_texto.py`](../../engine/indexing/pdf_texto.py): `paginas(bytes)` devuelve el texto de cada página con PyMuPDF (la Ley 769 se lee en menos de 1 s) o, si no está instalado, con pypdf (más de 50 s). Si prefieres usar PyMuPDF directamente (`pymupdf`, con `page.get_text("blocks")` o `"dict"` para ver posiciones y tamaños de letra), ya está en `engine/requirements.txt`.
+
 El motor **comprueba** tu salida antes de tocar los índices (`validar_registros` en [`engine/indexing/reprocesar.py`](../../engine/indexing/reprocesar.py)): que estén las 10 claves, que `norma` coincida, que los ids tengan el prefijo correcto y que no se repitan. Si algo falla, el trabajo termina en `error` con el motivo y los índices quedan como estaban.
 
 **Qué hace el motor con tu salida:** guarda el JSON de la norma en `corpus/procesados/<norma>.json` (por ejemplo `ley_769_de_2002.json`) y lo agrega a los índices. **No toca `corpus_ley_1801.json`.** La Ley 1801 no pasa por aquí (es la norma base).
@@ -153,4 +155,4 @@ Imprime cuántos artículos encontró, el primero y el último. Después, para c
 
 ## Mensaje para WhatsApp (16/11)
 
-> Wilder, el motor ya acepta normas nuevas (probé con la Ley 769, Código de Tránsito). La pieza que te toca es `corpus/pipeline/procesar_pdf.py`: hoy tiene una versión básica que funciona; reemplaza el interior con tu limpieza y segmentación, **sin cambiar la firma ni las 10 claves de salida** (están en tu guía, sección «Nuevo (16/11)»). El ejemplo real quedó en `corpus/procesados/ley_769_de_2002.json`: le faltan los art. 3, 18 y 128 y el 131 sale en un solo bloque gigante. Avísame cuando lo tengas y lo probamos juntos 🙏
+> Wilder, el motor ya acepta normas nuevas (probé con la Ley 769, Código de Tránsito). La pieza que te toca es `corpus/pipeline/procesar_pdf.py`: hoy tiene una versión básica que funciona; reemplaza el interior con tu limpieza y segmentación, *sin cambiar la firma ni las 10 claves de salida* (están en tu guía, sección «Nuevo (16/11)»). El ejemplo real quedó en `corpus/procesados/ley_769_de_2002.json`: le faltan los art. 3, 18 y 128 y el 131 sale en un solo bloque gigante. Avísame cuando lo tengas y lo probamos juntos 🙏
