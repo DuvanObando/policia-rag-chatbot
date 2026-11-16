@@ -79,6 +79,15 @@ Formato (el mismo que el provisional):
 
 BM25 usa **stemming Snowball** (o spaCy donde carga), **no lematización**, y hay que explicar por qué: spaCy está bloqueado por Windows en el equipo del líder. El análisis lingüístico del informe es independiente de ese detalle: ahí sí debes usar lematización (spaCy o Stanza).
 
+## Nuevo (16/11): qué cambió en el motor y cómo te afecta
+
+El motor ya puede cargar **normas nuevas** a partir de un PDF (por ejemplo la Ley 769 de 2002, Código de Tránsito), sin reconstruir todo: [`docs/reprocesamiento.md`](../reprocesamiento.md). Para tu parte:
+
+- **`temas.json`:** los registros de la Ley 1801 traen un campo `tema` (el del corpus de Wilder); las normas nuevas que entran por `procesar_pdf.py` traen un tema genérico (`"texto fuente Ley 769 de 2002"`). Alinea `engine/retrieval/temas.json` con los valores reales de `tema` de la Ley 1801 (coordínalo con Wilder, que es dueño del campo).
+- **Glosario:** `engine/glossary/sinonimos.json` se sigue entregando por PR, con el formato de esta guía. La expansión solo actúa en los modos `hibrido` y `lexico` de BM25.
+- **`texto_bm25.py`:** al agregar una norma, el motor tokeniza con el método con que se construyó el índice (hoy Snowball), no con el que haya disponible. Si cambias el método de preparación del texto, hay que reconstruir todo desde cero: `python engine/indexing/build_index.py --todas`.
+- **Docker:** la imagen del motor instala spaCy; los índices del repo se construyeron con Snowball. Es consistente mientras no se reconstruyan dentro de Docker.
+
 ## Cómo entregar
 
 1. `git checkout main && git pull`, luego `git checkout -b feature/santiago-castro-linguistica`.
@@ -92,9 +101,10 @@ BM25 usa **stemming Snowball** (o spaCy donde carga), **no lematización**, y ha
 - No toques `engine/retrieval/` ni `engine/indexing/` sin avisar: son del motor. Para cambios allí, pídelos o hazlos en un PR aparte.
 - No subas el entorno virtual, los índices ni modelos descargados.
 
-## Mensaje para enviar
+## Mensaje para enviar (WhatsApp, 16/11)
 
-> Santiago, ya dejé el motor del chatbot listo en `main`. Lo urgente *hoy*: prueba que spaCy te cargue (en mi PC Windows lo bloqueó el control de aplicaciones). Si te falla usa *Stanza*, y por favor *NO desactives esa protección de Windows*: no se puede volver a activar sin reinstalar el sistema.
-> Tu guía con fechas y todo lo que dejé armado está en `docs/guia-companeros/santiago-castro.md` (lee primero el README de esa carpeta).
-> Después necesito tu *glosario real* para reemplazar el provisional (`engine/glossary/sinonimos.json`) hacia el martes 17.
-> Avísame hoy qué te funcionó y saca tu clave gratis de Gemini 🙏
+> Santiago, el motor ya está completo en `main`. Lo tuyo, con fecha límite *el miércoles 18 de noviembre* para tu PR a `main`:
+> 1) Subir tu glosario de 49 términos a `engine/glossary/sinonimos.json` (formato en tu guía).
+> 2) Alinear `engine/retrieval/temas.json` con el campo `tema` del corpus real; coordínalo con Wilder.
+> 3) Tu parte del informe técnico (sección «Análisis lingüístico»), a más tardar el jueves 19.
+> Lo que cambió en el motor y te toca a ti está en tu guía, sección «Nuevo (16/11)». Rama y PR (`main` está protegida), y avísame al subirlo para reconstruir los índices y repetir las comparaciones 🙏

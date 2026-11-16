@@ -87,7 +87,7 @@ Para que el chatbot cite con precisión (p. ej. «Art. 180, par.»), el corpus d
 Formato (de `eval/ejemplo_formato.json`): `pregunta`, `respuesta_referencia`, `articulos_esperados` (lista) y `fuera_de_dominio` (true/false). Puedes agregar un campo `tipo` para poder analizar por categoría. Incluye:
 
 - Las **10 preguntas de ejemplo del enunciado**, ampliadas hasta 50 o más.
-- **Preguntas trampa fuera de dominio** (tránsito, impuestos, trámites de otras entidades…) en cantidad suficiente, **al menos 15** (cerca de un tercio). El motor no usa un umbral numérico de relevancia: la decisión «no está en el Código» la toma el modelo con el prompt, y estas preguntas sirven para medirla en el modo **híbrido** (que siempre trae resultados, aunque no tengan nada que ver) y decidir si hace falta algo más.
+- **Preguntas trampa fuera de dominio** (impuestos, trámites de otras entidades, laboral, penal, salud… **no solo de tránsito**: desde el 16/11 el motor puede cargar la Ley 769 y esas preguntas dejarían de ser trampa si esa norma estuviera cargada) en cantidad suficiente, **al menos 15** (cerca de un tercio). El motor no usa un umbral numérico de relevancia: la decisión «no está en el Código» la toma el modelo con el prompt, y estas preguntas sirven para medirla en el modo **híbrido** (que siempre trae resultados, aunque no tengan nada que ver) y decidir si hace falta algo más.
 - **Preguntas que piden un artículo por número** («¿Qué dice el artículo 163?»).
 - **Preguntas ambiguas entre dos temas** (p. ej. un perro suelto en el parque: animales y espacio público).
 - **Preguntas muy coloquiales** (jerga: «guaro», «boleta», «tombos»…).
@@ -153,6 +153,10 @@ Imprime cuántos artículos encontró, el primero y el último. Después, para c
 - Trae las notas de la Función Pública pegadas al texto («Modificado por el art. 21, Ley 1383 de 2010...»); con ellas puedes marcar la vigencia en vez de dejarla `no_verificada`.
 - Título y capítulo salen de los encabezados en mayúsculas; el libro no.
 
-## Mensaje para WhatsApp (16/11)
+## Mensaje para enviar (WhatsApp, 16/11)
 
-> Wilder, el motor ya acepta normas nuevas (probé con la Ley 769, Código de Tránsito). La pieza que te toca es `corpus/pipeline/procesar_pdf.py`: hoy tiene una versión básica que funciona; reemplaza el interior con tu limpieza y segmentación, *sin cambiar la firma ni las 10 claves de salida* (están en tu guía, sección «Nuevo (16/11)»). El ejemplo real quedó en `corpus/procesados/ley_769_de_2002.json`: le faltan los art. 3, 18 y 128 y el 131 sale en un solo bloque gigante. Avísame cuando lo tengas y lo probamos juntos 🙏
+> Wilder, el motor ya está completo en `main` y ahora puede cargar normas nuevas (probé con la Ley 769). Lo que te queda, con fecha límite *el miércoles 18 de noviembre* para subir tu PR a `main`:
+> 1) Mejorar `corpus/pipeline/procesar_pdf.py` sin cambiar la firma ni las 10 claves de salida: a la Ley 769 le faltan los art. 3, 18 y 128 y el 131 sale en un solo bloque.
+> 2) Completar `corpus/anotaciones_vigencia.json` y darme la *fecha de consulta* del corpus para `corpus/README_corpus.md`.
+> 3) Pasar el banco de preguntas a `eval/banco_preguntas.json` con el formato de `eval/ejemplo_formato.json`: trampas variadas (no solo de tránsito, porque el motor ya puede cargar la Ley 769), coloquiales, ambiguas y por número de artículo.
+> Todo está en tu guía, sección «Nuevo (16/11)». Rama y PR, que `main` está protegida 🙏
