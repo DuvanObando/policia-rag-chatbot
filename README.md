@@ -109,6 +109,8 @@ python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads
 
 Repite `--incluir-uploads` en cada reconstrucción o los documentos salen del índice.
 
+**Normas nuevas (reprocesamiento):** si el PDF es otra norma (p. ej. la Ley 769 de 2002), se sube con el campo `norma` y un administrador lanza `POST /corpus/reprocesar` (cabecera `X-Admin-Token` con el `ADMIN_TOKEN` del `.env`). El motor la agrega a los índices de forma incremental, sin reiniciarse y sin dejar de responder. Flujo, tiempos medidos y comandos en [docs/reprocesamiento.md](docs/reprocesamiento.md).
+
 **Privacidad (Ley 1581 de 2012):** el motor no registra en logs el texto de las preguntas, las respuestas ni los documentos.
 
 **Limitaciones conocidas**

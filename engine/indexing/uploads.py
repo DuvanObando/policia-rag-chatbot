@@ -2,13 +2,18 @@
 
 Flujo de dos pasos (RF4): la API solo GUARDA el documento y lo registra como
 "pendiente_de_indexar". NO genera embeddings ni toca los índices. El documento entra
-al buscador cuando alguien reconstruye el índice a mano:
+al buscador en un segundo paso, que alguien lanza a propósito:
+  - si se subió con "norma" (p. ej. "Ley 769 de 2002"): POST /corpus/reprocesar (con token de
+    administrador) lo convierte en artículos de esa norma y los agrega a los índices; queda
+    en estado "procesado" (ver engine/indexing/reprocesar.py y docs/reprocesamiento.md);
+  - si es un documento complementario sin norma: reconstruyendo el índice a mano con
     python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads
 
 Archivos (carpeta corpus/uploads/, ignorada por git):
     <nombre>_<fecha-hora>.pdf     el PDF original
     <nombre>_<fecha-hora>.txt     el texto extraído
     pendientes.json               registro: id, nombre, texto, fecha, paginas, caracteres, estado
+                                  y, si se indicaron, norma y fuente_url
 
 PRIVACIDAD: no registres en logs el nombre ni el contenido de los documentos.
 """
@@ -29,6 +34,7 @@ REGISTRO = CARPETA_UPLOADS / "pendientes.json"
 MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 ESTADO_PENDIENTE = "pendiente_de_indexar"
 ESTADO_INDEXADO = "indexado"
+ESTADO_PROCESADO = "procesado"   # incorporado como norma con POST /corpus/reprocesar
 
 _candado = threading.Lock()  # protege el registro cuando llegan varias subidas a la vez
 
@@ -82,13 +88,21 @@ def _escribir_registro(registro: List[dict]) -> None:
     os.replace(temporal, REGISTRO)  # escritura atómica
 
 
-def guardar(contenido: bytes, nombre_original: str) -> dict:
+def guardar(contenido: bytes, nombre_original: str, norma: str = None, fuente_url: str = None) -> dict:
     """Valida, guarda PDF y texto, y registra el documento como pendiente de indexar.
 
     No escribe nada en disco si el PDF no es válido. Devuelve la entrada del registro.
+    `norma` y `fuente_url` (opcionales) se guardan para el reprocesamiento.
     """
-    if not contenido.startswith(b"%PDF"):
-        raise PDFInvalido("El archivo no es un PDF válido (no empieza con la cabecera %PDF).")
+    # La norma PDF admite la cabecera en los primeros 1024 bytes (p. ej. la Función Pública
+    # entrega PDF con un salto de línea antes de "%PDF").
+    inicio = contenido.find(b"%PDF-", 0, 1024)
+    if inicio < 0:
+        raise PDFInvalido("El archivo no es un PDF válido (no tiene la cabecera %PDF).")
+    # Se guarda desde la cabecera (los bytes de más al inicio corren las posiciones internas del PDF).
+    # Ojo: algunos PDF oficiales son lentos de leer con pypdf (la Ley 769 de la Función Pública, 56
+    # páginas: ~60 s). PyMuPDF (ya en requirements.txt) es mucho más rápido; ver docs/reprocesamiento.md.
+    contenido = contenido[inicio:]
     paginas, texto = extraer_texto(contenido)
 
     CARPETA_UPLOADS.mkdir(parents=True, exist_ok=True)
@@ -117,6 +131,10 @@ def guardar(contenido: bytes, nombre_original: str) -> dict:
             "caracteres": len(texto),
             "estado": ESTADO_PENDIENTE,
         }
+        if norma:
+            entrada["norma"] = norma
+        if fuente_url:
+            entrada["fuente_url"] = fuente_url
         registro = leer_registro()
         registro.append(entrada)
         _escribir_registro(registro)
@@ -130,7 +148,8 @@ def documentos_para_indexar() -> List[dict]:
     no los pierda.
     """
     return [d for d in leer_registro()
-            if d["estado"] in (ESTADO_PENDIENTE, ESTADO_INDEXADO) and (CARPETA_UPLOADS / d["texto"]).exists()]
+            if d["estado"] in (ESTADO_PENDIENTE, ESTADO_INDEXADO) and not d.get("norma")
+            and (CARPETA_UPLOADS / d["texto"]).exists()]  # los que traen norma van por /corpus/reprocesar
 
 
 def marcar_indexados(ids: List[str]) -> int:
@@ -146,3 +165,14 @@ def marcar_indexados(ids: List[str]) -> int:
         if cambiados:
             _escribir_registro(registro)
     return cambiados
+
+
+def marcar_procesado(id_doc: str, norma: str, articulos: int) -> None:
+    """El documento ya se incorporó a los índices como la norma `norma` (POST /corpus/reprocesar)."""
+    with _candado:
+        registro = leer_registro()
+        for d in registro:
+            if d["id"] == id_doc:
+                d.update(estado=ESTADO_PROCESADO, norma=norma, articulos=articulos,
+                         fecha_procesado=datetime.now().isoformat(timespec="seconds"))
+        _escribir_registro(registro)

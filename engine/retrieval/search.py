@@ -10,12 +10,18 @@ Uso por línea de comandos (desde la raíz del repo):
 
 El modelo y el índice se cargan UNA sola vez por proceso (en la primera llamada,
 o antes con precargar()) y se reutilizan en las llamadas siguientes.
+
+VERSIONES DEL ÍNDICE (reprocesamiento del corpus): el índice de cada estrategia vive en memoria
+como una «versión» (FAISS + metadatos + tokens BM25 + artículos completos) que se reemplaza ENTERA
+y de una sola vez con instalar_version() cuando termina un reprocesamiento. Cada búsqueda toma una
+sola versión al empezar y la usa hasta el final, así nunca mezcla datos viejos y nuevos.
 """
 import argparse
 import json
 import os
 import re
 import sys
+import threading
 import time
 from functools import lru_cache
 from pathlib import Path
@@ -27,7 +33,8 @@ from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
-from indexing.embeddings import PREGUNTAS_DEMO, cargar_corpus, cargar_modelo, embeddings_preguntas  # noqa: E402
+from indexing import normas  # noqa: E402
+from indexing.embeddings import PREGUNTAS_DEMO, cargar_corpus_completo, cargar_modelo, embeddings_preguntas  # noqa: E402
 from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
 from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
 from retrieval.clasificador import articulos_mencionados, clasificar, empujes  # noqa: E402
@@ -67,55 +74,133 @@ def _modelo():
     return cargar_modelo()
 
 
-@lru_cache(maxsize=None)
-def _indice(estrategia: str):
-    """Carga (una sola vez por estrategia) el índice FAISS y sus metadatos."""
-    carpeta = CARPETA_INDICES / estrategia
+class Version:
+    """Una versión completa del índice de una estrategia. Inmutable una vez creada."""
+
+    def __init__(self, indice, meta: dict, datos_bm25: Optional[dict], articulos: Optional[dict] = None):
+        self.indice = indice
+        self.meta = meta
+        self.datos_bm25 = datos_bm25          # {"metodo", "descripcion_metodo", "k1", "b", "tokens"} o None
+        self._bm25 = None
+        self._candado = threading.Lock()
+        # Artículos completos (small-to-big): corpus base + normas adicionales de ESTA versión.
+        # El reprocesamiento los pasa ya armados (`articulos`), para no leer archivos que aún no confirmó.
+        self.articulos = articulos if articulos is not None else {
+            a["id"]: a for a in cargar_corpus_completo(Path(meta["corpus"]), meta.get("corpus_adicionales", []))}
+
+    def bm25(self):
+        """(BM25Okapi, método de preparación del texto); se arma la primera vez que se pide."""
+        if self._bm25 is None:
+            if self.datos_bm25 is None:
+                raise FileNotFoundError(
+                    f"No existe el índice BM25 de '{self.meta.get('estrategia')}'. Reconstruye el índice: "
+                    f"python engine/indexing/build_index.py --estrategia {self.meta.get('estrategia')}"
+                )
+            with self._candado:
+                if self._bm25 is None:
+                    d = self.datos_bm25
+                    self._bm25 = (BM25Okapi(d["tokens"], k1=d["k1"], b=d["b"]), d["metodo"])
+        return self._bm25
+
+    def normas(self) -> List[dict]:
+        """[{"norma": "Ley 1801 de 2016", "articulos": 249}, ...] (la base primero)."""
+        conteo = {}
+        for a in self.articulos.values():
+            n = a.get("norma") or normas.NORMA_BASE
+            conteo[n] = conteo.get(n, 0) + 1
+        return [{"norma": n, "articulos": conteo[n]} for n in normas.ordenar(list(conteo))]
+
+
+_VERSIONES = {}                  # estrategia -> Version vigente
+_CANDADO_VERSIONES = threading.Lock()
+
+
+def leer_version(carpeta: Path) -> Version:
+    """Lee de disco una versión del índice (index.faiss, metadatos.json y bm25_tokens.json)."""
     if not (carpeta / "index.faiss").exists():
         raise FileNotFoundError(
-            f"No existe el índice '{estrategia}'. Constrúyelo con: "
-            f"python engine/indexing/build_index.py --estrategia {estrategia}"
+            f"No existe el índice '{carpeta.name}'. Constrúyelo con: "
+            f"python engine/indexing/build_index.py --estrategia {carpeta.name}"
         )
     datos = (carpeta / "index.faiss").read_bytes()  # lectura con Python: evita fallos con tildes en la ruta
     indice = faiss.deserialize_index(np.frombuffer(datos, dtype="uint8"))
     meta = json.loads((carpeta / "metadatos.json").read_text(encoding="utf-8"))
-    return indice, meta
+    ruta_bm25 = carpeta / "bm25_tokens.json"
+    datos_bm25 = json.loads(ruta_bm25.read_text(encoding="utf-8")) if ruta_bm25.exists() else None
+    return Version(indice, meta, datos_bm25)
+
+
+def _version(estrategia: str) -> Version:
+    """Versión vigente del índice de esa estrategia (la carga de disco la primera vez)."""
+    v = _VERSIONES.get(estrategia)
+    if v is None:
+        with _CANDADO_VERSIONES:
+            v = _VERSIONES.get(estrategia)
+            if v is None:
+                v = leer_version(CARPETA_INDICES / estrategia)
+                _VERSIONES[estrategia] = v
+    return v
+
+
+def instalar_version(estrategia: str, version: Version) -> None:
+    """Cambia a `version` de forma atómica: las búsquedas que empiecen después ya la usan."""
+    if version.datos_bm25 is not None and modo_por_defecto() in ("lexico", "hibrido"):
+        version.bm25()  # se prepara antes del cambio, para que la primera búsqueda no lo pague
+    with _CANDADO_VERSIONES:
+        _VERSIONES[estrategia] = version
+
+
+def recargar(estrategia: str) -> None:
+    """Vuelve a leer de disco el índice de esa estrategia y lo instala."""
+    instalar_version(estrategia, leer_version(CARPETA_INDICES / estrategia))
+
+
+def _indice(estrategia: str):
+    """(índice FAISS, metadatos) de la versión vigente."""
+    v = _version(estrategia)
+    return v.indice, v.meta
 
 
 def precargar(estrategia: str = "articulo") -> None:
     """Carga modelo e índice por adelantado (p. ej. al arrancar la API)."""
     _modelo()
-    _indice(estrategia)
+    _version(estrategia)
 
 
 def info_indice(estrategia: str = "articulo") -> dict:
-    """Datos del índice cargado: estrategia, modelo de embeddings y número de fragmentos."""
-    indice, meta = _indice(estrategia)
-    return {"estrategia": estrategia, "modelo": meta["modelo"], "fragmentos": int(indice.ntotal),
-            "corpus": meta.get("corpus"), "carga_corpus": meta.get("carga_corpus")}
+    """Datos del índice cargado: estrategia, modelo, número de fragmentos y normas."""
+    v = _version(estrategia)
+    return {"estrategia": estrategia, "modelo": v.meta["modelo"], "fragmentos": int(v.indice.ntotal),
+            "corpus": v.meta.get("corpus"), "carga_corpus": v.meta.get("carga_corpus"),
+            "corpus_adicionales": v.meta.get("corpus_adicionales", []),
+            "normas_adicionales": v.meta.get("normas_adicionales", []), "normas": v.normas()}
 
 
-@lru_cache(maxsize=None)
+def normas_cargadas(estrategia: str = "fragmentos") -> List[dict]:
+    """Normas que tiene el índice vigente, con su número de artículos."""
+    return _version(estrategia).normas()
+
+
 def _articulos_del_corpus(estrategia: str) -> dict:
-    """Artículos completos del corpus con que se construyó el índice, por id (se carga una vez)."""
-    ruta = Path(_indice(estrategia)[1]["corpus"])
-    return {a["id"]: a for a in cargar_corpus(ruta)}  # mismo cargador que el índice
+    """Artículos completos (corpus base + normas adicionales) de la versión vigente, por id."""
+    return _version(estrategia).articulos
 
 
-def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict:
+def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos", version: Optional[Version] = None) -> dict:
     """Artículo completo al que pertenece un fragmento (para small-to-big).
 
-    Devuelve id, ubicacion (cadena), epigrafe, texto, vigencia y tema del artículo.
+    Devuelve id, norma, ubicacion (cadena), epigrafe, texto, vigencia y tema del artículo.
     """
-    a = _articulos_del_corpus(estrategia).get(id_articulo(id_fragmento))
+    v = version or _version(estrategia)
+    a = v.articulos.get(id_articulo(id_fragmento))
     if a is None:
         # Documento complementario (subido por /upload_pdf/): no está en el corpus,
         # así que se usa el propio fragmento como contexto.
-        _, meta = _indice(estrategia)
-        a = next(f for f in meta["fragmentos"] if f["id"] == id_fragmento)
+        a = next(f for f in v.meta["fragmentos"] if f["id"] == id_fragmento)
         a = {**a, "id": id_articulo(a["id"])}
     return {
         "id": a["id"],
+        "norma": a.get("norma") or normas.NORMA_BASE,
         "ubicacion": formatear_ubicacion(a["ubicacion"]),
         "epigrafe": a["epigrafe"],
         "texto": a["texto"],
@@ -129,6 +214,34 @@ def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos") -> dict
         "ubicaciones_fuente": a.get("ubicaciones_fuente"),
         "fuentes": a.get("fuentes"),
     }
+
+
+MAX_CARACTERES_CONTEXTO = 12000  # el artículo más largo de la Ley 1801 tiene ~9.000; la Ley 769 tiene uno de 28.000
+
+
+def articulo_para_contexto(id_fragmento: str, estrategia: str = "fragmentos", version: Optional[Version] = None,
+                           max_caracteres: int = MAX_CARACTERES_CONTEXTO) -> dict:
+    """Small-to-big con tope: el artículo completo, salvo que sea enorme.
+
+    Si el artículo pasa de `max_caracteres` (p. ej. el art. 131 de la Ley 769, con todas las multas),
+    se manda al modelo solo el trozo encontrado y sus vecinos, avisando que es un extracto. Así el
+    prompt no se dispara de tamaño (los planes gratuitos limitan los tokens por minuto).
+    """
+    v = version or _version(estrategia)
+    a = articulo_completo(id_fragmento, estrategia, v)
+    if len(a["texto"]) <= max_caracteres:
+        return a
+    m = re.search(r"-f(\d+)$", id_fragmento)
+    if m:
+        n, base = int(m.group(1)), id_articulo(id_fragmento)
+        por_id = {f["id"]: f["texto"] for f in v.meta["fragmentos"] if id_articulo(f["id"]) == base}
+        trozos = [por_id[f"{base}-f{i}"] for i in (n - 1, n, n + 1) if f"{base}-f{i}" in por_id]
+        texto = "\n[...]\n".join(trozos)
+    else:
+        texto = a["texto"][:max_caracteres]
+    aviso = ("[EXTRACTO: este artículo es muy largo; aquí van solo los trozos más relevantes para la pregunta. "
+             "Si la respuesta necesita otra parte del artículo, dilo.]\n")
+    return {**a, "texto": aviso + texto[:max_caracteres]}
 
 
 def _parte(texto: Optional[str]) -> Optional[str]:
@@ -156,17 +269,9 @@ def formatear_ubicacion(ub: dict) -> str:
     return ", ".join(partes)
 
 
-@lru_cache(maxsize=None)
 def _bm25(estrategia: str):
-    """(BM25Okapi, método de preparación del texto) del índice, cargado una sola vez."""
-    ruta = CARPETA_INDICES / estrategia / "bm25_tokens.json"
-    if not ruta.exists():
-        raise FileNotFoundError(
-            f"No existe el índice BM25 de '{estrategia}'. Reconstruye el índice: "
-            f"python engine/indexing/build_index.py --estrategia {estrategia}"
-        )
-    datos = json.loads(ruta.read_text(encoding="utf-8"))
-    return BM25Okapi(datos["tokens"], k1=datos["k1"], b=datos["b"]), datos["metodo"]
+    """(BM25Okapi, método de preparación del texto) de la versión vigente."""
+    return _version(estrategia).bm25()
 
 
 def verificar_bm25(estrategia: str) -> Optional[str]:
@@ -197,9 +302,10 @@ def precargar_busqueda(estrategia: str, modo: Optional[str] = None) -> None:
         _bm25(estrategia)
 
 
-def _puntajes_base(pregunta: str, estrategia: str, modo: str) -> list:
+def _puntajes_base(pregunta: str, estrategia: str, modo: str, version: Optional[Version] = None) -> list:
     """[(score, fragmento)] de mayor a menor, según el modo y SIN clasificador."""
-    indice, meta = _indice(estrategia)
+    v = version or _version(estrategia)
+    indice, meta = v.indice, v.meta
     frs = meta["fragmentos"]
 
     sem, lex = [], []
@@ -208,7 +314,7 @@ def _puntajes_base(pregunta: str, estrategia: str, modo: str) -> list:
         sc, ps = indice.search(consulta, min(POOL_MAX, indice.ntotal))
         sem = [(int(p), float(s)) for s, p in zip(sc[0], ps[0])]
     if modo in ("lexico", "hibrido"):
-        bm25, metodo = _bm25(estrategia)
+        bm25, metodo = v.bm25()
         # La expansión con glosario (BUSQUEDA_EXPANSION) se aplica SOLO a esta consulta léxica.
         pesos = bm25.get_scores(tokens_consulta_lexica(pregunta, metodo))
         orden = np.argsort(-pesos, kind="stable")[:POOL_MAX]
@@ -252,8 +358,9 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Option
     modo = modo or modo_por_defecto()
     if modo not in MODOS:
         raise ValueError(f"Modo no soportado: {modo!r}. Disponibles: {list(MODOS)}")
-    _, meta = _indice(estrategia)
-    candidatos = _puntajes_base(pregunta, estrategia, modo)
+    v = _version(estrategia)  # una sola versión durante toda la búsqueda
+    meta = v.meta
+    candidatos = _puntajes_base(pregunta, estrategia, modo, v)
 
     pedidos = []
     if clasificador:
@@ -262,7 +369,16 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Option
             candidatos = [(sc + empuje.get(f["tema"], 0.0), f) for sc, f in candidatos]
             candidatos.sort(key=lambda c: -c[0])
         existentes = {id_articulo(f["id"]) for f in meta["fragmentos"]}
-        pedidos = [f"art-{n}" for n in articulos_mencionados(pregunta) if f"art-{n}" in existentes]
+        # "artículo 131 de la Ley 769": si la pregunta nombra una norma cargada, el número es de esa
+        # norma; si no nombra ninguna, es de la Ley 1801 (como siempre).
+        cargadas = {normas.clave(x["norma"]): x["norma"] for x in v.normas()}
+        nombradas = [cargadas[c] for c in normas.mencionadas(pregunta) if c in cargadas] or [normas.NORMA_BASE]
+        pedidos = []
+        for n in articulos_mencionados(pregunta):
+            for norma in nombradas:
+                ida = normas.id_articulo(norma, n)
+                if ida in existentes and ida not in pedidos:
+                    pedidos.append(ida)
 
     # Un solo fragmento por artículo: el de mayor score.
     mejores, vistos = [], set()
@@ -289,6 +405,7 @@ def buscar(pregunta: str, k: int = 3, estrategia: str = "articulo", modo: Option
             "epigrafe": f["epigrafe"],
             "texto": f["texto"],
             "score": float(score),
+            "norma": f.get("norma") or normas.NORMA_BASE,
             "vigencia": f["vigencia"],
             "tema": f["tema"],
             "fuente": f.get("fuente"),

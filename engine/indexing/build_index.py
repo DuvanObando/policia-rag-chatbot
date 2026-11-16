@@ -3,6 +3,13 @@
 Uso (desde la raíz del repo):
     python engine/indexing/build_index.py [--corpus RUTA] [--estrategia articulo|fragmentos]
                                           [--tamano 250] [--solape 50] [--incluir-uploads]
+                                          [--adicional RUTA ...] [--sin-adicionales]
+    python engine/indexing/build_index.py --todas      # RECONSTRUIR TODO desde cero (las 2 estrategias)
+
+Normas adicionales (Ley 769, ...): el índice guarda en sus metadatos («corpus_adicionales») los
+JSON de las normas que se le agregaron con el reprocesamiento (engine/indexing/reprocesar.py).
+Al reconstruir, se vuelven a incluir esas mismas normas, salvo que se pase --sin-adicionales
+(solo la Ley 1801) o se elijan otras con --adicional.
 
 Guarda en engine/indexing/indexes/<estrategia>/:
   - index.faiss     índice FAISS IndexFlatIP con los vectores normalizados
@@ -42,9 +49,11 @@ from indexing.cargador_corpus import ULTIMA_CARGA  # noqa: E402
 from indexing.embeddings import (  # noqa: E402
     CORPUS_POR_DEFECTO,
     MODELO,
-    cargar_corpus,
+    cargar_corpus_completo,
     cargar_modelo,
     embeddings_articulos,
+    ruta_absoluta,
+    ruta_relativa,
     texto_articulo,
 )
 
@@ -65,6 +74,8 @@ CAMPOS = (
     "fuentes",
     "ubicacion_texto",
     "titulo_nombre",
+    "norma",
+    "fuente_url",
 )
 TAMANO_POR_DEFECTO = 250
 SOLAPE_POR_DEFECTO = 50
@@ -142,14 +153,31 @@ def guardar_indice(indice, ruta: Path) -> None:
     ruta.write_bytes(faiss.serialize_index(indice).tobytes())
 
 
+def adicionales_actuales(estrategia: str) -> list:
+    """JSON de normas adicionales que tiene hoy el índice de esa estrategia (rutas relativas)."""
+    ruta = CARPETA_INDICES / estrategia / "metadatos.json"
+    if not ruta.exists():
+        return []
+    return json.loads(ruta.read_text(encoding="utf-8")).get("corpus_adicionales", [])
+
+
 def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
               tamano: int = TAMANO_POR_DEFECTO, solape: int = SOLAPE_POR_DEFECTO,
-              incluir_uploads: bool = False) -> Path:
+              incluir_uploads: bool = False, adicionales=None, modelo=None) -> Path:
+    """Construye DESDE CERO el índice de una estrategia. `adicionales`: JSON de otras normas;
+    None = las que ya tiene el índice actual (para no perderlas al reconstruir)."""
     if estrategia not in ESTRATEGIAS:
         raise ValueError(f"Estrategia desconocida: {estrategia!r}. Disponibles: {list(ESTRATEGIAS)}")
+    if adicionales is None:
+        adicionales = adicionales_actuales(estrategia)
+    adicionales = [ruta_relativa(ruta_absoluta(a)) for a in adicionales]
+    faltan = [a for a in adicionales if not ruta_absoluta(a).exists()]
+    if faltan:
+        raise FileNotFoundError(f"No existen estos JSON de normas adicionales: {faltan}")
 
-    modelo = cargar_modelo()
-    fragmentos = ESTRATEGIAS[estrategia](cargar_corpus(corpus), modelo, tamano=tamano, solape=solape)
+    modelo = modelo or cargar_modelo()
+    articulos = cargar_corpus_completo(corpus, adicionales)
+    fragmentos = ESTRATEGIAS[estrategia](articulos, modelo, tamano=tamano, solape=solape)
     documentos = uploads.documentos_para_indexar() if incluir_uploads else []
     if documentos:
         fragmentos = list(fragmentos) + fragmentos_de_documentos(documentos, modelo, tamano, solape)
@@ -177,6 +205,7 @@ def construir(corpus=CORPUS_POR_DEFECTO, estrategia: str = "articulo",
         "parametros": {"tamano": tamano, "solape": solape} if estrategia == "fragmentos" else {},
         "fecha_construccion": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "corpus": str(corpus),
+        "corpus_adicionales": adicionales,
         "carga_corpus": dict(ULTIMA_CARGA),
         "dimension": int(vectores.shape[1]),
         "documentos_incluidos": [d["id"] for d in documentos],
@@ -201,17 +230,30 @@ def main() -> None:
     ap.add_argument("--solape", type=int, default=SOLAPE_POR_DEFECTO, help="tokens de solapamiento (estrategia fragmentos)")
     ap.add_argument("--incluir-uploads", action="store_true",
                     help="incluye los documentos subidos por /upload_pdf/ (por defecto NO se incluyen)")
+    ap.add_argument("--todas", action="store_true",
+                    help="reconstruye las dos estrategias (articulo y fragmentos) desde cero")
+    ap.add_argument("--adicional", action="append", default=None, metavar="RUTA",
+                    help="JSON de una norma adicional (se puede repetir); por defecto, las que ya tiene el índice")
+    ap.add_argument("--sin-adicionales", action="store_true",
+                    help="solo la Ley 1801: deja fuera las normas adicionales")
     args = ap.parse_args()
-    destino = construir(args.corpus, args.estrategia, args.tamano, args.solape, args.incluir_uploads)
-    meta = json.loads((destino / "metadatos.json").read_text(encoding="utf-8"))
-    print(f"Índice '{args.estrategia}' construido en {destino}")
-    print(f"  fragmentos: {meta['n_fragmentos']} | dimensión: {meta['dimension']} | modelo: {meta['modelo']}")
-    if meta["parametros"]:
-        print(f"  parámetros: {meta['parametros']}")
-    print(f"  BM25: {meta['bm25']['descripcion']}")
-    print(f"  corpus: {meta['corpus']} | carga: {meta['carga_corpus']}")
-    if args.incluir_uploads:
-        print(f"  documentos subidos incluidos: {len(meta['documentos_incluidos'])}")
+    adicionales = [] if args.sin_adicionales else args.adicional
+    estrategias = list(ESTRATEGIAS) if args.todas else [args.estrategia]
+    modelo = cargar_modelo()
+    for estrategia in estrategias:
+        destino = construir(args.corpus, estrategia, args.tamano, args.solape, args.incluir_uploads,
+                            adicionales=adicionales, modelo=modelo)
+        meta = json.loads((destino / "metadatos.json").read_text(encoding="utf-8"))
+        print(f"Índice '{estrategia}' construido en {destino}")
+        print(f"  fragmentos: {meta['n_fragmentos']} | dimensión: {meta['dimension']} | modelo: {meta['modelo']}")
+        if meta["parametros"]:
+            print(f"  parámetros: {meta['parametros']}")
+        print(f"  BM25: {meta['bm25']['descripcion']}")
+        print(f"  corpus: {meta['corpus']} | carga: {meta['carga_corpus']}")
+        print(f"  normas adicionales: {meta['corpus_adicionales'] or 'ninguna (solo Ley 1801)'}")
+        if args.incluir_uploads:
+            print(f"  documentos subidos incluidos: {len(meta['documentos_incluidos'])}")
+    print("Si el motor está corriendo, reinícialo para que use los índices nuevos.")
 
 
 if __name__ == "__main__":

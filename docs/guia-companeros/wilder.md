@@ -108,9 +108,49 @@ Formato (de `eval/ejemplo_formato.json`): `pregunta`, `respuesta_referencia`, `a
 - Si cambias nombres de campos del corpus, avisa antes: el motor, `build_index.py` y el clasificador los leen.
 - El corpus de muestra tiene vigencias aproximadas (una por artículo, con un criterio documentado en `corpus/muestra/README.md`). Es provisional: no lo trates como respuesta correcta.
 
-## Mensaje para enviar
+## Nuevo (16/11): procesar_pdf.py, la interfaz para normas nuevas
 
-> Wilder, ya dejé listo el motor del chatbot en `main` (busca, responde con citas y todo). Lo que más depende de ti ahora es el corpus: guarda la **vigencia por numeral**, no por artículo, porque hoy el bot cita texto que la Corte ya anuló (art. 140, num. 7; en el HTML del Senado viene tachado con `<S>`).
-> Tu guía con fechas, el esquema y lo que ya dejé listo: `docs/guia-companeros/wilder.md`. Lee primero el README de esa carpeta.
-> Necesito el **corpus provisional (20–30 artículos) el martes 10** y el **completo el jueves 12**. Avísame apenas lo subas para reconstruir los índices.
-> Y saca tu propia clave gratis de Gemini y trabaja el repo fuera de OneDrive 🙏
+El motor ya puede **agregar normas nuevas al corpus sin reconstruir todo** (por ejemplo la Ley 769 de 2002, Código Nacional de Tránsito). El paso que convierte el PDF en artículos es tuyo: [`corpus/pipeline/procesar_pdf.py`](../../corpus/pipeline/procesar_pdf.py). Hoy tiene una versión **básica** que funciona (extrae el texto, parte por «ARTÍCULO N» y marca vigencia `no_verificada`); tú reemplazas **el interior** con tu limpieza y segmentación reales. Flujo completo: [`docs/reprocesamiento.md`](../reprocesamiento.md).
+
+**Lo que NO puede cambiar:**
+
+1. La firma: `procesar_pdf(ruta_pdf, norma, fuente_url=None) -> list[dict]`.
+2. El formato de salida: una lista con un registro por artículo, con **exactamente estas claves** (puedes agregar otras; estas son obligatorias):
+
+| Clave | Tipo | Regla |
+|---|---|---|
+| `id` | str | `"ley769-art-131"`. Constrúyelo con `id_articulo(norma, numero)` de [`engine/indexing/normas.py`](../../engine/indexing/normas.py). Único dentro de la norma. Letras en mayúscula: `ley769-art-131A` |
+| `norma` | str | Igual al parámetro `norma` (`"Ley 769 de 2002"`) |
+| `ubicacion` | dict | `{"libro": str o null, "titulo": str o null, "capitulo": str o null, "articulo": "Artículo 131"}` |
+| `epigrafe` | str | Título del artículo (`"Multas"`); si no tiene, `"Artículo 131"` |
+| `texto` | str | Texto del artículo, sin encabezados ni pies de página |
+| `vigencia` | str | `"no_verificada"` mientras nadie la revise; si la verificas, los mismos valores de la Ley 1801 (`vigente`, `vigente_modificado`, `inexequible`...) |
+| `tema` | str | Tema; si no lo sabes: `"texto fuente Ley 769 de 2002"` |
+| `pdf` | str | Nombre del archivo PDF de origen |
+| `pagina` | int | Página (desde 1) donde empieza el artículo |
+| `fuente_url` | str o null | URL oficial de donde se descargó |
+
+3. Si el PDF no sirve (escaneado, vacío, sin artículos), lanza `ValueError` con un mensaje claro en español.
+
+El motor **comprueba** tu salida antes de tocar los índices (`validar_registros` en [`engine/indexing/reprocesar.py`](../../engine/indexing/reprocesar.py)): que estén las 10 claves, que `norma` coincida, que los ids tengan el prefijo correcto y que no se repitan. Si algo falla, el trabajo termina en `error` con el motivo y los índices quedan como estaban.
+
+**Qué hace el motor con tu salida:** guarda el JSON de la norma en `corpus/procesados/<norma>.json` (por ejemplo `ley_769_de_2002.json`) y lo agrega a los índices. **No toca `corpus_ley_1801.json`.** La Ley 1801 no pasa por aquí (es la norma base).
+
+**Cómo probarlo, desde la raíz del repo:**
+
+```bash
+engine\.venv\Scripts\python corpus/pipeline/procesar_pdf.py Ley_769_de_2002.pdf "Ley 769 de 2002" --salida prueba.json
+```
+
+Imprime cuántos artículos encontró, el primero y el último. Después, para cargarlo de verdad: [`docs/reprocesamiento.md`](../reprocesamiento.md) (por la API o con `engine/indexing/reprocesar.py`).
+
+**Ejemplo real:** [`corpus/procesados/ley_769_de_2002.json`](../../corpus/procesados/ley_769_de_2002.json), producido por la versión básica con el PDF de la Función Pública. Sirve para ver qué mejorar:
+
+- Encontró 167 artículos (del 1 al 170). Faltan el 3, el 18 y el 128: revisa cómo vienen en el PDF.
+- El art. 131 (multas) quedó como un solo bloque de unos 28.000 caracteres: conviene partirlo por literales y numerales (`A.1`, `B.1`...).
+- Trae las notas de la Función Pública pegadas al texto («Modificado por el art. 21, Ley 1383 de 2010...»); con ellas puedes marcar la vigencia en vez de dejarla `no_verificada`.
+- Título y capítulo salen de los encabezados en mayúsculas; el libro no.
+
+## Mensaje para WhatsApp (16/11)
+
+> Wilder, el motor ya acepta normas nuevas (probé con la Ley 769, Código de Tránsito). La pieza que te toca es `corpus/pipeline/procesar_pdf.py`: hoy tiene una versión básica que funciona; reemplaza el interior con tu limpieza y segmentación, **sin cambiar la firma ni las 10 claves de salida** (están en tu guía, sección «Nuevo (16/11)»). El ejemplo real quedó en `corpus/procesados/ley_769_de_2002.json`: le faltan los art. 3, 18 y 128 y el 131 sale en un solo bloque gigante. Avísame cuando lo tengas y lo probamos juntos 🙏

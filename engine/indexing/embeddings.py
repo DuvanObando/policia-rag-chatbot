@@ -30,6 +30,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 load_dotenv(RAIZ / ".env")
 sys.path.insert(0, str(RAIZ / "engine"))
 from indexing.cargador_corpus import cargar as _cargar_adaptado  # noqa: E402
+from indexing.cargador_corpus import cargar_norma as _cargar_norma  # noqa: E402
 
 # Corpus que usa el motor. CORPUS_RUTA en el .env (relativa a la raíz del repo o absoluta).
 #   corpus de la Fase 1 (real):  corpus/procesados/corpus_ley_1801.json   <- por defecto
@@ -49,6 +50,29 @@ PREGUNTAS_DEMO = [
 def cargar_corpus(ruta=CORPUS_POR_DEFECTO) -> List[dict]:
     """Corpus en el esquema del motor; adapta el formato de la Fase 1 sin tocar el archivo."""
     return _cargar_adaptado(ruta)
+
+
+def ruta_absoluta(ruta) -> Path:
+    """Ruta relativa a la raíz del repo (como se guardan en los metadatos) -> absoluta."""
+    p = Path(ruta)
+    return p if p.is_absolute() else RAIZ / p
+
+
+def ruta_relativa(ruta) -> str:
+    """Ruta absoluta -> relativa a la raíz del repo, con '/' (portable entre equipos)."""
+    p = Path(ruta).resolve()
+    try:
+        return p.relative_to(RAIZ.resolve()).as_posix()
+    except ValueError:
+        return p.as_posix()
+
+
+def cargar_corpus_completo(ruta_base=CORPUS_POR_DEFECTO, adicionales=()) -> List[dict]:
+    """Corpus base (Ley 1801) más las normas adicionales (JSON de corpus/procesados/)."""
+    articulos = cargar_corpus(ruta_base)
+    for r in adicionales:
+        articulos += _cargar_norma(ruta_absoluta(r))
+    return articulos
 
 
 def texto_articulo(articulo: dict) -> str:

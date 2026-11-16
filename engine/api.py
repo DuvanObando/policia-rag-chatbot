@@ -1,11 +1,14 @@
-"""API del motor RAG sobre la Ley 1801 de 2016.
+"""API del motor RAG sobre la Ley 1801 de 2016 y las normas que se agreguen al corpus.
 
-Contrato: ver docs/api_contract.md
+Contrato: ver docs/api_contract.md (y docs/reprocesamiento.md para el corpus)
 
 Endpoints:
-    GET  /health        estado del motor
-    POST /query         pregunta -> respuesta con citas (motor real: búsqueda + LLM)
-    POST /upload_pdf/   guarda un PDF como "pendiente_de_indexar" (NO regenera embeddings)
+    GET  /health                          estado del motor y normas cargadas
+    POST /query                           pregunta -> respuesta con citas (búsqueda + LLM)
+    POST /upload_pdf/                     guarda un PDF como "pendiente_de_indexar" (NO regenera embeddings, RF4)
+    POST /corpus/reprocesar               (token de administrador) incorpora un PDF subido como norma, en segundo plano
+    GET  /corpus/reprocesar/{trabajo_id}  estado de ese trabajo
+    GET  /corpus/documentos               normas cargadas y documentos subidos
 
 Arranque (desde la carpeta engine/):
     uvicorn api:app --port 8000
@@ -16,7 +19,9 @@ modelo usado y conteos. Tampoco se guarda nada en disco ni en base de datos.
 Al agregar logs nuevos, no incluyas `q.pregunta`, `respuesta` ni `historial`, ni
 imprimas objetos que los contengan.
 """
+import hmac
 import logging
+import os
 import sys
 import time
 from contextlib import asynccontextmanager
@@ -25,17 +30,17 @@ from typing import List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # carpeta engine/
 
-from fastapi import FastAPI, File, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, field_validator
 
 from generation.llm import ErrorLLM, configuracion, orden_proveedores, precargar_cliente, respaldo_externo
 from generation.responder import ESTRATEGIA, responder
-from indexing import uploads
+from indexing import normas, reprocesar, uploads
 from indexing.embeddings import MODELO
 from retrieval import expansion
-from retrieval.search import buscar, info_indice, modo_por_defecto, precargar_busqueda, rrf_k, verificar_bm25
+from retrieval.search import buscar, info_indice, modo_por_defecto, normas_cargadas, precargar_busqueda, rrf_k, verificar_bm25
 
 MAX_PREGUNTA = 500  # caracteres
 MAX_HISTORIAL = 50  # mensajes
@@ -87,7 +92,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Motor RAG - Ley 1801 de 2016", lifespan=lifespan)
+app = FastAPI(title="Motor RAG - Ley 1801 de 2016 y otras normas", lifespan=lifespan)
 
 
 # ---------------------------------------------------------------- modelos
@@ -127,6 +132,7 @@ class Fragmento(BaseModel):
     epigrafe: str
     texto: str
     score: float
+    norma: Optional[str] = None
     vigencia: Optional[str] = None
     tema: Optional[str] = None
     fuente: Optional[str] = None
@@ -143,14 +149,24 @@ class Cita(BaseModel):
     numeral: Optional[str] = None
     paragrafo: Optional[str] = None
     texto: str
+    norma: Optional[str] = None
 
 
 class RespuestaUpload(BaseModel):
+    id: str
     nombre_guardado: str
     paginas: int
     caracteres: int
     estado: str
+    norma: Optional[str] = None
+    fuente_url: Optional[str] = None
     mensaje: str
+
+
+class PedidoReprocesar(BaseModel):
+    id: str                            # id del PDF subido (lo devuelve POST /upload_pdf/)
+    norma: Optional[str] = None        # si no se dio al subirlo: "Ley 769 de 2002"
+    fuente_url: Optional[str] = None
 
 
 class RespuestaQuery(BaseModel):
@@ -207,6 +223,8 @@ def health(request: Request):
         "busqueda_expansion": expansion.info(),
         "fragmentos_en_indice": idx["fragmentos"],
         "corpus": Path(idx["corpus"]).name if idx.get("corpus") else None,
+        "normas": idx["normas"],                       # [{"norma": "Ley 1801 de 2016", "articulos": 249}, ...]
+        "reprocesamiento": {"trabajo_activo": reprocesar.trabajo_activo()},
         "llm_proveedor": proveedor,
         "llm_principal": principal,
         "llm_respaldo": respaldo,
@@ -243,28 +261,119 @@ def query(q: Query, request: Request):
 
 
 @app.post("/upload_pdf/", response_model=RespuestaUpload)
-def upload_pdf(file: UploadFile = File(...)):
-    """Guarda un PDF y lo deja "pendiente_de_indexar". NO genera embeddings ni toca los índices (RF4)."""
+def upload_pdf(file: UploadFile = File(...), norma: Optional[str] = Form(None), fuente_url: Optional[str] = Form(None)):
+    """Guarda un PDF y lo deja "pendiente_de_indexar". NO genera embeddings ni toca los índices (RF4).
+
+    `norma` ("Ley 769 de 2002") y `fuente_url` son opcionales; se usan después en POST /corpus/reprocesar.
+    """
+    if norma is not None and norma.strip():
+        try:
+            norma = normas.normalizar(norma)
+        except ValueError as e:
+            return JSONResponse(status_code=422, content={"error": str(e)})
+    else:
+        norma = None
+    if fuente_url is not None and fuente_url.strip():
+        fuente_url = fuente_url.strip()
+        if not fuente_url.lower().startswith(("http://", "https://")) or len(fuente_url) > 500:
+            return JSONResponse(status_code=422, content={"error": "fuente_url debe ser una URL http(s) de máximo 500 caracteres."})
+    else:
+        fuente_url = None
     contenido = file.file.read(uploads.MAX_BYTES + 1)  # lee a lo sumo 10 MB + 1 byte
     if len(contenido) > uploads.MAX_BYTES:
         return JSONResponse(status_code=413, content={"error": "El archivo supera el máximo permitido de 10 MB."})
     try:
-        d = uploads.guardar(contenido, file.filename)
+        d = uploads.guardar(contenido, file.filename, norma=norma, fuente_url=fuente_url)
     except uploads.PDFInvalido as e:
         return JSONResponse(status_code=422, content={"error": str(e)})
 
     # Sin nombre ni contenido del documento en el log (privacidad).
     log.info("/upload_pdf 200 bytes=%d paginas=%d caracteres=%d estado=%s",
              len(contenido), d["paginas"], d["caracteres"], d["estado"])
+    if norma:
+        mensaje = (f"Documento guardado como {norma}. Todavía NO está disponible en las consultas (no se "
+                   f"regeneraron embeddings): para incorporarlo, un administrador debe lanzar "
+                   f"POST /corpus/reprocesar con id «{d['id']}».")
+    else:
+        mensaje = ("Documento guardado. Todavía NO está disponible en las consultas: quedará disponible "
+                   "cuando se reconstruya el índice manualmente "
+                   "(python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads), "
+                   "o con POST /corpus/reprocesar si se indica a qué norma corresponde. "
+                   "No se regeneraron embeddings.")
     return {
+        "id": d["id"],
         "nombre_guardado": d["nombre"],
         "paginas": d["paginas"],
         "caracteres": d["caracteres"],
         "estado": d["estado"],
-        "mensaje": (
-            "Documento guardado. Todavía NO está disponible en las consultas: quedará disponible "
-            "cuando se reconstruya el índice manualmente "
-            "(python engine/indexing/build_index.py --estrategia fragmentos --incluir-uploads). "
-            "No se regeneraron embeddings."
-        ),
+        "norma": norma,
+        "fuente_url": fuente_url,
+        "mensaje": mensaje,
     }
+
+
+# ---------------------------------------------------------------- corpus: reprocesamiento
+
+def _token_valido(token: Optional[str]) -> Optional[JSONResponse]:
+    """None si el token de administrador es correcto; si no, la respuesta de error."""
+    esperado = os.getenv("ADMIN_TOKEN", "").strip()
+    if not esperado:
+        return JSONResponse(status_code=503, content={
+            "error": "El reprocesamiento está deshabilitado: falta ADMIN_TOKEN en el .env del motor."})
+    if not token or not hmac.compare_digest(token.strip().encode(), esperado.encode()):
+        return JSONResponse(status_code=401, content={
+            "error": "Falta el token de administrador o no es válido (cabecera X-Admin-Token)."})
+    return None
+
+
+@app.post("/corpus/reprocesar", status_code=202)
+def corpus_reprocesar(p: PedidoReprocesar, x_admin_token: Optional[str] = Header(None)):
+    """Incorpora un PDF subido como norma, EN SEGUNDO PLANO. Responde de inmediato (202) con trabajo_id."""
+    error = _token_valido(x_admin_token)
+    if error:
+        log.warning("/corpus/reprocesar %d: token ausente o inválido", error.status_code)
+        return error
+    try:
+        t = reprocesar.lanzar(p.id, p.norma, p.fuente_url)
+    except KeyError:
+        return JSONResponse(status_code=404, content={"error": "No existe un documento subido con ese id."})
+    except reprocesar.TrabajoOcupado as e:
+        return JSONResponse(status_code=409, content={
+            "error": "Ya hay un reprocesamiento en curso; espera a que termine.", "trabajo_activo": str(e)})
+    except ValueError as e:
+        return JSONResponse(status_code=422, content={"error": str(e)})
+    log.info("/corpus/reprocesar 202 trabajo=%s", t["trabajo_id"])  # sin el nombre del documento
+    return {**t, "consultar": f"/corpus/reprocesar/{t['trabajo_id']}"}
+
+
+@app.get("/corpus/reprocesar/{trabajo_id}")
+def corpus_estado(trabajo_id: str):
+    """Estado de un trabajo: en_cola, extrayendo, indexando, listo o error, con progreso (0-100)."""
+    t = reprocesar.trabajo(trabajo_id)
+    if t is None:
+        return JSONResponse(status_code=404, content={"error": "No existe un trabajo con ese id (o el motor se reinició)."})
+    return t
+
+
+@app.get("/corpus/documentos")
+def corpus_documentos():
+    """Normas cargadas en el índice vigente y documentos subidos (sin su contenido)."""
+    idx = info_indice(ESTRATEGIA)
+    detalle = {normas.clave(d["norma"]): d for d in idx["normas_adicionales"]}
+    lista = []
+    for n in idx["normas"]:
+        d = detalle.get(normas.clave(n["norma"]), {})
+        lista.append({
+            "norma": n["norma"],
+            "titulo": normas.titulo(n["norma"]),
+            "articulos": n["articulos"],
+            "base": normas.es_base(n["norma"]),
+            "archivo": d.get("archivo") or (Path(idx["corpus"]).name if normas.es_base(n["norma"]) else None),
+            "fuente_url": d.get("fuente_url"),
+            "fecha_carga": d.get("fecha_carga"),
+            "vigencia_verificada": normas.es_base(n["norma"]),
+        })
+    documentos = [{k: d.get(k) for k in ("id", "nombre", "fecha", "paginas", "caracteres", "estado", "norma",
+                                         "fuente_url", "articulos", "fecha_procesado")}
+                  for d in uploads.leer_registro()]
+    return {"normas": lista, "documentos": documentos}
