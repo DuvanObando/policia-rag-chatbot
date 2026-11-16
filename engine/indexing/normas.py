@@ -20,6 +20,14 @@ TITULOS = {
     ("ley", "769"): "Código Nacional de Tránsito Terrestre",
 }
 
+# Cómo nombra la gente a cada norma sin decir su número («artículo 131 del Código de Tránsito»).
+# Se comparan sin tildes y en minúsculas. Una norma sin alias solo se reconoce por «Ley 769».
+ALIAS = {
+    ("ley", "1801"): ["codigo nacional de policia", "codigo de policia", "codigo nacional de seguridad y convivencia",
+                      "codigo de seguridad y convivencia", "codigo de convivencia"],
+    ("ley", "769"): ["codigo nacional de transito", "codigo de transito", "codigo de transito terrestre"],
+}
+
 _TIPOS = r"ley|decreto(?:\s+ley)?|decreto-ley|resoluci[oó]n|acuerdo|acto\s+legislativo"
 _NORMA = re.compile(rf"^\s*({_TIPOS})\s+(?:n[oº°]\.?\s*)?(\d{{1,5}})(?:\s+de\s+(\d{{4}}))?\s*$", re.IGNORECASE)
 _EN_TEXTO = re.compile(rf"\b({_TIPOS})\s+(\d{{1,5}})(?:\s+de\s+(\d{{4}}))?", re.IGNORECASE)
@@ -101,11 +109,16 @@ def describir(norma: str) -> str:
 
 
 def mencionadas(texto: str) -> List[Tuple[str, str]]:
-    """Claves de las normas que se mencionan en un texto: [('ley', '769')]."""
+    """Claves de las normas que se mencionan en un texto, por número («Ley 769») o por su nombre
+    común («Código de Tránsito»): [('ley', '769')]."""
     vistas = []
     for m in _EN_TEXTO.finditer(texto or ""):
         k = (_tipo(m.group(1)), str(int(m.group(2))))
         if k not in vistas:
+            vistas.append(k)
+    plano = re.sub(r"\s+", " ", _sin_tildes(texto or "").lower())
+    for k, nombres in ALIAS.items():
+        if k not in vistas and any(re.search(rf"\b{re.escape(n)}\b", plano) for n in nombres):
             vistas.append(k)
     return vistas
 
@@ -113,3 +126,25 @@ def mencionadas(texto: str) -> List[Tuple[str, str]]:
 def ordenar(normas: List[str]) -> List[str]:
     """La norma base primero; las demás en orden alfabético."""
     return sorted(set(normas), key=lambda n: (not es_base(n), n))
+
+
+def norma_principal() -> str:
+    """Norma que tiene prioridad cuando la pregunta pide «artículo N» sin decir la norma.
+
+    NORMA_PRINCIPAL del .env (p. ej. «Ley 1801 de 2016»); si falta o está mal escrita, la norma base.
+    """
+    import os
+
+    valor = (os.getenv("NORMA_PRINCIPAL") or "").strip()
+    if not valor:
+        return NORMA_BASE
+    try:
+        return normalizar(valor)
+    except ValueError:
+        return NORMA_BASE
+
+
+def por_prioridad(cargadas: List[str]) -> List[str]:
+    """Normas cargadas en orden de prioridad: la principal primero, luego la base y las demás."""
+    principal = clave(norma_principal())
+    return sorted(ordenar(cargadas), key=lambda n: clave(n) != principal)

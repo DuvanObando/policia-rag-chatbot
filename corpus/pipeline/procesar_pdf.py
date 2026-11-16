@@ -35,7 +35,7 @@ Prueba rápida, desde la raíz del repo:
 =====================================================================================================
 
 Qué hace esta versión básica:
-  - extrae el texto página por página con pypdf;
+  - extrae el texto página por página con PyMuPDF (o pypdf si no está instalado);
   - quita las líneas que se repiten en más de la mitad de las páginas (encabezados y pies);
   - parte por líneas que empiezan con «ARTÍCULO N» (acepta 1o., 2°, 131A...), solo si el número es
     mayor que el del artículo anterior: así no se confunden con artículos citados dentro del texto;
@@ -52,6 +52,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / "engine"))
+from indexing import pdf_texto  # noqa: E402
 from indexing.normas import id_articulo  # noqa: E402
 
 _ARTICULO = re.compile(
@@ -62,24 +63,13 @@ _CAPITULO = re.compile(r"^\s*CAP[ÍI]TULO\s+([IVXLC]+|\d+|[ÚU]NICO)\b\.?\s*(.*)
 
 
 def _paginas(ruta_pdf: Path):
-    from io import BytesIO
-
-    from pypdf import PdfReader
-
-    try:
-        datos = ruta_pdf.read_bytes()
-        # Algunos PDF oficiales traen bytes antes de "%PDF-" (p. ej. la Función Pública): se descartan,
-        # porque corren las posiciones internas del archivo. Aun así, pypdf es lento con ese PDF (~60-80 s):
-        # Wilder, con tu versión puedes usar PyMuPDF (ya está en engine/requirements.txt), que es mucho más rápido.
-        inicio = datos.find(b"%PDF-", 0, 1024)
-        lector = PdfReader(BytesIO(datos[inicio:] if inicio > 0 else datos))
-        if lector.is_encrypted and not lector.decrypt(""):
-            raise ValueError("El PDF está protegido con contraseña.")
-        return [(p.extract_text() or "") for p in lector.pages]
-    except ValueError:
-        raise
-    except Exception as e:
-        raise ValueError(f"No se pudo leer el PDF ({type(e).__name__}).") from e
+    datos = ruta_pdf.read_bytes()
+    # Algunos PDF oficiales traen bytes antes de "%PDF-" (p. ej. la Función Pública): se descartan,
+    # porque corren las posiciones internas del archivo.
+    inicio = datos.find(b"%PDF-", 0, 1024)
+    # PyMuPDF si está instalado (rápido) y pypdf como respaldo (ver engine/indexing/pdf_texto.py).
+    # pdf_texto.PDFNoLegible es un ValueError con un mensaje en español.
+    return pdf_texto.paginas(datos[inicio:] if inicio > 0 else datos)
 
 
 def _sin_repetidas(paginas):

@@ -23,9 +23,10 @@ import re
 import threading
 import unicodedata
 from datetime import datetime
-from io import BytesIO
 from pathlib import Path
 from typing import List
+
+from indexing import pdf_texto
 
 RAIZ = Path(__file__).resolve().parents[2]
 CARPETA_UPLOADS = RAIZ / "corpus" / "uploads"
@@ -57,16 +58,11 @@ def limpiar_nombre(nombre: str) -> str:
 
 def extraer_texto(contenido: bytes):
     """(páginas, texto) del PDF. Lanza PDFInvalido si está dañado, protegido o sin texto."""
-    from pypdf import PdfReader
-
     try:
-        lector = PdfReader(BytesIO(contenido))
-        if lector.is_encrypted and not lector.decrypt(""):
+        paginas = [p.strip() for p in pdf_texto.paginas(contenido)]
+    except pdf_texto.PDFNoLegible as e:
+        if "contraseña" in str(e):
             raise PDFInvalido("El PDF está protegido con contraseña y no se puede leer.")
-        paginas = [(p.extract_text() or "").strip() for p in lector.pages]
-    except PDFInvalido:
-        raise
-    except Exception:  # pypdf lanza muchos tipos de error con archivos dañados
         raise PDFInvalido("No se pudo leer el PDF: el archivo está dañado o no es un PDF válido.")
     texto = "\n\n".join(p for p in paginas if p)
     if not texto.strip():
@@ -100,8 +96,8 @@ def guardar(contenido: bytes, nombre_original: str, norma: str = None, fuente_ur
     if inicio < 0:
         raise PDFInvalido("El archivo no es un PDF válido (no tiene la cabecera %PDF).")
     # Se guarda desde la cabecera (los bytes de más al inicio corren las posiciones internas del PDF).
-    # Ojo: algunos PDF oficiales son lentos de leer con pypdf (la Ley 769 de la Función Pública, 56
-    # páginas: ~60 s). PyMuPDF (ya en requirements.txt) es mucho más rápido; ver docs/reprocesamiento.md.
+    # El texto se extrae con PyMuPDF (rápido) o, si no está instalado, con pypdf (lento con PDF largos:
+    # la Ley 769 de la Función Pública, 56 páginas, tardaba ~52 s); ver engine/indexing/pdf_texto.py.
     contenido = contenido[inicio:]
     paginas, texto = extraer_texto(contenido)
 

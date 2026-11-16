@@ -94,7 +94,7 @@ BM25 usa **stemming Snowball** (o spaCy donde carga), **no lematización**, y ha
 
 ## Mensaje para enviar
 
-> Santiago, ya dejé el motor del chatbot listo en `main`. Lo urgente **hoy**: prueba que spaCy te cargue (en mi PC Windows lo bloqueó el control de aplicaciones). Si te falla usa **Stanza**, y por favor **NO desactives esa protección de Windows**: no se puede volver a activar sin reinstalar el sistema.
+> Santiago, ya dejé el motor del chatbot listo en `main`. Lo urgente *hoy*: prueba que spaCy te cargue (en mi PC Windows lo bloqueó el control de aplicaciones). Si te falla usa *Stanza*, y por favor *NO desactives esa protección de Windows*: no se puede volver a activar sin reinstalar el sistema.
 > Tu guía con fechas y todo lo que dejé armado está en `docs/guia-companeros/santiago-castro.md` (lee primero el README de esa carpeta).
-> Después necesito tu **glosario real** para reemplazar el provisional (`engine/glossary/sinonimos.json`) hacia el martes 17.
+> Después necesito tu *glosario real* para reemplazar el provisional (`engine/glossary/sinonimos.json`) hacia el martes 17.
 > Avísame hoy qué te funcionó y saca tu clave gratis de Gemini 🙏
