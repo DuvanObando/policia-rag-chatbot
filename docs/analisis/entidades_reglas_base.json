@@ -1,0 +1,125 @@
+{
+  "alcance": "solo texto base Ley 1801",
+  "registros": 249,
+  "autoridades": {
+    "Corte Constitucional": {
+      "ocurrencias": 113,
+      "registros": 73
+    },
+    "autoridad de policía": {
+      "ocurrencias": 82,
+      "registros": 61
+    },
+    "Policía Nacional": {
+      "ocurrencias": 74,
+      "registros": 47
+    },
+    "alcalde": {
+      "ocurrencias": 60,
+      "registros": 41
+    },
+    "personal uniformado de la Policía": {
+      "ocurrencias": 36,
+      "registros": 21
+    },
+    "gobernador": {
+      "ocurrencias": 21,
+      "registros": 16
+    },
+    "concejo municipal o distrital": {
+      "ocurrencias": 16,
+      "registros": 11
+    },
+    "inspector de policía": {
+      "ocurrencias": 10,
+      "registros": 8
+    },
+    "comandante de estación": {
+      "ocurrencias": 9,
+      "registros": 8
+    },
+    "autoridad ambiental": {
+      "ocurrencias": 8,
+      "registros": 6
+    },
+    "Presidente de la República": {
+      "ocurrencias": 7,
+      "registros": 7
+    },
+    "Ministerio Público": {
+      "ocurrencias": 6,
+      "registros": 5
+    },
+    "corregidor": {
+      "ocurrencias": 5,
+      "registros": 4
+    },
+    "Ministerio del Interior": {
+      "ocurrencias": 4,
+      "registros": 2
+    }
+  },
+  "lugares": {
+    "espacio público": {
+      "ocurrencias": 66,
+      "registros": 36
+    },
+    "transporte público": {
+      "ocurrencias": 25,
+      "registros": 10
+    },
+    "domicilio": {
+      "ocurrencias": 15,
+      "registros": 11
+    },
+    "lugar abierto al público": {
+      "ocurrencias": 13,
+      "registros": 9
+    },
+    "parque": {
+      "ocurrencias": 13,
+      "registros": 7
+    },
+    "área protegida": {
+      "ocurrencias": 11,
+      "registros": 7
+    },
+    "vía pública": {
+      "ocurrencias": 8,
+      "registros": 8
+    },
+    "establecimiento educativo": {
+      "ocurrencias": 4,
+      "registros": 2
+    },
+    "establecimiento de comercio": {
+      "ocurrencias": 4,
+      "registros": 3
+    },
+    "estadio o escenario deportivo": {
+      "ocurrencias": 2,
+      "registros": 2
+    },
+    "zona de recreo": {
+      "ocurrencias": 1,
+      "registros": 1
+    }
+  },
+  "montos": {
+    "multa_general_por_tipo": {
+      "tipo 1": 33,
+      "tipo 2": 37,
+      "tipo 3": 40,
+      "tipo 4": 123
+    },
+    "multa_especial": 45,
+    "referencias_a_salarios_minimos": 18
+  },
+  "plazos_por_unidad": {
+    "días": 31,
+    "meses": 14,
+    "años": 14,
+    "horas": 10,
+    "minutos": 3
+  }
+}
