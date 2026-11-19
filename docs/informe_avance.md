@@ -1,8 +1,68 @@
 # Informe de avance: chatbot RAG sobre el Código Nacional de Seguridad y Convivencia Ciudadana
 
-**Proyecto:** `policia-rag-chatbot` · **Corte:** 12 de noviembre de 2026 (último commit revisado: `c3dbdc7`) · **Entrega final:** viernes 20 de noviembre de 2026.
+**Proyecto:** `policia-rag-chatbot` · **Corte:** 19 de noviembre de 2026 (estado final; la sección 0 resume lo nuevo y las secciones 1 a 10 conservan el corte del 12/11 salvo donde se indica) · **Entrega final:** viernes 20 de noviembre de 2026.
 
 Este informe es la base del informe técnico final. Todo lo que dice sale del repositorio: el código, los documentos de `docs/`, los resultados de las evaluaciones y el historial de git. Cuando un dato no está guardado en el repositorio, aparece como **«pendiente de verificar»**; los datos que aportó el responsable del motor y que no quedan en el repo se señalan como tales.
+
+---
+
+## 0. Estado final al 19 de noviembre
+
+**Qué hay en `main` el 19/11** (todo verificado de punta a punta en el PC de Duvan con el entorno virtual + `uvicorn`; Docker no se probó en ese PC):
+
+- **Frontend y backend de Santiago Bulla** (PR #14 y #18): chat con historial, panel de fragmentos con vigencia, tema e inexequibles tachados (RF5), aviso legal, pantalla de ingreso por rol y **pestaña de Administración** protegida con `ADMIN_CLAVE` (el backend la valida y agrega el `ADMIN_TOKEN` del motor, que nunca llega al navegador). Docker del motor en `docker/docker-compose.yml`.
+- **Reprocesamiento de normas nuevas** (16/11): un administrador sube el PDF de una norma (p. ej. la Ley 769 de 2002) y el motor la agrega **sin reconstruir todo ni apagarse** ([`docs/reprocesamiento.md`](reprocesamiento.md)). Lectura de PDF con PyMuPDF (subida de 63 s a 0,4 s).
+- **Fase 2 de Santiago Castro integrada** (rama `feature/santiago-castro-linguistica`): glosario de 49 términos y 374 coloquiales, informe de análisis lingüístico, extractor de entidades por reglas y **propuesta de 32 temas** por rangos de artículos, ya aplicada en el clasificador.
+- **Evaluación formal** (Fase 6) con `eval/run_eval.py` y [`eval/reporte.md`](../eval/reporte.md).
+- Arranque con un clic: `iniciar_todo.bat` / `detener_todo.bat`. Guía para correrlo en otro PC: [`guia-companeros/traspaso-santiago-castro.md`](guia-companeros/traspaso-santiago-castro.md).
+
+### 0.1 Diagnóstico de las «preguntas indirectas» (reportado por Santiago Bulla)
+
+Se probaron 10 preguntas indirectas por la API y por el frontend, con 20 s entre preguntas ([`eval/preguntas_indirectas.json`](../eval/preguntas_indirectas.json)). **Había dos errores reales:**
+
+1. **«Un policía me pidió la cédula, ¿estoy obligado a mostrarla?» salía fuera de dominio.** Causa: búsqueda. El art. 35 (num. 3, resistirse al procedimiento de identificación) quedaba en el puesto 30, y el clasificador temático no ayudaba porque el corpus trae el mismo `tema` en los 249 artículos. **Corrección:** aplicar los 32 temas de Castro en el cargador, sin editar el corpus (sección 0.2). Ahora el art. 35 sale primero y la respuesta lo cita.
+2. **«Me detuvieron por conducir mi moto borracho, ¿me pueden multar?»** (tránsito, Ley 769 no cargada) respondía con el art. 146, num. 6 de la Ley 1801 (comer o beber en el transporte público): una analogía falsa. **Corrección:** regla 4b del prompt: no aplicar un artículo a una conducta distinta de la que describe, sin dejar de aceptar que la gente pregunte con sus palabras («cédula» = identificación; una primera versión demasiado estricta hacía que el modelo se abstuviera en 4 de las 9 y se ajustó). Ahora sale fuera de dominio.
+
+Tras las correcciones: **9 de 9 preguntas de la Ley 1801 responden con el artículo esperado** (licor → 140; música → 33; vender comida → 92; cédula → 35; perro → 134; TransMilenio → 146; borracho en la calle → 155; reclamar un comparendo → 180 y 219; orinar → 140) y la de la moto sale fuera de dominio. Tiempos de 1,8 a 7,7 s. Las otras 8 ya salían bien antes de las correcciones. No quedó registro de qué preguntas probó Bulla; además de la de la cédula, en las pruebas aparecieron respuestas 503 por el límite del plan gratuito, que en el frontend se ven como «El servicio está ocupado».
+
+### 0.2 Temas de Castro en el clasificador
+
+Mapeo id → tema en [`engine/retrieval/temas_por_articulo.json`](../engine/retrieval/temas_por_articulo.json) (generado de [`docs/analisis/propuesta_temas.json`](analisis/propuesta_temas.json)), aplicado al cargar el corpus y al leer el índice (`TEMAS_PROPUESTA=1`); `temas.json` con los 32 temas y empuje semántico 0,02. Resultado con 68 preguntas (solo recuperación, modo semántico; [`docs/resultados_temas.md`](resultados_temas.md)): MRR **0,791** sin clasificador, **0,805** con el anterior, **0,863** con los temas de Castro; ningún grupo de preguntas empeora (banco de Wilder 0,897 → 0,909; indirectas 0,648 → 0,944). Comparaciones repetidas con el glosario de Castro: [`docs/resultados_19nov/`](resultados_19nov/README.md) (la expansión mejora la jerga pero no actúa en el modo semántico de la demo; el modo semántico sigue siendo el mejor).
+
+### 0.3 Demostración de la Ley 769 (19/11, por la pantalla de Administración)
+
+1. Antes: «Me detuvieron por conducir mi moto borracho…» → fuera de dominio («Fuera del Código» en el frontend).
+2. Carga del PDF oficial (56 páginas) desde Administración: subida y extracción en menos de 1 s; trabajo `listo` con 167 artículos y 315 fragmentos nuevos. **El chat siguió respondiendo durante la carga** (18 de 23 preguntas con HTTP 200, de 4,8 a 28,8 s; 4 respuestas 503 por el límite gratuito de Groq y 1 de 504).
+3. Después: la pregunta de la moto cita la **Ley 769 de 2002, art. 131**; «¿Qué pasa si conduzco borracho?» cita los arts. 131, 149 y 152; la de la licencia, el art. 131, B.1.
+4. Para que la de la moto funcionara se mejoró el extracto de los artículos enormes (el art. 131 tiene 28.000 caracteres): ahora se envían los trozos de ese artículo más parecidos a la pregunta.
+5. Al final se quitó la Ley 769: índices idénticos al respaldo previo (mismos vectores, ids y BM25).
+
+Ese día la carga tardó 19,5 min (6 min el 16/11) porque el PC tenía Docker Desktop abierto y solo 0,1 GB de RAM libre: para la sustentación conviene cerrar todo lo demás.
+
+### 0.4 Evaluación formal (Fase 6)
+
+`eval/run_eval.py` corre el motor completo (búsqueda + LLM) con pausas de 20 s y calcula las métricas que pide el enunciado. El banco oficial `eval/banco_preguntas.json` está vacío, así que se usó el banco de Wilder (`corpus/preguntas_ley_1801.json`, 50 preguntas) adaptado por `eval/bancos.py`, más las 10 preguntas indirectas. Resultado del 19/11 ([`eval/reporte.md`](../eval/reporte.md); 60 preguntas, 25 min, ninguna sin respuesta):
+
+| Métrica | Valor |
+|---|---|
+| Precisión@3 | 0,333 (el techo: un artículo esperado por pregunta y 3 entregados) |
+| Recall@3 | **0,942** |
+| MRR | **0,908** |
+| Exactitud de fuera de dominio | **0,933** (detectó 10 de 11 trampas) |
+| Corrección de la cita (al menos un artículo citado es el esperado) | **0,935** |
+| Cita exacta (todos los citados son esperados) | 0,783 |
+| Tiempo por pregunta (mediana / máximo) | 1,4 s / 10,2 s |
+
+Groq había agotado el límite de `gpt-oss-120b` tras un día de pruebas: 46 respuestas fueron del respaldo `gpt-oss-20b` y 12 de Gemini. Las 3 abstenciones equivocadas son de esos modelos (el 120b respondió bien dos de ellas el mismo día), así que con el 120b disponible el resultado esperado es mejor. Errores: 1 trampa de tránsito respondida por analogía (20b), 2 fallos de recuperación del art. 223A y 1 cita a un artículo vecino. Fidelidad: requiere revisión humana (detalle en `eval/resultados_eval.json`).
+
+### 0.5 Pendientes al 19/11
+
+| Persona | Pendiente |
+|---|---|
+| **Wilder** | No entregó nada desde el 16/11: `procesar_pdf.py` mejorado (a la Ley 769 le faltan los arts. 3, 18 y 128 y el 131 queda en un bloque), `corpus/anotaciones_vigencia.json` completo, fecha de consulta en `corpus/README_corpus.md` y el banco oficial `eval/banco_preguntas.json` (con trampas variadas; hoy está vacío y la evaluación usó su banco anterior adaptado). Secciones «Corpus» y «Evaluación» del informe técnico |
+| **Santiago Castro** | Correr el proyecto en su PC para la sustentación (guía de traspaso) y verificar Docker. Su sección del informe técnico ya está en [`docs/analisis/seccion_informe_tecnico.md`](analisis/seccion_informe_tecnico.md) |
+| **Santiago Bulla** | Sección «Integración y despliegue» del informe técnico y el video de 5 minutos |
+| **Todos** | Informe técnico final (≤ 15 páginas) y ensayo de la sustentación |
 
 ---
 
@@ -32,35 +92,40 @@ Este informe es la base del informe técnico final. Todo lo que dice sale del re
 
 ```mermaid
 flowchart TB
-    subgraph OFF["Construcción de los índices (se ejecuta aparte)"]
+    subgraph WEB["Interfaz (Santiago Bulla)"]
         direction LR
-        PIPE["Pipeline de corpus<br/>PDF: extraer, limpiar, segmentar"] --> CORPUS[("corpus_ley_1801.json<br/>290 registros")]
-        CORPUS --> CARG["Cargador del corpus<br/>cargador_corpus.py"]
-        ANOT[("anotaciones_vigencia.json")] --> CARG
-        CARG --> BUILD["build_index.py<br/>fragmentos de 250 tokens"]
-        BUILD --> FAISS[("Índice FAISS<br/>E5, 471 fragmentos")]
-        BUILD --> BM25[("Índice BM25<br/>bm25_tokens.json")]
+        U["Usuario"] --> FE["Frontend React<br/>chat + panel de fuentes"]
+        ADM["Administrador<br/>ADMIN_CLAVE"] --> FE
+        FE --> BE["Backend Express<br/>CORS + X-Admin-Clave"]
     end
-    subgraph ON["Consulta (en tiempo real)"]
-        U["Usuario: pregunta"] --> API["API FastAPI<br/>POST /query"]
-        API --> BUS["Búsqueda<br/>buscar()"]
-        CLAS["Clasificador temático<br/>+ artículo por número"] --> BUS
-        EXP["Expansión con glosario<br/>solo BM25"] --> BUS
-        BUS --> SB["Small-to-big<br/>artículo completo"]
-        SB --> PR["Prompt<br/>reglas + artículos + pregunta"]
-        PR --> LLM{"Cadena de LLM<br/>según LLM_ORDEN"}
-        LLM --> GROQ["Groq<br/>gpt-oss-120b → gpt-oss-20b"]
-        LLM --> GEM["Gemini<br/>3.5-flash-lite → 3.6-flash"]
-        GROQ --> CIT["Extractor de citas<br/>valida artículo y numeral"]
-        GEM --> CIT
-        CIT --> R["API: respuesta JSON<br/>respuesta, citas, fragmentos,<br/>fuera_de_dominio"]
+    subgraph ON["Consulta en tiempo real (motor FastAPI)"]
+        direction TB
+        API["POST /query"] --> BUS["Búsqueda semántica E5 + FAISS<br/>clasificador: 32 temas de Castro<br/>+ artículo por número"]
+        BUS --> SB["Small-to-big<br/>artículo completo o extracto"]
+        SB --> PR["Prompt con reglas<br/>+ artículos + pregunta"]
+        PR --> LLM{"LLM según LLM_ORDEN<br/>Groq y Gemini"}
+        LLM --> CIT["Validación de citas<br/>y fuera de dominio"]
+        CIT --> R["Respuesta JSON<br/>citas, fragmentos, vigencia"]
     end
-    OFF ~~~ U
-    OFF -->|"índices FAISS y BM25"| BUS
-    OFF -->|"artículo completo"| SB
+    subgraph IDX["Corpus e índices (se construyen aparte)"]
+        direction TB
+        CORPUS[("Corpus Ley 1801<br/>249 artículos")] --> CARG["Cargador<br/>vigencia + temas"]
+        CARG --> BUILD["build_index.py<br/>trozos de 250 tokens"]
+        BUILD --> IND[("FAISS + BM25<br/>471 fragmentos")]
+    end
+    subgraph REP["Agregar una norma (Administración)"]
+        direction TB
+        UP["POST /upload_pdf/<br/>guarda el PDF (RF4)"] --> JOB["POST /corpus/reprocesar<br/>X-Admin-Token, en segundo plano"]
+        JOB --> PDFX["PyMuPDF + procesar_pdf.py"]
+        PDFX --> INC["Embeddings solo de lo nuevo<br/>cambio atómico de índices"]
+    end
+    BE -->|"/query"| API
+    BE -->|"admin"| UP
+    IND --> BUS
+    INC -->|"índices nuevos, sin reiniciar"| IND
 ```
 
-El bloque superior se ejecuta una vez (y otra vez cuando cambia el corpus); el inferior, en cada pregunta.
+La construcción de los índices se ejecuta una vez (y otra vez cuando cambia el corpus); la consulta, en cada pregunta. Desde el 16/11 se puede **agregar una norma** (p. ej. la Ley 769 de 2002) desde la pantalla de Administración sin reconstruir todo ni apagar el motor ([`docs/reprocesamiento.md`](reprocesamiento.md)).
 
 Hay versiones interactivas y verificadas contra el código en [`docs/diagramas/`](diagramas/README.md) (arquitectura, estructura del repositorio y flujo de una consulta).
 
@@ -406,11 +471,11 @@ Las preguntas de demostración son: licor en el parque (art. 140), ingreso a dom
 | RF2. Cita los artículos que sustentan la respuesta | **Cumple** (en la API) | Prompt regla 2; validación de citas en [`responder.py`](../engine/generation/responder.py) y [`citas.py`](../engine/generation/citas.py) | Duvan |
 | RF3. Si no está en el corpus, lo dice y no inventa | **Cumple**; falta medirlo con el banco completo | Frase fija y `fuera_de_dominio`; 2 de 2 fuera de dominio en la prueba de la API | Duvan (banco: Wilder) |
 | RF4. `POST /upload_pdf/` sin regenerar embeddings | **Cumple** | [`uploads.py`](../engine/indexing/uploads.py); el PDF queda `pendiente_de_indexar` | Duvan |
-| RF5. La interfaz muestra los fragmentos recuperados | **Parcial**: la API los devuelve, pero no hay interfaz | Campo `fragmentos` de `/query`; [`frontend/README.md`](../frontend/README.md) es un placeholder | Santiago Bulla |
+| RF5. La interfaz muestra los fragmentos recuperados | **Cumple** (19/11): panel de fragmentos con vigencia, tema y norma | [`frontend/README.md`](../frontend/README.md); verificado en el navegador el 19/11 | Santiago Bulla |
 | RNF1. Respuesta en menos de 10 s | **Parcial**: típico de 1,2 a 4,8 s, pero el peor caso medido fue 12,8 s, y Gemini con 503/504 pasa de 10 s | [`demo_entrega.md`](demo_entrega.md); presupuesto de 21 s de Gemini en `llm.py` | Duvan |
 | RNF2. Claves en variables de entorno, nunca en el repositorio | **Cumple** | [`.gitignore`](../.gitignore) excluye `.env`; solo se versiona [`.env.example`](../.env.example), con claves vacías | Santiago Bulla (motor: Duvan) |
-| RNF3. El backend restringe orígenes con CORS | **Parcial**: el código existe en el esqueleto, pero el backend no está terminado ni probado | [`backend/src/server.js`](../backend/src/server.js) | Santiago Bulla |
-| RNF4. Git, documentado y reproducible | **Parcial**: el motor es reproducible; falta el frontend y completar el backend | [`README.md`](../README.md), [`engine/requirements.txt`](../engine/requirements.txt), [`backend/package.json`](../backend/package.json) | Santiago Bulla (motor: Duvan) |
+| RNF3. El backend restringe orígenes con CORS | **Cumple** (19/11): CORS con `ORIGENES_PERMITIDOS` y rutas de administración con `ADMIN_CLAVE` (401 sin ella) | [`backend/README.md`](../backend/README.md) | Santiago Bulla |
+| RNF4. Git, documentado y reproducible | **Cumple** (19/11), con el entorno virtual; Docker sin verificar en el PC de Duvan | [`guia-companeros/traspaso-santiago-castro.md`](guia-companeros/traspaso-santiago-castro.md), [`README.md`](../README.md) | Todos |
 
 ---
 
@@ -439,11 +504,11 @@ Las preguntas de demostración son: licor en el parque (art. 140), ingreso a dom
 **Limitaciones:**
 
 1. **Vigencia por artículo, no por numeral.** Fuera de las 6 expresiones anotadas, el motor solo puede advertir que se verifique en la fuente oficial.
-2. **El empuje del clasificador no actúa con el corpus real** (0 de 249 temas coinciden); solo funciona la búsqueda por número de artículo. Con el corpus real, p09 y p13 no se encuentran con ningún método.
+2. **El empuje del clasificador no actuaba con el corpus real: resuelto el 19/11** con los 32 temas de Castro (sección 0.2). Con el corpus real, p09 y p13 no se encuentran con ningún método.
 3. **Las 41 reformas no se indexan** y el motor no sabe citar artículos de otras normas. El banco de Wilder tiene 40 preguntas sobre esas reformas, así que hoy casi todas fallarían por diseño.
 4. **Las evaluaciones son de muestras pequeñas** (10 a 19 preguntas, escritas para la muestra de 10 artículos). Con el corpus real ya están las cuatro comparaciones (segmentación, clasificador, modos y expansión), pero falta la evaluación con el banco de 50+ preguntas.
 5. **BM25 usa stemming, no lematización**, en el equipo del líder (spaCy bloqueado).
-6. **El glosario es la semilla provisional** de 18 términos, y la expansión no actúa en el modo semántico por defecto.
+6. **El glosario de Castro (49 términos) ya está integrado**, pero la expansión no actúa en el modo semántico por defecto.
 7. **El historial de conversación se acepta, pero no se usa**: cada pregunta se responde sola.
 8. **Los documentos subidos no se citan bien**: el extractor de citas solo entiende «Art. N» ([`README.md`](../README.md)).
 
@@ -454,12 +519,14 @@ Las preguntas de demostración son: licor en el parque (art. 140), ingreso a dom
 | El arranque tarda de 42 a 64 s | Levantar el motor unos 2 minutos antes ([`demo_entrega.md`](demo_entrega.md)). |
 | Límites del plan gratuito (429 de Groq, 503 de Gemini) | Dejar 10 s o más entre preguntas; cambiar `LLM_ORDEN` y reiniciar si un proveedor falla. |
 | Una respuesta tarda más de 10 s | La cadena de respaldo responde, pero puede tardar; usar las 5 preguntas verificadas del guion. |
-| No hay interfaz web | La demo se hace en `http://localhost:8000/docs` (Swagger). |
+| No había interfaz web (12/11) | Desde el 19/11 la demo es por el frontend de Bulla (`iniciar_todo.bat`); Swagger queda de respaldo. |
 | Faltan los índices en un equipo nuevo | Construirlos antes: unos 17 minutos en total en CPU. |
 
 ---
 
 ## 9. Pendientes hacia la entrega final (20/11)
+
+> **Tabla del corte del 12/11.** La lista actualizada al 19/11 está en la sección 0.5.
 
 Según las guías de [`docs/guia-companeros/`](guia-companeros/README.md) y el estado real del repositorio. Prioridad: **A** = sin esto no hay entrega; **B** = afecta la nota; **C** = mejora.
 

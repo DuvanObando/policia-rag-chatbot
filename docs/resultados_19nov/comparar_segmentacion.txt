@@ -1,0 +1,28 @@
+
+POSICIÓN DEL ARTÍCULO ESPERADO (1 = primero, 0 = no aparece)
+#   Esperado  >512    articulo  fragmentos  Pregunta
+p01 140       sí             0           1  ¿Quién decide en qué zonas de la ciudad no se puede consumir
+p02 124       sí             3           2  Aparte de este código, ¿hay otra ley que castigue el maltrat
+p03 180       sí             0           1  Si pago rápido el comparendo, ¿me rebajan algo del valor?
+p04 139       sí             2           1  ¿Se considera de todos el agua de los ríos y los caminos púb
+p05 163       no             1           1  Hay un incendio en mi edificio, ¿puede la policía entrar a m
+p06 173       no             2           4  ¿Qué otras sanciones, además de la multa, me puede imponer l
+p07 183       no             1           1  Tengo una multa sin pagar desde hace un año, ¿qué trámites n
+p08 198       no             5           1  ¿Quiénes tienen la autoridad para resolver los conflictos de
+p09 218       no             0           0  ¿Qué es el documento que me entrega el policía cuando me sor
+p10 222       no             2           3  ¿Cómo es el trámite cuando el policía resuelve el problema a
+
+RESUMEN
+Estrategia   Vectores  Acierto@1  Acierto@3     MRR  ms/búsq.
+articulo          249       0.20       0.60   0.403       275
+fragmentos        471       0.60       0.80   0.708       250
+
+SOLO PREGUNTAS CUYA RESPUESTA ESTÁ DESPUÉS DEL TOKEN 512 (4)
+Estrategia    Acierto@1  Acierto@3     MRR
+articulo           0.00       0.50   0.208
+fragmentos         0.75       1.00   0.875
+
+SOLO PREGUNTAS SOBRE TEXTO QUE SÍ ENTRA EN 512 TOKENS (6)
+Estrategia    Acierto@1  Acierto@3     MRR
+articulo           0.33       0.67   0.533
+fragmentos         0.50       0.67   0.597

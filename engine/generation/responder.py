@@ -84,7 +84,7 @@ def responder(pregunta: str, k: int = 3, incluir_diagnostico: bool = False) -> d
         art = id_articulo(f["id"])
         if art not in vistos:
             vistos.add(art)
-            a = articulo_para_contexto(f["id"], ESTRATEGIA)  # completo, o un extracto si es enorme
+            a = articulo_para_contexto(f["id"], ESTRATEGIA, pregunta=pregunta)  # completo, o un extracto si es enorme
             articulos.append({**a, "numero": numero_articulo(a["id"])})
 
     # 3. Prompt + LLM. El dominio son las normas cargadas en el índice vigente.

@@ -1,5 +1,7 @@
 # Diagramas del proyecto
 
+> **Vigencia (19/11):** estos tres diagramas son del 12/11 y muestran el motor y la API. **No incluyen** lo que llegó después: el frontend y el backend de Santiago Bulla con la pantalla de Administración, el reprocesamiento de normas nuevas (16/11) ni los 32 temas de Santiago Castro. El flujo completo y actual está en el diagrama Mermaid de la sección 2 del [informe](../informe_avance.md) (Figura 1 del PDF) y en el diagrama de [`docs/reprocesamiento.md`](../reprocesamiento.md).
+
 Generados con [Archify](https://github.com/tt-a1i/archify) a partir del código del repo (commit `1259b13`), con cada nodo ligado a su archivo y líneas. Los HTML son interactivos y autónomos (ábrelos en el navegador); los PNG salen del menú Exportar del propio visor.
 
 | Diagrama | HTML | PNG | Fuente editable |

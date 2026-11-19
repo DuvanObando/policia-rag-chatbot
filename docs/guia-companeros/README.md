@@ -2,6 +2,14 @@
 
 Esta carpeta es el punto de partida de **cada integrante**. Todo lo que necesitas para empezar sin preguntarle a nadie está aquí o enlazado desde aquí.
 
+## Estado al 19 de noviembre: parte de Duvan CERRADA
+
+- **Para la sustentación del viernes 20** (instalar y hacer correr todo en otro PC, guion de la demo con la Ley 769 en vivo y qué hacer si algo falla): **[traspaso-santiago-castro.md](traspaso-santiago-castro.md)**.
+- Integrados el 19/11 en `main`: el frontend con administración del corpus y el backend de Santiago Bulla (PR #18) y la Fase 2 de Santiago Castro (glosario de 49 términos, análisis, entidades y propuesta de 32 temas, ya aplicada en el clasificador).
+- Evaluación formal: [`eval/reporte.md`](../../eval/reporte.md). Clasificador con los temas de Castro: [`docs/resultados_temas.md`](../resultados_temas.md). Guion de la demo: [`docs/demo_entrega.md`](../demo_entrega.md).
+- Arranque con un clic: `iniciar_todo.bat` y `detener_todo.bat` (raíz del repo).
+- Cierre de Duvan: [duvan.md](duvan.md).
+
 ## Estado al 16 de noviembre
 
 El **motor RAG está COMPLETO en `main`** (Duvan): búsqueda semántica con clasificador temático (y modos léxico e híbrido), respuestas con **citas por numeral y parágrafo** verificadas, detección de **fuera de dominio**, LLM con **respaldo Groq y Gemini**, **reprocesamiento de normas nuevas desde un PDF** sin reiniciar el motor (probado con la Ley 769 de 2002), lectura de PDF con **PyMuPDF** (la subida pasó de 63 s a 0,4 s) y regla del «artículo N» con varias normas.

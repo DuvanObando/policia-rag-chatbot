@@ -1,0 +1,12 @@
+[
+ {"id": "i01", "tipo": "indirecta", "pregunta": "¿Me pueden multar por tomar licor en el parque?", "articulos_esperados": ["art-140"], "fuera_de_dominio": false, "nota": "Art. 140, num. 7 (consumo en espacio público; aparte inexequible)."},
+ {"id": "i02", "tipo": "indirecta", "pregunta": "Mi vecino pone música a todo volumen hasta la madrugada, ¿qué puedo hacer?", "articulos_esperados": ["art-33"], "fuera_de_dominio": false, "nota": "Art. 33: tranquilidad, ruidos."},
+ {"id": "i03", "tipo": "indirecta", "pregunta": "¿Puedo vender comida en la calle sin permiso?", "articulos_esperados": ["art-140", "art-92"], "fuera_de_dominio": false, "nota": "Art. 140 (ocupar el espacio público) o art. 92 (actividad económica sin requisitos)."},
+ {"id": "i04", "tipo": "indirecta", "pregunta": "Un policía me pidió la cédula, ¿estoy obligado a mostrarla?", "articulos_esperados": ["art-35"], "fuera_de_dominio": false, "nota": "Art. 35, num. 3: resistirse al procedimiento de identificación."},
+ {"id": "i05", "tipo": "indirecta", "pregunta": "Mi perro mordió a alguien en el parque, ¿qué me pasa?", "articulos_esperados": ["art-134", "art-124"], "fuera_de_dominio": false, "nota": "Art. 134 (caninos potencialmente peligrosos, ataque) o art. 124 (tenencia de animales)."},
+ {"id": "i06", "tipo": "indirecta", "pregunta": "¿Qué pasa si me cuelo en TransMilenio?", "articulos_esperados": ["art-146"], "fuera_de_dominio": false, "nota": "Art. 146: sistemas de transporte motorizados (evadir el pago)."},
+ {"id": "i07", "tipo": "indirecta", "pregunta": "¿Me pueden llevar a la estación si estoy borracho en la calle?", "articulos_esperados": ["art-155"], "fuera_de_dominio": false, "nota": "Art. 155: traslado por protección."},
+ {"id": "i08", "tipo": "indirecta", "pregunta": "Me pusieron un comparendo, ¿cómo lo reclamo?", "articulos_esperados": ["art-219", "art-222", "art-180"], "fuera_de_dominio": false, "nota": "Art. 219 (orden de comparendo), 222 (proceso verbal inmediato: recurso) o 180 (objetar la multa)."},
+ {"id": "i09", "tipo": "indirecta", "pregunta": "¿Es ilegal orinar en la calle?", "articulos_esperados": ["art-140"], "fuera_de_dominio": false, "nota": "Art. 140, num. 11: necesidades fisiológicas en el espacio público."},
+ {"id": "i10", "tipo": "transito", "pregunta": "Me detuvieron por conducir mi moto borracho, ¿me pueden multar?", "articulos_esperados": [], "fuera_de_dominio": true, "nota": "Tránsito (Ley 769). Con solo la Ley 1801 cargada, lo correcto es fuera de dominio."}
+]

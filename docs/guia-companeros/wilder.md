@@ -153,6 +153,16 @@ Imprime cuántos artículos encontró, el primero y el último. Después, para c
 - Trae las notas de la Función Pública pegadas al texto («Modificado por el art. 21, Ley 1383 de 2010...»); con ellas puedes marcar la vigencia en vez de dejarla `no_verificada`.
 - Título y capítulo salen de los encabezados en mayúsculas; el libro no.
 
+## Nuevo (19/11): la evaluación formal ya corre con tu banco
+
+`eval/run_eval.py` ya calcula Precisión@k, Recall@k, MRR, exactitud de fuera de dominio y corrección de la cita, y escribe `eval/reporte.md`. **Lee `eval/banco_preguntas.json`**; como está vacío, el 19/11 usó tu banco anterior (`corpus/preguntas_ley_1801.json`) adaptado por `eval/bancos.py` (los artículos esperados salen del campo `source`). Cuando subas el banco oficial (formato de `eval/ejemplo_formato.json`: `pregunta`, `respuesta_referencia`, `articulos_esperados`, `fuera_de_dominio` y, si quieres, `tipo`), córrelo así desde la raíz:
+
+```bash
+engine\.venv\Scripts\python eval/run_eval.py --indirectas --pausa 20
+```
+
+Tarda unos 25 minutos con 60 preguntas (la pausa es por los límites gratuitos de Groq y Gemini). Prueba rápida: `--limite 5 --pausa 5`. Incluye trampas variadas, no solo de tránsito: con la Ley 769 cargada esas preguntas dejan de ser trampa.
+
 ## Mensaje para enviar (WhatsApp, 16/11)
 
 > Wilder, el motor ya está completo en `main` y ahora puede cargar normas nuevas (probé con la Ley 769). Lo que te queda, con fecha límite *el miércoles 18 de noviembre* para subir tu PR a `main`:

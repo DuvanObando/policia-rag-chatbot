@@ -1,0 +1,1641 @@
+[
+ {
+  "id": "pregunta_01",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué comportamientos se consideran peligrosos porque pueden terminar en una pelea o agresión física?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-30",
+   "art-28"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 3.1,
+  "modelo": "openai/gpt-oss-120b",
+  "respaldo": false,
+  "citas_descartadas": [],
+  "respuesta": "Los comportamientos que la norma señala como peligrosos porque pueden derivar en confrontaciones violentas o agresiones físicas son:\n\n1. **Reñir, incitar o incurrir en confrontaciones violentas que puedan derivar en agresiones físicas** (Art. 27, num. 1).  \n2. **Lanzar objetos que puedan causar daño o sustancias peligrosas a personas** (Art. 27, num. 2).  \n3. **Agredir físicamente a personas por cualquier medio** (Art. 27, num. 3).  \n4. **Amenazar con causar un daño físico a personas por cualquier medio** (Art. 27, num. 4).  \n\n*Nota:* El artículo 27 está catalogado como **vigente_modificado**; por lo tanto, se recomienda verificar el numeral correspondiente en la fuente oficial para confirmar que no haya sido alterado o declarado inexequible.  \n\n*(Fuente: Ley 1801 de 2016, Art. 27, numerales 1-4)*",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_02",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo llevar un cuchillo en la calle si lo uso como herramienta de mi trabajo?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-166",
+   "art-140"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.4,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí, según el artículo 27 de la Ley 1801 de 2016, el portar un cuchillo en la calle está permitido **siempre y cuando sea una herramienta de tu actividad deportiva, oficio, profesión o estudio**.  \n(Art. 27, numeral 6)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_03",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La Policía puede apagar temporalmente el equipo que está haciendo mucho ruido en mi casa o barrio?",
+  "esperados": [
+   "art-33"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-33",
+   "art-95",
+   "art-35"
+  ],
+  "citados": [
+   "art-33"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.47,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí. Según el Artículo 33 de la Ley 1801 de 2016, las autoridades de Policía pueden **desactivar temporalmente la fuente de ruido** cuando el residente se niega a desactivarla.  \n(Art. 33, num. 1, a) (Art. 33, par. 1)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_04",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Dar un beso en un parque se considera automáticamente un acto sexual o de exhibicionismo?",
+  "esperados": [
+   "art-33"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-33",
+   "art-140",
+   "art-60"
+  ],
+  "citados": [
+   "art-33"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.32,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, dar un beso en un parque no se considera automáticamente un acto sexual o de exhibicionismo.  \nEl artículo 33, párrafo 2, establece que “no constituyen actos sexuales o de exhibicionismo los besos o caricias que las personas, sin importar su género, color de piel, orientación sexual o identidad de género, manifiesten como expresiones de cariño, en ejercicio de su derecho al libre desarrollo de la personalidad.” (Art. 33, par. 2)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_05",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Está prohibido consumir alcohol dentro de un colegio?",
+  "esperados": [
+   "art-34"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-34",
+   "art-39",
+   "art-140"
+  ],
+  "citados": [
+   "art-34"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.45,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí, el consumo de alcohol dentro de un colegio está prohibido.  \nEl artículo 34 de la Ley 1801 de 2016 establece que “Consumir bebidas alcohólicas, drogas o sustancias prohibidas, dentro de la institución o centro educativo” es un comportamiento que no debe efectuarse (Art. 34, num. 1).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_06",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puede un adulto facilitar sustancias psicoactivas cerca de un colegio?",
+  "esperados": [
+   "art-34"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-34",
+   "art-41",
+   "art-39"
+  ],
+  "citados": [
+   "art-34"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.4,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, un adulto no puede facilitar sustancias psicoactivas cerca de un colegio.  \n\n- **Facilitar, distribuir o expender** bebidas alcohólicas, drogas o sustancias prohibidas dentro de la institución o centro educativo está prohibido (Art. 34, num. 2).  \n- **Facilitar, distribuir o expender** bebidas alcohólicas o sustancias prohibidas en el espacio público o lugares abiertos al público dentro del perímetro circundante de la institución, conforme al perímetro establecido por el alcalde, también está prohibido (Art. 34, num. 4).  \n\nEl parágrafo 2 del artículo 34 indica que la persona mayor de edad que incurra en estos comportamientos será objeto de medidas correctivas, sin perjuicio de la responsabilidad penal que se genere bajo el Código Penal (Art. 34, par. 2).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_07",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Quién define el perímetro alrededor de un colegio donde se restringe el consumo de sustancias psicoactivas?",
+  "esperados": [
+   "art-34"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-34",
+   "art-39",
+   "art-140"
+  ],
+  "citados": [
+   "art-34"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.23,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El perímetro que delimita la zona donde se restringe el consumo de sustancias psicoactivas alrededor de un colegio lo define el alcalde del municipio.  \n(Art. 34, par. 3)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_08",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué pasa si un establecimiento permite vender o distribuir sustancias psicoactivas en zonas escolares?",
+  "esperados": [
+   "art-34"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-34",
+   "art-140",
+   "art-39"
+  ],
+  "citados": [
+   "art-34"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.53,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Si un establecimiento educativo permite vender o distribuir sustancias psicoactivas dentro de su zona escolar, se estaría incurriendo en el **numeral 2** del Art. 34 de la Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).  \n\n**Qué implica:**\n\n- **Multa General tipo 4** y **destrucción del bien** (el objeto que se vendió o distribuyó). (Art. 34, num. 2)  \n- Además, la persona mayor de edad que incurra en esta conducta será objeto de la aplicación de las medidas correctivas previstas en el **parágrafo 2** del mismo artículo, sin perjuicio de la responsabilidad penal que se genere bajo el Título XIII del Código Penal. (Art. 34, par. 2)  \n\nEn resumen, la venta o distribución de sustancias psicoactivas en zonas escolares constituye una conducta prohibida que conlleva sanciones económicas y la destrucción del bien, y puede acarrear responsabilidad penal.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_09",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Se puede consumir o vender sustancias psicoactivas en un parque aunque sea la dosis personal?",
+  "esperados": [
+   "art-140"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-140",
+   "art-34",
+   "art-41"
+  ],
+  "citados": [
+   "art-140"
+  ],
+  "fuera_obtenido": false,
+  "s": 10.2,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No se puede consumir, portar, distribuir, ofrecer o comercializar sustancias psicoactivas, ni siquiera la dosis personal, en los parques. \n\nOjo: el artículo 140 figura como vigente, modificado y con inexequibilidad parcial; verifica ese artículo en la fuente oficial porque podría tener apartes modificados o declarados inexequibles (Ley 1801 de 2016, páginas 54 y 55). Según este artículo, son comportamientos contrarios al cuidado e integridad del espacio público los siguientes:\n\n* Consumir, portar, distribuir, ofrecer o comercializar sustancias psicoactivas, inclusive la dosis personal, en los parques (Art. 140, num. 13).\n* Consumir, portar, distribuir, ofrecer o comercializar sustancias psicoactivas, incluso la dosis personal, en áreas o zonas del espacio público definidas por el alcalde del municipio por motivos de interés público (Art. 140, num. 14).\n\nQuien incurra en el numeral 13 o en el numeral 14 será objeto de la aplicación de Multa General tipo 4 y destrucción del bien (Art. 140, par. 2).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_10",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Un alcalde puede definir zonas específicas del espacio público donde se restringe el consumo de sustancias psicoactivas?",
+  "esperados": [
+   "art-140"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-140",
+   "art-34",
+   "art-49"
+  ],
+  "citados": [
+   "art-34"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.37,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí. El artículo 34 de la Ley 1801 establece que los alcaldes pueden fijar perímetros para restringir el consumo de sustancias psicoactivas en lugares públicos.  \n- “Corresponderá a los alcaldes, establecer los perímetros para la restricción del consumo de sustancias psicoactivas en los lugares públicos establecidos en el presente artículo. La delimitación debe ser clara y visible para los ciudadanos, informando del espacio restringido.” (Art. 34, par. 3)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": false,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_11",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué medida puede aplicarse por consumir sustancias psicoactivas en una de las zonas restringidas del artículo 140?",
+  "esperados": [
+   "art-140"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-140",
+   "art-34",
+   "art-41"
+  ],
+  "citados": [
+   "art-140"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.41,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "La Ley 1801 de 2016, artículo 140, establece que consumir sustancias psicoactivas en las zonas restringidas (numerales 13 y 14) es un comportamiento prohibido.  \nPara ese comportamiento se aplican las siguientes medidas correctivas:\n\n- Multa General tipo 4; Destrucción del bien. (Art. 140, num. 13; Art. 140, num. 14)  \n\nOjo: el artículo 140 figura como **vigente_modificado_con_inexequibilidad_parcial**; verifica la fuente oficial para confirmar si alguna parte del numeral ha sido modificada o declarada inexequible.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_12",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Un negocio puede ser suspendido automáticamente por cualquier incumplimiento de requisitos de funcionamiento?",
+  "esperados": [
+   "art-92"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-92",
+   "art-93",
+   "art-94"
+  ],
+  "citados": [
+   "art-92"
+  ],
+  "fuera_obtenido": false,
+  "s": 3.04,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [
+   "Art. 87"
+  ],
+  "respuesta": "Ojo: el artículo 92 figura como vigente_modificado; verifica el parágrafo 7 en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles.\n\nPara efecto de aplicar el comportamiento sobre desarrollar la actividad económica sin cumplir los requisitos de la normatividad vigente, este se debe interpretar y aplicar únicamente teniendo en cuenta los requisitos de apertura y funcionamiento establecidos en el artículo 87 de la Ley 1801 de 2016 (Art. 92, par. 7). \n\nAdemás, cuando se trata de controlar el uso reglamentado del suelo y las disposiciones de ubicación, destinación o finalidad para la que fue construida la edificación, el control es exclusivo de los Inspectores de Policía, y en ese caso no procederá la medida de suspensión temporal de actividades (Art. 92, par. 7).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_13",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Quién controla el uso del suelo de un establecimiento cuando se revisa el cumplimiento de requisitos?",
+  "esperados": [
+   "art-92"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-92",
+   "art-86",
+   "art-87"
+  ],
+  "citados": [
+   "art-87",
+   "art-92"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.21,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El uso del suelo de un establecimiento se controla por los **Inspectores de Policía**.  \n- En el Art. 87 de la Ley 1801 se indica que las autoridades de Policía pueden verificar el cumplimiento de los requisitos, incluido el uso del suelo (Art. 87, par. 1).  \n- En el Art. 92 se especifica que el control de uso reglamentado del suelo y las disposiciones de ubicación, destinación o finalidad, para la que fue construida la edificación, es exclusivo de los Inspectores de Policía (Art. 92, par. 12).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_14",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué requisitos se deben mirar para aplicar la regla sobre un negocio que funciona sin cumplir los requisitos legales?",
+  "esperados": [
+   "art-92"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-87",
+   "art-92",
+   "art-86"
+  ],
+  "citados": [
+   "art-87",
+   "art-92"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.72,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Para determinar si un negocio está funcionando sin cumplir los requisitos legales, debes revisar los requisitos que la Ley 1801 de 2016 exige antes de iniciar y durante la actividad económica.  \nLos requisitos que se deben verificar son los que aparecen en el **Artículo 87**:\n\n1. **Normas de uso del suelo, destinación o finalidad** de la edificación y su ubicación. (Art. 87, num. 1)  \n2. **Matrícula mercantil vigente** en la Cámara de Comercio de la jurisdicción donde se desarrolla la actividad. (Art. 87, num. 2)  \n3. **Comunicación de apertura** del establecimiento al comandante de estación o subestación de Policía del lugar donde funciona. (Art. 87, num. 3)  \n4. **Permiso o autorización** del Ministerio de Tecnologías de la Información y las Comunicaciones (o su delegado) para la comercialización de equipos terminales móviles. (Art. 87, num. 4)  \n\nDurante la ejecución de la actividad, también se deben cumplir:\n\n5. **Normas sobre niveles de intensidad auditiva**. (Art. 87, num. 5)  \n6. **Horarios establecidos** para la actividad económica. (Art. 87, num. 6)  \n7. **Condiciones de seguridad, sanitarias y ambientales** determinadas en el régimen de Policía. (Art. 87, num. 7)  \n8. **Objeto registrado en la matrícula mercantil** y no desarrollar otra actividad diferente. (Art. 87, num. 8)  \n9. **Comprobante de pago al día** para obras musicales protegidas por derechos de autor. (Art. 87, num. 9)  \n10. **Registro nacional de turismo** si se ofrecen servicios de alojamiento al público u hospitalidad. (Art. 87, num. 10)\n\nSi el negocio no cumple alguno de estos requisitos, se considera que está operando sin cumplir la normativa vigente, lo que puede dar lugar a las medidas correctivas previstas en el **Artículo 92** (numeral 16). (Art. 92, num. 16)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 0.5,
+  "pos": 2,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_15",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Un conjunto residencial puede prohibir que los animales domésticos pasen por sus zonas comunes?",
+  "esperados": [
+   "art-117"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-117",
+   "art-124",
+   "art-116"
+  ],
+  "citados": [
+   "art-117"
+  ],
+  "fuera_obtenido": false,
+  "s": 3.25,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, un conjunto residencial no puede prohibir que los animales domésticos pasen por sus zonas comunes.  \nEl artículo 117 del Código Nacional de Seguridad y Convivencia Ciudadana establece que “No podrán prohibirse el tránsito y permanencia de animales domésticos o mascotas en las zonas comunes de propiedades horizontales o conjuntos residenciales” (Art. 117).  \n\nPor lo tanto, la prohibición de la permanencia de mascotas en las zonas comunes sería contraria a la norma vigente.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_16",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué deben hacer los perros cuando transitan por zonas comunes de un conjunto residencial?",
+  "esperados": [
+   "art-117"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-117",
+   "art-124",
+   "art-118"
+  ],
+  "citados": [
+   "art-117",
+   "art-118"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.2,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Los perros que transiten por las zonas comunes de un conjunto residencial deben:\n\n1. **No estar prohibidos**: la ley no permite prohibir su tránsito ni permanencia en esas áreas. (Art. 117, num. 1)\n\n2. **Ser sujetos por traílla**: todos los ejemplares caninos deben ir sujetos por su traílla. (Art. 118, num. 1)\n\n3. **Usar bozal cuando corresponda**: si el perro es potencialmente peligroso (o “perro de manejo especial” según la actualización), debe llevar bozal ajustado. (Art. 118, num. 1)\n\nEn resumen, los perros pueden circular por las zonas comunes siempre que estén sujetos por traílla y, en caso de ser perros potencialmente peligrosos, también con bozal.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_17",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puede la administración de un conjunto ignorar una regla de su manual que contradiga lo que dice la ley sobre mascotas?",
+  "esperados": [
+   "art-117"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-117",
+   "art-124",
+   "art-118"
+  ],
+  "citados": [
+   "art-117"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.32,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "La administración de un conjunto residencial **no puede ignorar** una regla de su manual de convivencia que contradiga lo que establece la Ley 1801 de 2016 sobre la tenencia de mascotas.  \n\nEl artículo 117 del Código Nacional de Seguridad y Convivencia Ciudadana indica que los administradores “quedan autorizados para **no aplicar las normas de los Manuales de Convivencia que contraríen las disposiciones aquí descritas**; por tanto, deberán solicitar de manera inmediata a las Asambleas de Copropietarios la actualización de los Manuales de Convivencia de propiedades horizontales o conjuntos residenciales, a la normatividad que contempla el capítulo II del presente código.” (Art. 117)  \n\nEn otras palabras, si una norma interna del conjunto entra en conflicto con la ley, la administración debe dejar de aplicarla y buscar la corrección del manual ante la asamblea.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_18",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La Policía puede trasladar a alguien para protegerlo si está en una situación de riesgo?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-157",
+   "art-169"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.42,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí. La Policía puede trasladar a una persona para su protección cuando su vida o integridad están en riesgo y no acepta la mediación policial.  \nEl traslado por protección está previsto en el **Artículo 155** de la Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).  \n\n- Se permite el traslado cuando la persona se encuentre:  \n  - inmersa en riña;  \n  - deambulando en estado de indefensión;  \n  - con alteración del estado de conciencia por motivos de salud mental;  \n  - bajo efectos de bebidas alcohólicas o sustancias psicoactivas y muestra comportamientos agresivos o temerarios;  \n  - realizando actividades peligrosas o de riesgo que pongan en peligro su vida o la de terceros;  \n  - en peligro de ser agredida. (Art. 155, num. 1-h)\n\n- En los casos de los literales B, C y D, la Policía puede ejecutar el traslado sin agotar la mediación policial. (Art. 155, par. 1)\n\n- El traslado debe realizarse en un Centro de Traslado por Protección, o en su defecto, en un lugar que garantice la protección y los derechos fundamentales. (Art. 155, par. 2-3)\n\n- La duración máxima del traslado es de 12 horas, y puede cesar cuando desaparezcan las causas que lo motivaron. (Art. 155, par. 3)\n\n- El personal uniformado debe informar al superior jerárquico y documentar el traslado mediante informe escrito. (Art. 155, par. 5)\n\nEn resumen, la Policía sí puede trasladar a una persona para protegerla cuando se cumplan los criterios de riesgo establecidos en el Art. 155.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_19",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La Policía puede llevar a una persona a una estación para hacer un traslado por protección?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-157",
+   "art-159"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.36,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1
+ },
+ {
+  "id": "pregunta_20",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Cuánto tiempo puede durar como máximo un traslado por protección?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-157",
+   "art-97"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.45,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El traslado por protección no puede durar más de **12 horas**.  \n(Art. 155)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_21",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué debe hacer la Policía si traslada a una persona para protegerla?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-157",
+   "art-159"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.45,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "La Policía debe seguir los pasos que establece el Artículo 155 de la Ley 1801 de 2016 (Traslado por protección).  \n**Acciones que debe realizar:**\n\n1. **Entregar la persona a un familiar o al coordinador del Centro de Traslado por Protección** (para que garantice sus derechos). (Art. 155, par. 2)  \n2. **Informar de inmediato al superior jerárquico** y documentar mediante un informe escrito con los datos de la persona trasladada y las circunstancias del traslado. (Art. 155, par. 5)  \n3. **Proveer copia del informe** al coordinador del Centro de Traslado por Protección cuando la persona sea conducida a un sitio dispuesto por la entidad territorial, distrital o municipal. (Art. 155, par. 5)  \n4. **Permitir que la persona trasladada se comunique** con un allegado o con quien pueda asistirla, informándole el motivo y sitio de traslado; si no tiene medios, la autoridad los facilitará. (Art. 155, par. 7)  \n5. **No realizar el traslado en instalaciones de la Policía Nacional** ni en sitios de reclusión penal. (Art. 155, par. 4)  \n\nEstas disposiciones son vigentes y condicionadas; se recomienda verificar la fuente oficial para confirmar que no haya apartes modificados o declarados inexequibles.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_22",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La persona trasladada por protección puede avisarle a un familiar dónde está?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-157",
+   "art-82"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.21,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí. El artículo 155 de la Ley 1801 de 2016 establece que la autoridad de Policía debe permitir a la persona que va a ser trasladada comunicarse con un familiar u otra persona que pueda asistirla para informarle el motivo y el sitio de traslado. Si la persona no tiene medios de comunicación, la autoridad debe facilitarles esos medios. (Art. 155, par. 7)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_23",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué pasa si en mi municipio no existe un Centro de Traslado por Protección?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-119",
+   "art-157"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.84,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Si en tu municipio no existe un Centro de Traslado por Protección, la Ley 1801 de 2016 indica que:\n\n- **No se podrá ejecutar el traslado por protección** hasta que la entidad territorial (municipio o distrito) disponga de un lugar idóneo que garantice el respeto por los derechos fundamentales y la dignidad humana. (Art. 155, par. 6)\n\n- **Se podrán emplear otros medios de policía** o medidas correctivas que permitan restaurar la seguridad y convivencia ciudadana mientras se espera la creación del centro. (Art. 155, par. 6)\n\n- **Las alcaldías, distritos o municipios pueden realizar convenios, coordinaciones o asociaciones con otros entes territoriales** para materializar el medio de policía establecido en el artículo. (Art. 155, par. 6)\n\nEn resumen, la ausencia de un Centro de Traslado por Protección impide la aplicación de ese medio específico, pero la autoridad puede usar otras medidas correctivas y buscar acuerdos con otras entidades para garantizar la protección de las personas en riesgo.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_24",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué nuevas conductas relacionadas con armas menos letales se añadieron a las reglas de convivencia?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-30",
+   "art-59"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.84,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [
+   "Ley 2197, Art. 39"
+  ],
+  "respuesta": "Las nuevas conductas que se incorporaron al Art. 27 sobre armas menos letales son:\n\n1. **Portar armas, elementos y dispositivos menos letales sin permiso de autoridad competente cuando estas lo requieran.** (Art. 27, num. 9)  \n2. **Portar armas, elementos y dispositivos menos letales cuando haya perdido vigencia el permiso respectivo.** (Art. 27, num. 10)  \n3. **Portar armas, elementos y dispositivos menos letales bajo el influjo de sustancias psicoactivas ilícitas o prohibidas, o en estado de embriaguez.** (Art. 27, num. 11)  \n\nEstas disposiciones fueron añadidas por el Art. 39 de la Ley 2197 de 2022.  \n\n*(Fuente: Art. 27, numerales 8-11 de la Ley 1801 de 2016)*",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_25",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo llevar un arma menos letal modificada para que funcione de otra manera?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-29",
+   "art-30"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.74,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, no puedes llevar un arma menos letal modificada para que funcione de otra manera.  \nEl artículo 27 de la Ley 1801 de 2016 establece que:\n\n- **Numeral 8**: “Portar armas, elementos y dispositivos menos letales que hayan sido modificados en sus características de fabricación, origen, diseño y propósito, sin perjuicio de las sanciones penales a que haya lugar.” (Art. 27, num. 8)  \n- **Numeral 9**: “Portar armas, elementos y dispositivos menos letales sin permiso de autoridad competente cuando estas lo requieran.” (Art. 27, num. 9)  \n- **Numeral 10**: “Portar armas, elementos y dispositivos menos letales cuando haya perdido vigencia el permiso respectivo.” (Art. 27, num. 10)  \n- **Numeral 11**: “Portar armas, elementos y dispositivos menos letales bajo el influjo de sustancias psicoactivas ilícitas o prohibidas, o en estado de embriaguez.” (Art. 27, num. 11)\n\nOjo: el artículo 27 figura como **vigente_modificado**; verifica los numerales 8-11 en la fuente oficial, porque podrían haber apartes modificados o declarados inexequibles.  \n\nEn resumen, la modificación de un arma menos letal para que funcione de otra manera está prohibida y puede acarrear sanciones penales.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_26",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo portar un arma menos letal si el permiso que necesitaba está vencido?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-29",
+   "art-30"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.54,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, no puedes portar un arma menos letal si el permiso que necesitaba está vencido.  \nEl artículo 27, numeral 10 de la Ley 1801 de 2016 establece que “Portar armas, elementos y dispositivos menos letales cuando haya perdido vigencia el permiso respectivo” es un comportamiento prohibido. (Art. 27, num. 10)  \n\nEl artículo 27 está vigente, pero ha sido modificado; verifica la versión oficial para confirmar que el numeral 10 sigue vigente y no ha sido declarado inexequible. (Art. 27, vigencia: vigente_modificado)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_27",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo portar un arma menos letal si estoy borracho?",
+  "esperados": [
+   "art-27"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-27",
+   "art-155",
+   "art-38"
+  ],
+  "citados": [
+   "art-27"
+  ],
+  "fuera_obtenido": false,
+  "s": 5.45,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, no puedes portar un arma, elemento o dispositivo menos letal si estás en estado de embriaguez o bajo el influjo de sustancias psicoactivas ilícitas o prohibidas (Art. 27, num. 11).\n\n*   Ojo: el artículo 27 figura como vigente modificado; verifica el numeral 11 en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles.\n\nQuien incurra en este comportamiento será objeto de las medidas correctivas señaladas para las infracciones de este artículo, y en todos los casos la Policía deberá utilizar la mediación como intento para resolver el conflicto (Art. 27, par. 1; Art. 27, par. 2).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_28",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La alcaldía tiene responsabilidades especiales para tener un Centro de Traslado por Protección?",
+  "esperados": [
+   "art-205"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-205",
+   "art-157"
+  ],
+  "citados": [
+   "art-155",
+   "art-205"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.34,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí.  \n- El **Artículo 155** indica que la entidad territorial (municipio, distrito o alcaldía) debe **responsabilizarse de la implementación y dotación del Centro de Traslado por Protección** y garantizar que las instalaciones cumplan con los requisitos de seguridad, respeto y dignidad humana, en un plazo no mayor a tres (3) años a partir de la expedición de la ley. (Art. 155, num. 3)  \n- El **Artículo 205** establece que el alcalde debe **crear centros especiales o mecanismos de atención y protección de personas trasladadas o conducidas por el personal uniformado de la Policía** y coordinar y desarrollar programas pedagógicos para la convivencia. (Art. 205, num. 12)  \n\nEn resumen, la alcaldía tiene la obligación de crear y mantener un Centro de Traslado por Protección, asegurando su funcionamiento y cumplimiento de los estándares de protección y derechos humanos.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 0.5,
+  "pos": 2,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_29",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué sistema nacional se creó para organizar el recaudo de multas y comparendos?",
+  "esperados": [
+   "art-185A"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-185A",
+   "art-185B",
+   "art-180"
+  ],
+  "citados": [
+   "art-185A"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.16,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El sistema creado es el **Sistema Único de Información de recaudo a nivel nacional de los pagos por concepto de comparendos y medidas correctivas** (Art. 185A). (Art. 185A)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_30",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La Policía puede consultar cámaras de seguridad privadas para prevenir o investigar hechos?",
+  "esperados": [
+   "art-237B"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-237B",
+   "art-21",
+   "art-237"
+  ],
+  "citados": [
+   "art-237B"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.16,
+  "modelo": "openai/gpt-oss-120b",
+  "respaldo": false,
+  "citas_descartadas": [],
+  "respuesta": "La Policía Nacional puede acceder a los circuitos cerrados de vigilancia y seguridad privada para **identificación** o **judicialización** de hechos. La parte que menciona el acceso para “prevención” está marcada como **[INEXEQUIBLE]**, por lo que esa finalidad ya no rige.  \n\n(Ojo: el artículo 237B figura como *vigente_modificado*; verifica el numeral en la fuente oficial, porque podría haber apartes modificados o declarados inexequibles.)  \n\n(Art. 237B)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_31",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Si me ponen una multa de convivencia, puedo cambiar algunas multas pequeñas por participar en una actividad comunitaria?",
+  "esperados": [
+   "art-223A"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-180",
+   "art-212",
+   "art-175"
+  ],
+  "citados": [
+   "art-180",
+   "art-175"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.54,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí.  \n- Si la multa que te impusieron es de **Tipo 1** o **Tipo 2** (dos o cuatro salarios mínimos diarios legales vigentes), puedes solicitar que se conmute esa multa por la participación en un programa comunitario o actividad pedagógica de convivencia. La solicitud debe hacerse **máximo cinco (5) días hábiles** después de la expedición del comparendo. (Art. 180, num. 1)  \n- La participación en ese programa es una medida correctiva que la autoridad de policía puede imponer por cualquier comportamiento contrario a la convivencia. (Art. 175, par. 1)  \n\nEn otras palabras, si la multa que recibiste es de Tipo 1 o Tipo 2, tienes la opción de cambiarla por la participación en una actividad comunitaria dentro del plazo indicado. Si la multa fuera de Tipo 3 o Tipo 4, no se contempla esa posibilidad.",
+  "precision": 0.0,
+  "recall": 0.0,
+  "rr": 0.0,
+  "pos": 0,
+  "cita_correcta": false,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_32",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Cuántos días tengo para objetar una orden de comparendo con multa general según el procedimiento especial?",
+  "esperados": [
+   "art-223A"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-180",
+   "art-223A",
+   "art-219"
+  ],
+  "citados": [
+   "art-223A"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.12,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Para objetar una orden de comparendo que contenga una multa general, el procedimiento especial establece que tienes **tres (3) días hábiles** a partir de la expedición de la orden.  \n\n(Art. 223A, num. 2)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 0.5,
+  "pos": 2,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_33",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo hacer el programa comunitario de convivencia en un municipio diferente al lugar donde ocurrió el problema?",
+  "esperados": [
+   "art-223A"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-175",
+   "art-180",
+   "art-111"
+  ],
+  "citados": [
+   "art-175",
+   "art-111"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.43,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, el programa comunitario de convivencia debe ser organizado por la administración **distrital o municipal** donde ocurrió el comportamiento contrario a la convivencia.  \n- El artículo 175 indica que la medida “será impuesta por la autoridad de Policía competente para todos los comportamientos contrarios a la convivencia… organizada por la administración distrital o municipal” (Art. 175).  \n- El artículo 111, que establece la medida correctiva, también se refiere a la participación en “programa comunitario o actividad pedagógica de convivencia” sin mencionar la posibilidad de hacerlo en otro municipio (Art. 111).  \n\nPor lo tanto, la participación debe realizarse en el mismo municipio donde se cometió la infracción.",
+  "precision": 0.0,
+  "recall": 0.0,
+  "rr": 0.0,
+  "pos": 0,
+  "cita_correcta": false,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_34",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué pasa si una persona repite un comportamiento contrario a la convivencia por el que ya le impusieron una multa?",
+  "esperados": [
+   "art-223A"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-223A",
+   "art-212",
+   "art-25"
+  ],
+  "citados": [
+   "art-212",
+   "art-223A"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.25,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Si una persona repite un comportamiento contrario a la convivencia por el que ya le impusieron una multa, la ley establece que la nueva multa se incrementará.  \n**Incremento de la multa**  \n1. El incumplimiento o la reiteración del comportamiento aumentan la multa en un **cincuenta por ciento (50%)**. (Art. 212, num. 1)  \n2. Si la reiteración ocurre dentro del año siguiente a la firmeza de la primera multa, el aumento pasa a ser **setenta y cinco por ciento (75%)**. (Art. 212, num. 1)  \n\n**Procedimiento adicional**  \n- Cuando la multa es de tipo 1 a 4, el procedimiento se regula por el Art. 223A, que indica que la multa queda firme cinco días después de la expedición si no se objeta, y que el cobro coactivo puede iniciarse. (Art. 223A, num. 5)  \n\nOjo: el Art. 223A figura como “vigente_modificado”; verifica el numeral 5 en la fuente oficial porque podría haber apartes modificados o declarados inexequibles.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_35",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Qué mecanismo puede usar la Policía para ayudar a dos vecinos a resolver un problema sin pelear?",
+  "esperados": [
+   "art-154"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-154",
+   "art-215",
+   "art-10"
+  ],
+  "citados": [
+   "art-154"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.08,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El mecanismo que la Policía puede usar para ayudar a dos vecinos a resolver un problema sin pelear es la **mediación policial**.  \n- Mediación Policial (Artículo 154, epígrafe) (Art. 154)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta36",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿La mediación policial es obligatoria antes de acudir a otro trámite?",
+  "esperados": [
+   "art-154"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-154",
+   "art-149",
+   "art-234A"
+  ],
+  "citados": [
+   "art-154"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.13,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "La mediación policial **no es obligatoria** antes de acudir a otro trámite.  \nEl artículo 154 de la Ley 1801 de 2016 establece que “la mediación policial no configura requisito de procedibilidad” (Art. 154, par. 2).  \n\nEsto significa que las autoridades no pueden exigir que se realice una mediación policial como condición previa para iniciar cualquier otro procedimiento.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_37",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Todos los problemas entre vecinos se pueden resolver mediante conciliación o mediación?",
+  "esperados": [
+   "art-231"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-233",
+   "art-231",
+   "art-232"
+  ],
+  "citados": [
+   "art-232",
+   "art-233",
+   "art-231"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.38,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, no todos los problemas entre vecinos pueden resolverse únicamente por conciliación o mediación.  \n\n**Según la Ley 1801 de 2016**:\n\n- La conciliación y la mediación solo pueden aplicarse a conflictos de convivencia que **no sean conductas delictivas** ni estén bajo la competencia de otras jurisdicciones, y que **no infrinjan normas urbanísticas, ambientales, sanitarias, del uso del espacio público, del ejercicio de la actividad económica, de la libertad de circulación, de las interacciones entre las personas y las autoridades, que afecten la integridad de niños, niñas y adolescentes, del ejercicio de la prostitución, o del derecho de reunión**. (Art. 232, num. 1; Art. 232, num. 2)  \n\n- Además, la conciliación solo procede ante la autoridad de policía que conozca del caso, en cualquier etapa del trámite del procedimiento o cuando se presente el conflicto de convivencia. (Art. 232, num. 1)  \n\n- La mediación permite que el mediador escuche a las personas en conflicto y facilite una solución equitativa, pero solo cuando los derechos de las partes sean de libre disposición y se encuentren dentro del ámbito de convivencia. (Art. 233)  \n\n- Los mecanismos alternativos de solución de conflictos de convivencia (conciliación o mediación) están disponibles **solo cuando los derechos de las partes sean de libre disposición** y no se trate de conductas delictivas o competencia de otras jurisdicciones. (Art. 231)  \n\nEn resumen, los conflictos que involucren delitos, normas urbanísticas, ambientales, sanitarias, de uso del espacio público, de actividad económica, de libertad de circulación, de interacciones con autoridades, de integridad de menores, de prostitución o de derecho de reunión **no pueden resolverse mediante conciliación o mediación**. Para esos casos, se requiere otro tipo de procedimiento legal.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 0.5,
+  "pos": 2,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "pregunta_38",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿En qué momento puedo pedir una conciliación ante una autoridad de Policía por un conflicto de convivencia?",
+  "esperados": [
+   "art-232"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-232",
+   "art-234A",
+   "art-180"
+  ],
+  "citados": [
+   "art-232"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.12,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Puedes solicitar una conciliación ante la autoridad de policía en **cualquier etapa del trámite del procedimiento** o **en el momento en que se presente el conflicto de convivencia**.  \n(Art. 232)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_39",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Si llego a un acuerdo en una conciliación de convivencia, queda por escrito?",
+  "esperados": [
+   "art-232"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-232",
+   "art-231",
+   "art-233"
+  ],
+  "citados": [
+   "art-232"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.43,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí. Cuando se llega a un acuerdo en una conciliación de convivencia, la autoridad de policía o el conciliador **suscribirá un acta de conciliación** donde se consignarán las obligaciones de cada una de las partes. Ese acta queda por escrito y tiene efectos de cosa juzgada y mérito ejecutivo ante las autoridades judiciales competentes. (Art. 232)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_40",
+  "tipo": "norma_modificatoria",
+  "pregunta": "¿Puedo conciliar cualquier comportamiento que haya cometido frente a la Policía?",
+  "esperados": [
+   "art-232"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-232",
+   "art-25",
+   "art-35"
+  ],
+  "citados": [
+   "art-232"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.11,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No, no puedes conciliar cualquier comportamiento que hayas cometido frente a la Policía.  \nEl Art. 232 de la Ley 1801 de 2016 establece que la conciliación **no** es aplicable a los siguientes tipos de conductas:\n\n1. **Comportamientos que infringen normas urbanísticas, ambientales, sanitarias, del uso del espacio público, del ejercicio de la actividad económica, de la libertad de circulación, de las interacciones entre las personas y las autoridades, que afectan la integridad de niños, niñas y adolescentes, del ejercicio de la prostitución, y del derecho de reunión.** (Art. 232)  \n\nEn otras palabras, solo se puede conciliar cuando el conflicto no involucre alguno de esos comportamientos. Si el acto que cometiste cae dentro de alguna de las categorías anteriores, la conciliación no será una opción. (Art. 232)",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "pregunta_41",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿A qué edad puedo sacar una licencia para conducir una moto?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-92",
+   "art-38",
+   "art-183"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.73,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_42",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Necesito casco para manejar bicicleta o motocicleta?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-142",
+   "art-143",
+   "art-144"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.39,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_43",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Puedo conducir un carro sin tener licencia?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-183",
+   "art-87",
+   "art-27"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.24,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_44",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Qué significa una señal de tránsito de Pare?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-53",
+   "art-174",
+   "art-160"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.04,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_45",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Puedo conducir una moto por el andén?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-140",
+   "art-56",
+   "art-135"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.11,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_46",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Cuánto es la multa por pasar un semáforo en rojo?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-180",
+   "art-181",
+   "art-223A"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.23,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_47",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Los niños pueden viajar en el asiento delantero de un carro?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-39",
+   "art-36",
+   "art-38"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 2.08,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_48",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Tengo que llevar la licencia de conducción cuando manejo?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-134",
+   "art-87",
+   "art-124"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 1.51,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_49",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Puedo conducir después de tomar bebidas alcohólicas?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-49",
+   "art-34",
+   "art-140"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 5.0,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana)."
+ },
+ {
+  "id": "pregunta_50",
+  "tipo": "fuera_de_dominio",
+  "pregunta": "¿Quién tiene prioridad en una intersección sin semáforo?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-141",
+   "art-140",
+   "art-146"
+  ],
+  "citados": [
+   "art-141"
+  ],
+  "fuera_obtenido": false,
+  "s": 1.35,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "En una intersección sin semáforo, la ley establece que **los peatones y ciclistas tienen prioridad** sobre los demás vehículos, salvo cuando la vía sea férrea, autopista o arteria, según lo dispuesto en el artículo 141. (Art. 141)"
+ },
+ {
+  "id": "i01",
+  "tipo": "indirecta",
+  "pregunta": "¿Me pueden multar por tomar licor en el parque?",
+  "esperados": [
+   "art-140"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-140",
+   "art-103",
+   "art-180"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 2.8,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1
+ },
+ {
+  "id": "i02",
+  "tipo": "indirecta",
+  "pregunta": "Mi vecino pone música a todo volumen hasta la madrugada, ¿qué puedo hacer?",
+  "esperados": [
+   "art-33"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-33",
+   "art-34",
+   "art-35"
+  ],
+  "citados": [
+   "art-33"
+  ],
+  "fuera_obtenido": false,
+  "s": 3.25,
+  "modelo": "openai/gpt-oss-20b",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "El vecino que reproduce música a todo volumen hasta la madrugada está incurriendo en el **numeral 1, literal a** del Art. 33 de la Ley 1801 de 2016, que prohíbe “Sonidos o ruidos en actividades, fiestas, reuniones o eventos similares que afecten la convivencia del vecindario, cuando generen molestia por su impacto auditivo” (Art. 33, num. 1, lit. a).  \n\n**Qué puedes hacer:**\n\n1. **Denunciar a la Policía**. La autoridad puede desactivar temporalmente la fuente de ruido si el residente se niega a hacerlo (Art. 33, num. 1, lit. a).  \n2. **Solicitar la intervención de la Policía** para que realice la desactivación o la imposición de una multa.  \n3. Si la música continúa, la Policía puede aplicar la **medida correctiva** correspondiente al numeral 1 del Art. 33, que incluye una **Multa General tipo 3** (Art. 33, num. 1).  \n\n> Ojo: el artículo 33 está vigente, pero la Corte Constitucional declaró **inexequible** la expresión subrayada que menciona “consumir sustancias alcohólicas, psicoactivas o prohibidas” (Art. 33, num. 2, lit. c). Esta parte no afecta la situación de la música.  \n\nPara más información sobre el procedimiento de denuncia, puedes consultar el archivo PDF de la ley: *documentos/leyes/Ley_1801_de_2016.pdf* (páginas 10-11).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i03",
+  "tipo": "indirecta",
+  "pregunta": "¿Puedo vender comida en la calle sin permiso?",
+  "esperados": [
+   "art-140",
+   "art-92"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-92",
+   "art-110",
+   "art-93"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 9.87,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).",
+  "precision": 0.3333333333333333,
+  "recall": 0.5,
+  "rr": 1.0,
+  "pos": 1
+ },
+ {
+  "id": "i04",
+  "tipo": "indirecta",
+  "pregunta": "Un policía me pidió la cédula, ¿estoy obligado a mostrarla?",
+  "esperados": [
+   "art-35"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-35",
+   "art-162",
+   "art-150"
+  ],
+  "citados": [
+   "art-35",
+   "art-150"
+  ],
+  "fuera_obtenido": false,
+  "s": 2.32,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí, está obligado a mostrar su cédula o documento de identificación cuando se lo solicite la autoridad de Policía. De acuerdo con la Ley 1801 de 2016, se consideran comportamientos contrarios a la convivencia que no deben realizarse:\n\n- Impedir, dificultar, obstaculizar o resistirse a un procedimiento de identificación o individualización por parte de las autoridades de Policía (Art. 35, num. 3).\n- Negarse a dar información veraz sobre lugar de residencia, domicilio y actividad a las autoridades de Policía cuando estas lo requieran en procedimientos de Policía (Art. 35, num. 4).\n\nPor otra parte, las órdenes de Policía son de obligatorio cumplimiento y las personas que las desobedezcan serán obligadas a cumplirlas utilizando, si es necesario, los medios, medidas y procedimientos establecidos en el Código (Art. 150).\n\n(Nota de trazabilidad de consulta: el texto de estas normas puede consultarse en el archivo `documentos/leyes/Ley_1801_de_2016.pdf`, páginas 11, 12 y 59).\n\n*Recuerda que esta información es de carácter orientativo. Si tienes dudas sobre un procedimiento específico o requieres asesoría legal, te sugiero consultar a un abogado o a la autoridad competente.*",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": false
+ },
+ {
+  "id": "i05",
+  "tipo": "indirecta",
+  "pregunta": "Mi perro mordió a alguien en el parque, ¿qué me pasa?",
+  "esperados": [
+   "art-134",
+   "art-124"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-134",
+   "art-124",
+   "art-128"
+  ],
+  "citados": [
+   "art-134"
+  ],
+  "fuera_obtenido": false,
+  "s": 9.45,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Ojo: el artículo 134 figura como vigente modificado con inexequibilidad parcial; verifica ese artículo en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles. \n\nSi un ejemplar canino de manejo especial (también denominado canino potencialmente peligroso) ataca a una persona causándole lesiones permanentes de cualquier tipo, se aplican las siguientes consecuencias para el propietario:\n\n* El propietario será sancionado por la autoridad municipal competente con Multa General tipo 4 (Art. 134, par. 3).\n* El propietario estará obligado a pagar por todos los daños causados a la persona (Art. 134, par. 3).\n\nAdicionalmente, si el animal es reincidente en el ataque, se procederá a su decomiso, y un veterinario (preferiblemente etólogo) determinará el tratamiento a seguir (Art. 134, par. 3). Todo esto se aplica sin perjuicio de las disposiciones de la Ley 1774 de 2016 y de las demás normas sobre protección animal y prevención del maltrato animal (Art. 134, par. 4).\n\n*Nota sobre la fuente:* Este texto se encuentra en la Ley 1801 de 2016, páginas 50 y 51, dentro del archivo `documentos/leyes/Ley_1801_de_2016.pdf`. \n\nDado que se trata de un caso particular y delicado, se sugiere consultar a un abogado o a la autoridad competente para recibir asesoría sobre su situación específica.",
+  "precision": 0.6666666666666666,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i06",
+  "tipo": "indirecta",
+  "pregunta": "¿Qué pasa si me cuelo en TransMilenio?",
+  "esperados": [
+   "art-146"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-146",
+   "art-95",
+   "art-124"
+  ],
+  "citados": [
+   "art-146"
+  ],
+  "fuera_obtenido": false,
+  "s": 8.56,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Si te evades el pago de la tarifa, validación, tiquete o medios que utilices para acceder a la prestación del servicio esencial de transporte público de pasajeros en cualquier modalidad (como colarse en TransMilenio), incurres en un comportamiento contrario a la convivencia (Art. 146, num. 7). \n\nPor este comportamiento se aplica la siguiente medida correctiva de manera general:\n\n* Multa General tipo 2 (Art. 146, par. 1).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i07",
+  "tipo": "indirecta",
+  "pregunta": "¿Me pueden llevar a la estación si estoy borracho en la calle?",
+  "esperados": [
+   "art-155"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-155",
+   "art-209",
+   "art-156"
+  ],
+  "citados": [
+   "art-155"
+  ],
+  "fuera_obtenido": false,
+  "s": 5.28,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Ojo: el artículo 155 figura como vigente, modificado y condicionado; verifica este artículo en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles. \n\nLa Policía Nacional puede trasladar a una persona para su protección (lo que se conoce como traslado por protección) en los siguientes casos:\n- Cuando se encuentre inmerso en riña (Art. 155, lit. A).\n- Se encuentre deambulando en estado de indefensión (Art. 155, lit. B).\n- Padezca alteración del estado de conciencia por aspectos de orden mental (Art. 155, lit. C).\n- Se encuentre o aparente estar bajo efectos del consumo de bebidas alcohólicas o sustancias psicoactivas ilícitas o prohibidas y exteriorice comportamientos agresivos o temerarios (Art. 155, lit. D).\n- Realice actividades peligrosas o de riesgo que pongan en peligro su vida o integridad, o la de terceros (Art. 155, lit. E).\n- Se encuentre en peligro de ser agredido (Art. 155, lit. h).\n\nAdicionalmente, ten en cuenta lo que establecen los parágrafos de esa norma sobre este procedimiento:\n- El traslado por protección en ningún caso se realizará en las instalaciones de la Policía Nacional o a sitios de reclusión de personas retenidas a la luz del ordenamiento penal (Art. 155, par. 4).\n- La Policía entregará a la persona a un familiar que asuma su protección, o en su defecto al coordinador del Centro de Traslado por Protección (Art. 155, par. 2).\n- La duración del traslado podrá cesar en cualquier momento cuando las causas que lo motivaron hayan desaparecido, sin que en ningún caso sea mayor a 12 horas (Art. 155, par. 3).\n- La autoridad de Policía le permitirá a la persona comunicarse con un allegado o con quien pueda asistirlo para informarle el motivo y sitio del traslado (Art. 155, par. 7).\n- En aquellos lugares donde no se cuente con un Centro de Traslado por Protección, no se ejecutará el medio de policía hasta tanto la entidad territorial disponga de un lugar idóneo que garantice el respeto por los derechos fundamentales y la dignidad humana (Art. 155, par. 6).\n\nSi deseas consultar el texto completo, puedes revisarlo en el archivo `documentos/leyes/Ley_1801_de_2016.pdf` (páginas 59 y 60). Esta información es de carácter orientativo; si necesitas una asesoría específica para tu caso, te sugiero consultar a un abogado o a la autoridad competente.",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i08",
+  "tipo": "indirecta",
+  "pregunta": "Me pusieron un comparendo, ¿cómo lo reclamo?",
+  "esperados": [
+   "art-219",
+   "art-222",
+   "art-180"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-218",
+   "art-219",
+   "art-180"
+  ],
+  "citados": [
+   "art-180",
+   "art-219"
+  ],
+  "fuera_obtenido": false,
+  "s": 8.36,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Ojo: el artículo 180 figura como vigente_modificado; verifica el artículo en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles.\n\nSi no estás de acuerdo con la aplicación de la multa señalada en la orden de comparendo o con el cumplimiento de la medida de participación en programa comunitario o actividad pedagógica de convivencia, cuando este aplique, puedes presentarte dentro de los tres (3) días hábiles siguientes ante la autoridad competente para objetar la medida mediante el procedimiento establecido en el Código (Art. 180).\n\nAdicionalmente, las autoridades de Policía tienen el deber de suministrar de oficio toda la información al infractor acerca de los recursos que le corresponden y los términos que tiene para interponerlos al momento de imponer una medida correctiva (Art. 219, par. 2).\n\nRecuerda que esto es una información general de las normas y no una asesoría jurídica personalizada; si necesitas una decisión o guía para tu caso particular, te sugiero consultar a un abogado o a la autoridad competente. Puedes consultar el texto completo en el archivo `documentos/leyes/Ley_1801_de_2016.pdf` (páginas 67, 68 y 78, 79).",
+  "precision": 0.6666666666666666,
+  "recall": 0.6666666666666666,
+  "rr": 0.5,
+  "pos": 2,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i09",
+  "tipo": "indirecta",
+  "pregunta": "¿Es ilegal orinar en la calle?",
+  "esperados": [
+   "art-140"
+  ],
+  "fuera_esperado": false,
+  "recuperados": [
+   "art-140",
+   "art-111",
+   "art-33"
+  ],
+  "citados": [
+   "art-140"
+  ],
+  "fuera_obtenido": false,
+  "s": 10.08,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "Sí, realizar necesidades fisiológicas en el espacio público es un comportamiento contrario al cuidado e integridad del espacio público y no debe efectuarse (Art. 140, num. 11).\n\nOjo: el artículo 140 figura como modificado; verifica el numeral 11 en la fuente oficial, porque podría tener apartes modificados o declarados inexequibles.\n\nQuien incurra en este comportamiento será objeto de la aplicación de las siguientes medidas correctivas:\n* Multa General tipo 4 (Art. 140, par. 2).\n* Participación en programa comunitario o actividad pedagógica de convivencia (Art. 140, par. 2).",
+  "precision": 0.3333333333333333,
+  "recall": 1.0,
+  "rr": 1.0,
+  "pos": 1,
+  "cita_correcta": true,
+  "cita_exacta": true
+ },
+ {
+  "id": "i10",
+  "tipo": "transito",
+  "pregunta": "Me detuvieron por conducir mi moto borracho, ¿me pueden multar?",
+  "esperados": [],
+  "fuera_esperado": true,
+  "recuperados": [
+   "art-180",
+   "art-146",
+   "art-181"
+  ],
+  "citados": [],
+  "fuera_obtenido": true,
+  "s": 9.45,
+  "modelo": "gemini-3.5-flash-lite",
+  "respaldo": true,
+  "citas_descartadas": [],
+  "respuesta": "No encontré esa información en las normas cargadas: Ley 1801 de 2016 (Código Nacional de Seguridad y Convivencia Ciudadana).\n\nRelacionado: Si una persona se encuentra en estado de embriaguez, la Policía Nacional podrá aplicar la medida de traslado por protección (ver reglas generales de medidas correctivas y de policía en el Código). Ojo: el artículo 180 figura como modificado, y el artículo 146 regula comportamientos contrarios a la convivencia en sistemas de transporte público masivo o colectivo (Art. 146), pero las normas aportadas no contienen disposiciones específicas sobre conducir vehículos motorizados particulares en estado de embriaguez; verifica estos artículos en la fuente oficial."
+ }
+]

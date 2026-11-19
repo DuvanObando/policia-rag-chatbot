@@ -214,6 +214,9 @@ def cargar(ruta) -> List[dict]:
         salida = aplicar_anotaciones([dict(r) for r in registros])
     for r in salida:
         r["norma"] = r.get("norma") or NORMA_BASE
+    # Tema por rangos de artículos (propuesta de Santiago Castro): sin editar el corpus.
+    from indexing import temas_articulos
+    temas_articulos.aplicar(salida)
     return salida
 
 

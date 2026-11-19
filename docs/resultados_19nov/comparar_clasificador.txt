@@ -1,0 +1,68 @@
+
+Empuje (modo semantico): 0.02 | umbral relativo: 0.5
+
+POSICIÓN DEL ARTÍCULO ESPERADO (1 = primero, 0 = no aparece)
+#   Esper.  sin  con     Tema detectado                             conf.  Pregunta
+p01 140       1    1     Espacio público                             1.00  ¿Quién decide en qué zonas de la ciudad no se puede…
+p02 124       2    2     Animales domésticos y mascotas              1.00  Aparte de este código, ¿hay otra ley que castigue e…
+p03 180       1    1     Comparendo                                  1.00  Si pago rápido el comparendo, ¿me rebajan algo del …
+p04 139       1    1     Ambiente y minería                          1.00  ¿Se considera de todos el agua de los ríos y los ca…
+p05 163       1    1     Ingreso a domicilio                         1.00  Hay un incendio en mi edificio, ¿puede la policía e…
+p06 173       4    3  ↑  Medidas correctivas                         0.50  ¿Qué otras sanciones, además de la multa, me puede …
+p07 183       1    1     No pago de multas y recaudo                 0.67  Tengo una multa sin pagar desde hace un año, ¿qué t…
+p08 198       1    1     Autoridades de policía                      1.00  ¿Quiénes tienen la autoridad para resolver los conf…
+p09 218       0    0     general                                     0.00  ¿Qué es el documento que me entrega el policía cuan…
+p10 222       3    2  ↑  Espacio público                             0.50  ¿Cómo es el trámite cuando el policía resuelve el p…
+p11 163       0    1  ↑  general                                     0.00  ¿Qué dice el artículo 163?
+p12 124       1    1     Animales domésticos y mascotas              0.50  ¿Cuánto me cobran si dejo a mi perro suelto en el p…
+p13 222       0    0     general                                     0.00  ¿Qué pasa si no hago caso cuando un agente me da un…
+
+RESUMEN (13 preguntas)
+                       Acierto@1  Acierto@3     MRR
+sin clasificador            0.54       0.69   0.622
+con clasificador            0.62       0.85   0.718
+
+RESUMEN solo las 10 preguntas originales
+sin clasificador            0.60       0.80   0.708
+con clasificador            0.60       0.90   0.733
+
+QUÉ CAMBIÓ Y POR QUÉ
+
+p06 (original): ¿Qué otras sanciones, además de la multa, me puede imponer la policía?
+  esperado art-173: posición 4 -> 3 | primero: art-180 -> art-180
+  tema del artículo esperado: 'Medidas correctivas'; score del esperado 0.834 -> 0.844
+  tema detectado 'Medidas correctivas': puntaje 1, confianza 0.5, coincidencias ['sancion*']
+  tema detectado 'Tipos de multa': puntaje 1, confianza 0.5, coincidencias ['multa*']
+  empuje aplicado: {'Medidas correctivas': 0.01, 'Tipos de multa': 0.01}
+  artículos pedidos por número: ninguno
+
+p10 (original): ¿Cómo es el trámite cuando el policía resuelve el problema ahí mismo en la calle, sin audiencia?
+  esperado art-222: posición 3 -> 2 | primero: art-223 -> art-223
+  tema del artículo esperado: 'Proceso verbal inmediato y abreviado'; score del esperado 0.841 -> 0.851
+  tema detectado 'Espacio público': puntaje 1, confianza 0.5, coincidencias ['calle*']
+  tema detectado 'Proceso verbal inmediato y abreviado': puntaje 1, confianza 0.5, coincidencias ['audiencia*']
+  empuje aplicado: {'Espacio público': 0.01, 'Proceso verbal inmediato y abreviado': 0.01}
+  artículos pedidos por número: ninguno
+
+p11 (articulo_por_numero): ¿Qué dice el artículo 163?
+  esperado art-163: posición 0 -> 1 | primero: art-92 -> art-163
+  tema del artículo esperado: 'Ingreso a domicilio'; score del esperado nan -> 0.789
+  empuje aplicado: ninguno
+  artículos pedidos por número: ['163']
+
+PREGUNTAS DONDE EL TEMA DETECTADO NO COINCIDE CON EL TEMA DEL ARTÍCULO ESPERADO
+  p03: esperado tema 'Tipos de multa'; detectado ['Comparendo']
+  p04: esperado tema 'Espacio público'; detectado ['Ambiente y minería']
+  p09: esperado tema 'Comparendo'; detectado ['general']
+  p11: esperado tema 'Ingreso a domicilio'; detectado ['general']
+  p13: esperado tema 'Proceso verbal inmediato y abreviado'; detectado ['general']
+
+SENSIBILIDAD AL EMPUJE (solo informativo: el valor por defecto se fijó antes de evaluar)
+  empuje  Acierto@1  Acierto@3     MRR
+    0.00       0.62       0.77   0.699
+    0.01       0.62       0.85   0.718
+    0.02       0.62       0.85   0.718
+    0.03       0.54       0.85   0.679
+    0.05       0.46       0.77   0.603
+    0.08       0.46       0.77   0.590
+    0.12       0.46       0.77   0.590

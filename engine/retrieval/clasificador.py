@@ -25,7 +25,10 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List
 
-RUTA_TEMAS = Path(__file__).resolve().parent / "temas.json"
+import os  # noqa: E402
+
+# TEMAS_RUTA (opcional) apunta a otro temas.json: solo para comparar versiones (eval/comparar_temas.py).
+RUTA_TEMAS = Path(os.getenv("TEMAS_RUTA") or Path(__file__).resolve().parent / "temas.json")
 GENERAL = "general"
 
 _ARTICULO = re.compile(r"\b(?:articulos?|arts?)\.?\s*(\d+(?:\s*(?:,|y|e)\s*\d+)*)")

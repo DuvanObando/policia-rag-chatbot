@@ -1,5 +1,6 @@
 // Panel de fuentes (RF5): fragmentos recuperados para verificar la respuesta.
 // Todo lo que no sea "vigente" lleva señal visible y las expresiones [INEXEQUIBLE: ...] se tachan.
+// Los fragmentos de una norma distinta de la Ley 1801 muestran su norma.
 export default function PanelFuentes({ mensaje }) {
   const datos = mensaje?.datos;
 
@@ -26,7 +27,10 @@ export default function PanelFuentes({ mensaje }) {
             )}
           </header>
           <p className="ubicacion">{f.ubicacion}</p>
-          {f.tema && <span className="etiqueta tema">{f.tema}</span>}
+          <div className="etiquetas">
+            {f.norma && f.norma !== "Ley 1801 de 2016" && <span className="etiqueta norma">{f.norma}</span>}
+            {f.tema && <span className="etiqueta tema">{f.tema}</span>}
+          </div>
 
           <p className="texto-fragmento">
             {f.texto.split(/(\[INEXEQUIBLE: [^\]]*\])/).map((parte, i) =>

@@ -1,7 +1,7 @@
-// Ventana de conversación: lista de mensajes, caja de pregunta y subida de PDF.
+// Ventana de conversación: lista de mensajes y caja de pregunta.
+// Los textos nombran las normas cargadas cuando hay más de una (no solo la Ley 1801).
 import { useEffect, useRef, useState } from "react";
 import Mensaje from "./Mensaje.jsx";
-import SubirPdf from "./SubirPdf.jsx";
 
 const MAX_PREGUNTA = 500;
 const SUGERENCIAS = [
@@ -11,8 +11,9 @@ const SUGERENCIAS = [
   "¿Qué consecuencias tiene no pagar una multa?",
 ];
 
-export default function Chat({ mensajes, habilitado, enviando, estado, indiceFuentes, onPreguntar, onVerFuentes, onNuevaConversacion }) {
+export default function Chat({ mensajes, habilitado, enviando, estado, normas, indiceFuentes, onPreguntar, onVerFuentes, onNuevaConversacion }) {
   const [texto, setTexto] = useState("");
+  const dominio = normas.length > 1 ? "las normas cargadas" : "el Código Nacional de Policía";
   const listaRef = useRef(null);
 
   // Baja al último mensaje sin mover el resto de la página
@@ -39,7 +40,12 @@ export default function Chat({ mensajes, habilitado, enviando, estado, indiceFue
       <div className="mensajes" ref={listaRef}>
         {!mensajes.length && (
           <div className="bienvenida">
-            <p>Pregunta en lenguaje natural sobre multas, comportamientos contrarios a la convivencia, medidas correctivas o procedimientos de policía. Cada respuesta cita los artículos que la sustentan.</p>
+            <p>
+              {normas.length > 1
+                ? `Pregunta en lenguaje natural sobre las normas cargadas (${normas.join(", ")}). Si preguntas por un artículo, indica de qué norma es.`
+                : "Pregunta en lenguaje natural sobre multas, comportamientos contrarios a la convivencia, medidas correctivas o procedimientos de policía."}{" "}
+              Cada respuesta cita los artículos que la sustentan.
+            </p>
             <div className="sugerencias">
               {SUGERENCIAS.map((s) => (
                 <button key={s} onClick={() => onPreguntar(s)} disabled={!habilitado}>
@@ -56,7 +62,7 @@ export default function Chat({ mensajes, habilitado, enviando, estado, indiceFue
 
         {enviando && (
           <div className="mensaje asistente pensando">
-            <span /> <span /> <span /> Buscando en el Código…
+            <span /> <span /> <span /> Buscando en {dominio}…
           </div>
         )}
       </div>
@@ -72,13 +78,12 @@ export default function Chat({ mensajes, habilitado, enviando, estado, indiceFue
           value={texto}
           maxLength={MAX_PREGUNTA}
           rows={2}
-          placeholder={habilitado ? "Escribe tu pregunta sobre el Código Nacional de Policía…" : "Esperando al motor…"}
+          placeholder={habilitado ? `Escribe tu pregunta sobre ${dominio}…` : "Esperando al motor…"}
           disabled={!habilitado}
           onChange={(e) => setTexto(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && enviar(e)}
         />
         <div className="caja-acciones">
-          <SubirPdf habilitado={!enviando} />
           <span className="contador">{texto.length}/{MAX_PREGUNTA}</span>
           <button type="submit" className="boton-primario" disabled={!habilitado || !texto.trim()}>
             Enviar

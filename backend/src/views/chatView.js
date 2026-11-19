@@ -1,5 +1,6 @@
 // Vista del chat: arma el JSON que consume el frontend a partir de la respuesta del motor.
 // El score no se envía: su escala cambia según el modo de búsqueda (ver docs/api_contract.md).
+// Las citas de otras normas ya traen la norma en el texto ("Ley 769, Art. 131, num. 2").
 module.exports = {
   render: (res, datos) =>
     res.json({
@@ -13,6 +14,7 @@ module.exports = {
         ubicacion: f.ubicacion,
         epigrafe: f.epigrafe,
         texto: f.texto,
+        norma: f.norma || null,
         vigencia: f.vigencia || null,
         tema: f.tema || null,
         archivo_fuente: f.archivo_fuente || f.fuente || null,
