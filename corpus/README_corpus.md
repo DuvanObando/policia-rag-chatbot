@@ -13,6 +13,16 @@ identificar la norma, por ejemplo:
 El nombre `Mod_` o `Adi_` se conserva como clasificación del archivo, no como
 conclusión jurídica sobre la vigencia actual de sus disposiciones.
 
+## Fuente y fecha de consulta
+
+Los PDF incluidos en `documentos/leyes/` y `documentos/decretos/` se consultaron
+como fuentes documentales el **10 de noviembre de 2026**.
+
+La fecha de consulta indica cuándo se obtuvo el material documental; no significa
+que las disposiciones estén vigentes ni que su vigencia haya sido verificada.
+Cada PDF conserva su procedencia y las páginas físicas de origen en el JSON
+generado.
+
 ## Construcción
 
 Desde la raíz del repositorio, instala las dependencias del motor en su entorno:
