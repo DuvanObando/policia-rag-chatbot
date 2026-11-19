@@ -101,10 +101,13 @@ El motor ya puede cargar **normas nuevas** a partir de un PDF (por ejemplo la Le
 - No toques `engine/retrieval/` ni `engine/indexing/` sin avisar: son del motor. Para cambios allí, pídelos o hazlos en un PR aparte.
 - No subas el entorno virtual, los índices ni modelos descargados.
 
-## Mensaje para enviar (WhatsApp, 16/11)
+## Mensaje para enviar (WhatsApp, 19/11: traspaso)
 
-> Santiago, el motor ya está completo en `main`. Lo tuyo, con fecha límite *el miércoles 18 de noviembre* para tu PR a `main`:
-> 1) Subir tu glosario de 49 términos a `engine/glossary/sinonimos.json` (formato en tu guía).
-> 2) Alinear `engine/retrieval/temas.json` con el campo `tema` del corpus real; coordínalo con Wilder.
-> 3) Tu parte del informe técnico (sección «Análisis lingüístico»), a más tardar el jueves 19.
-> Lo que cambió en el motor y te toca a ti está en tu guía, sección «Nuevo (16/11)». Rama y PR (`main` está protegida), y avísame al subirlo para reconstruir los índices y repetir las comparaciones 🙏
+Guía completa: [traspaso-santiago-castro.md](traspaso-santiago-castro.md).
+
+> Santiago, hoy cerré mi parte y te dejo el proyecto para la sustentación de mañana 💪 La guía paso a paso está aquí: https://github.com/DuvanObando/policia-rag-chatbot/blob/main/docs/guia-companeros/traspaso-santiago-castro.md
+> *Hoy*, para tenerlo corriendo en tu PC: clona el repo *fuera de OneDrive* (en `C:\dev`), saca tus claves gratis de Groq y Gemini y crea *tus propios* `ADMIN_TOKEN` y `ADMIN_CLAVE` (no uses los que pasaron por WhatsApp).
+> Después: venv, `pip install`, construir los índices y doble clic en `iniciar_todo.bat`. Son unos 45-60 min la primera vez, casi todo esperando descargas.
+> La forma verificada es el *venv*. Docker es la alternativa y *no se probó en mi PC*: si lo quieres usar, pruébalo hoy (sección 9 de la guía) y si falla, usa el venv.
+> Para la demo te sugiero: preguntar lo de la moto borracho (sale fuera de dominio), cargar la *Ley 769* desde Administración (unos 6 min, el chat sigue respondiendo) y repetirla: ahí cita la Ley 769.
+> Tu glosario y tus 32 temas ya están en `main` y arreglaron la pregunta de la cédula 🙌 Cualquier cosa me escribes.

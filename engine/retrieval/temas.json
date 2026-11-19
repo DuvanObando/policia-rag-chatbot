@@ -1,213 +1,537 @@
 {
-  "_ayuda": [
-    "Para ampliar el clasificador NO hace falta tocar Python: edita este archivo y reinicia el motor.",
-    "'tema' debe ser IGUAL al campo 'tema' de los fragmentos del corpus: así se sabe qué artículos reciben el empuje.",
-    "'libro' y 'titulo' dicen a qué parte del Código corresponde el tema (informativo; se devuelven al clasificar).",
-    "'palabras_clave': sin tildes ni mayúsculas da igual (se normalizan). Una palabra que termina en * coincide con cualquier terminación: 'mult*' encuentra multa, multas, multar, multado. Una frase de varias palabras pesa más (cada palabra suma 1).",
-    "Incluye formas coloquiales (trago, rumba, perro...). Evita palabras que salen en casi todas las preguntas (policia, ley, codigo): no ayudan a distinguir temas.",
-    "'configuracion.empuje_por_modo': cuánto se suma al score de los candidatos del tema detectado, según el modo de búsqueda (el score tiene otra escala en cada modo; ver docs/busqueda_hibrida.md). 0 desactiva el empuje. 'umbral_relativo': un tema también recibe empuje si su puntaje es al menos esta fracción del puntaje del mejor tema."
-  ],
-  "configuracion": {
-    "empuje_por_modo": {
-      "semantico": 0.03,
-      "lexico": 0.5,
-      "hibrido": 0.003
-    },
-    "umbral_relativo": 0.5
+ "_ayuda": [
+  "Para ampliar el clasificador NO hace falta tocar Python: edita este archivo y reinicia el motor.",
+  "'tema' debe ser IGUAL al campo 'tema' de los fragmentos del corpus: así se sabe qué artículos reciben el empuje.",
+  "'libro' y 'titulo' dicen a qué parte del Código corresponde el tema (informativo; se devuelven al clasificar).",
+  "'palabras_clave': sin tildes ni mayúsculas da igual (se normalizan). Una palabra que termina en * coincide con cualquier terminación: 'mult*' encuentra multa, multas, multar, multado. Una frase de varias palabras pesa más (cada palabra suma 1).",
+  "Incluye formas coloquiales (trago, rumba, perro...). Evita palabras que salen en casi todas las preguntas (policia, ley, codigo): no ayudan a distinguir temas.",
+  "'configuracion.empuje_por_modo': cuánto se suma al score de los candidatos del tema detectado, según el modo de búsqueda (el score tiene otra escala en cada modo; ver docs/busqueda_hibrida.md). 0 desactiva el empuje. 'umbral_relativo': un tema también recibe empuje si su puntaje es al menos esta fracción del puntaje del mejor tema.",
+  "Desde el 19/11: los 32 temas son los de la propuesta de Santiago Castro (docs/analisis/propuesta_temas.json). El tema de cada artículo NO sale del corpus (que trae un valor genérico) sino de engine/retrieval/temas_por_articulo.json, aplicado al cargar con TEMAS_PROPUESTA=1 (engine/indexing/temas_articulos.py). Las palabras clave son de Duvan, reutilizando las del clasificador anterior; ver docs/clasificador.md.",
+  "Empuje desde el 19/11: semántico 0.02 (con 0.03 el banco de Wilder empeoraba un poco; con 0.02 ningún grupo empeora; ver docs/resultados_temas.md). Léxico e híbrido se escalaron en la misma proporción (×2/3) que calculó eval/calibrar_empuje.py."
+ ],
+ "configuracion": {
+  "empuje_por_modo": {
+   "semantico": 0.02,
+   "lexico": 0.333,
+   "hibrido": 0.002
   },
-  "temas": [
-    {
-      "tema": "Medidas correctivas",
-      "libro": "Libro III",
-      "titulo": "Título I",
-      "palabras_clave": [
-        "medida*",
-        "correctiv*",
-        "sancion*",
-        "castigo*",
-        "amonestacion",
-        "decomis*",
-        "expulsion",
-        "demolicion",
-        "suspension"
-      ]
-    },
-    {
-      "tema": "Tipos de multa",
-      "libro": "Libro III",
-      "titulo": "Título I",
-      "palabras_clave": [
-        "multa*",
-        "multen",
-        "multe",
-        "cobran",
-        "cobrar",
-        "valor de la multa",
-        "smdlv",
-        "salario minimo",
-        "salarios minimos",
-        "descuento*",
-        "rebaja*",
-        "pronto pago",
-        "conmutar",
-        "conmutacion"
-      ]
-    },
-    {
-      "tema": "No pago de multas",
-      "libro": "Libro III",
-      "titulo": "Título I",
-      "palabras_clave": [
-        "no pago",
-        "no pagar",
-        "sin pagar",
-        "no pague",
-        "deuda*",
-        "mora",
-        "intereses",
-        "cobro coactivo",
-        "pagar la multa",
-        "multas vencidas"
-      ]
-    },
-    {
-      "tema": "Comparendo",
-      "libro": "Libro III",
-      "titulo": "Título III",
-      "palabras_clave": [
-        "comparendo*",
-        "orden de comparendo",
-        "infraccion*",
-        "infractor*",
-        "me pusieron un comparendo"
-      ]
-    },
-    {
-      "tema": "Espacio público",
-      "libro": "Libro II",
-      "titulo": "Título XIV",
-      "palabras_clave": [
-        "espacio publico",
-        "parque*",
-        "calle*",
-        "anden*",
-        "acera*",
-        "plaza*",
-        "via publica",
-        "vias publicas",
-        "camino*",
-        "rio",
-        "rios",
-        "uso comun",
-        "bienes de uso publico",
-        "vendedor* ambulante*",
-        "grafiti*",
-        "mobiliario urbano"
-      ]
-    },
-    {
-      "tema": "Consumo de sustancias en espacio público",
-      "libro": "Libro II",
-      "titulo": "Título XIV",
-      "palabras_clave": [
-        "trago*",
-        "licor*",
-        "alcohol*",
-        "cerveza*",
-        "rumba*",
-        "borracho*",
-        "embriag*",
-        "droga*",
-        "marihuana",
-        "bazuco",
-        "psicoactiv*",
-        "dosis personal",
-        "porro*",
-        "consumir",
-        "consumo",
-        "fumar"
-      ]
-    },
-    {
-      "tema": "Animales potencialmente peligrosos",
-      "libro": "Libro II",
-      "titulo": "Título XIII",
-      "palabras_clave": [
-        "perro*",
-        "gato*",
-        "mascota*",
-        "animal*",
-        "canino*",
-        "felino*",
-        "pitbull",
-        "rottweiler",
-        "bulldog",
-        "mordi*",
-        "muerde",
-        "semoviente*",
-        "bestia*",
-        "raza peligrosa",
-        "maltrato animal"
-      ]
-    },
-    {
-      "tema": "Ingreso a domicilio",
-      "libro": "Libro III",
-      "titulo": "Título I",
-      "palabras_clave": [
-        "domicilio*",
-        "casa",
-        "vivienda*",
-        "apartamento*",
-        "edificio*",
-        "inmueble*",
-        "entrar",
-        "ingresar",
-        "ingreso",
-        "allanamiento",
-        "allanar",
-        "orden escrita",
-        "sin orden",
-        "orden judicial",
-        "juez"
-      ]
-    },
-    {
-      "tema": "Autoridades de policía",
-      "libro": "Libro III",
-      "titulo": "Título II",
-      "palabras_clave": [
-        "autoridad*",
-        "alcalde*",
-        "alcaldia*",
-        "gobernador*",
-        "inspector*",
-        "comandante*",
-        "corregidor*",
-        "presidente",
-        "quien decide",
-        "quien manda",
-        "competencia*",
-        "funcionario*"
-      ]
-    },
-    {
-      "tema": "Proceso verbal inmediato",
-      "libro": "Libro III",
-      "titulo": "Título III",
-      "palabras_clave": [
-        "proceso verbal",
-        "verbal inmediato",
-        "audiencia*",
-        "descargos",
-        "apelacion",
-        "apelar",
-        "recurso*",
-        "reclamar",
-        "tramite*",
-        "ahi mismo",
-        "en el sitio"
-      ]
-    }
-  ]
+  "umbral_relativo": 0.5
+ },
+ "temas": [
+  {
+   "tema": "Principios y bases de la convivencia",
+   "libro": "Libro I",
+   "articulos": "1-10",
+   "palabras_clave": [
+    "convivencia ciudadana",
+    "principios del codigo",
+    "objeto del codigo",
+    "deberes de las personas"
+   ]
+  },
+  {
+   "tema": "Poder, función y actividad de policía",
+   "libro": "Libro I",
+   "articulos": "11-23",
+   "palabras_clave": [
+    "poder de policia",
+    "funcion de policia",
+    "actividad de policia",
+    "reglamento de policia"
+   ]
+  },
+  {
+   "tema": "Aspectos generales de los comportamientos contrarios a la convivencia",
+   "libro": "Libro II",
+   "articulos": "24-26",
+   "palabras_clave": [
+    "comportamientos contrarios",
+    "comportamiento contrario"
+   ]
+  },
+  {
+   "tema": "Seguridad e integridad de las personas",
+   "libro": "Libro II",
+   "articulos": "27-30",
+   "palabras_clave": [
+    "pelea*",
+    "rina*",
+    "golpe*",
+    "agred*",
+    "agresion*",
+    "arma*",
+    "cuchillo*",
+    "navaja*",
+    "machete*",
+    "pistola*",
+    "amenaz*",
+    "polvora",
+    "pirotecni*",
+    "voladores"
+   ]
+  },
+  {
+   "tema": "Tranquilidad y relaciones respetuosas",
+   "libro": "Libro II",
+   "articulos": "31-35",
+   "palabras_clave": [
+    "ruido*",
+    "musica",
+    "volumen",
+    "bulla",
+    "escandalo*",
+    "parlante*",
+    "equipo de sonido",
+    "madrugada",
+    "vecino*",
+    "fiesta*",
+    "cedula",
+    "identificarme",
+    "identificarse",
+    "identificacion",
+    "documento de identidad",
+    "documentos",
+    "irrespet*",
+    "insult*",
+    "groser*",
+    "desobedec*",
+    "desacat*"
+   ]
+  },
+  {
+   "tema": "Niños, niñas y adolescentes y grupos de especial protección",
+   "libro": "Libro II",
+   "articulos": "36-41",
+   "palabras_clave": [
+    "nino*",
+    "nina*",
+    "menor de edad",
+    "menores de edad",
+    "adolescente*",
+    "colegio*",
+    "discapacidad",
+    "adulto mayor",
+    "adultos mayores"
+   ]
+  },
+  {
+   "tema": "Ejercicio de la prostitución",
+   "libro": "Libro II",
+   "articulos": "42-46",
+   "palabras_clave": [
+    "prostitu*",
+    "trabajo sexual",
+    "trabajadora sexual",
+    "trabajadoras sexuales",
+    "proxeneta*"
+   ]
+  },
+  {
+   "tema": "Reunión, manifestación y aglomeraciones de público",
+   "libro": "Libro II",
+   "articulos": "47-75",
+   "palabras_clave": [
+    "manifestacion*",
+    "protesta*",
+    "marcha*",
+    "concierto*",
+    "espectaculo*",
+    "evento*",
+    "estadio*",
+    "futbol",
+    "hinchas",
+    "aglomeracion*",
+    "reunion*"
+   ]
+  },
+  {
+   "tema": "Posesión, tenencia y domicilio",
+   "libro": "Libro II",
+   "articulos": "76-82",
+   "palabras_clave": [
+    "invasion",
+    "invadir",
+    "invadieron",
+    "invadio",
+    "lote*",
+    "predio*",
+    "posesion",
+    "perturbacion",
+    "ocupacion de hecho",
+    "linderos",
+    "cerca del vecino"
+   ]
+  },
+  {
+   "tema": "Actividad económica",
+   "libro": "Libro II",
+   "articulos": "83-95",
+   "palabras_clave": [
+    "negocio*",
+    "establecimiento*",
+    "local comercial",
+    "bar",
+    "bares",
+    "discoteca*",
+    "licencia de funcionamiento",
+    "horario de funcionamiento",
+    "comerciante*",
+    "actividad economica",
+    "vender",
+    "venta*"
+   ]
+  },
+  {
+   "tema": "Ambiente y minería",
+   "libro": "Libro II",
+   "articulos": "96-108",
+   "palabras_clave": [
+    "arbol*",
+    "fauna",
+    "flora",
+    "rio*",
+    "quebrada*",
+    "humedal*",
+    "mineria",
+    "minero*",
+    "tala",
+    "quema*",
+    "contaminacion",
+    "agua"
+   ]
+  },
+  {
+   "tema": "Salud pública y residuos",
+   "libro": "Libro II",
+   "articulos": "109-111",
+   "palabras_clave": [
+    "basura*",
+    "residuo*",
+    "escombro*",
+    "desecho*",
+    "fumar",
+    "cigarrillo*",
+    "salud publica"
+   ]
+  },
+  {
+   "tema": "Patrimonio cultural",
+   "libro": "Libro II",
+   "articulos": "112-115",
+   "palabras_clave": [
+    "patrimonio",
+    "monumento*",
+    "grafiti*",
+    "graffiti*",
+    "bien de interes cultural",
+    "museo*"
+   ]
+  },
+  {
+   "tema": "Animales domésticos y mascotas",
+   "libro": "Libro II",
+   "articulos": "116-125",
+   "palabras_clave": [
+    "mascota*",
+    "animal*",
+    "perro*",
+    "perrito*",
+    "gato*",
+    "excremento*",
+    "popo",
+    "correa",
+    "traílla",
+    "maltrato animal"
+   ]
+  },
+  {
+   "tema": "Caninos potencialmente peligrosos",
+   "libro": "Libro II",
+   "articulos": "126-134",
+   "palabras_clave": [
+    "pitbull",
+    "pit bull",
+    "rottweiler",
+    "perro bravo",
+    "perro peligroso",
+    "raza peligrosa",
+    "bozal",
+    "mordi*",
+    "mordedura*"
+   ]
+  },
+  {
+   "tema": "Urbanismo",
+   "libro": "Libro II",
+   "articulos": "135-138",
+   "palabras_clave": [
+    "construccion*",
+    "construir",
+    "obra*",
+    "licencia de construccion",
+    "remodel*",
+    "ampliar la casa",
+    "urbanismo"
+   ]
+  },
+  {
+   "tema": "Espacio público",
+   "libro": "Libro II",
+   "articulos": "139-140",
+   "palabras_clave": [
+    "espacio publico",
+    "parque*",
+    "calle*",
+    "anden*",
+    "acera*",
+    "plaza*",
+    "via publica",
+    "vias publicas",
+    "trago*",
+    "licor*",
+    "alcohol*",
+    "cerveza*",
+    "bebidas alcoholicas",
+    "droga*",
+    "marihuana",
+    "orinar",
+    "orine",
+    "necesidades fisiologicas",
+    "vendedor ambulante",
+    "vendedores ambulantes",
+    "ventas ambulantes"
+   ]
+  },
+  {
+   "tema": "Movilidad, circulación y transporte",
+   "libro": "Libro II",
+   "articulos": "141-148",
+   "palabras_clave": [
+    "transmilenio",
+    "transporte publico",
+    "transporte masivo",
+    "sistema de transporte",
+    "bus",
+    "buses",
+    "metro",
+    "colarse",
+    "cuelo",
+    "colado*",
+    "torniquete*",
+    "pasaje*",
+    "evadir el pago",
+    "bicicleta*",
+    "patineta*"
+   ]
+  },
+  {
+   "tema": "Medios de policía",
+   "libro": "Libro III",
+   "articulos": "149-154",
+   "palabras_clave": [
+    "medios de policia",
+    "orden de policia",
+    "permiso excepcional",
+    "mediacion policial"
+   ]
+  },
+  {
+   "tema": "Traslado, registro e incautación",
+   "libro": "Libro III",
+   "articulos": "155-161, 164-165",
+   "palabras_clave": [
+    "traslado*",
+    "trasladar",
+    "llevar a la estacion",
+    "estacion de policia",
+    "centro de traslado",
+    "me pueden llevar",
+    "requisa*",
+    "requisar",
+    "esculcar",
+    "registro a persona",
+    "incauta*",
+    "borracho*",
+    "embriag*",
+    "ebrio*"
+   ]
+  },
+  {
+   "tema": "Ingreso a domicilio",
+   "libro": "Libro III",
+   "articulos": "162-163",
+   "palabras_clave": [
+    "domicilio*",
+    "casa",
+    "vivienda*",
+    "apartamento*",
+    "inmueble*",
+    "entrar a mi casa",
+    "allanamiento",
+    "allanar",
+    "orden escrita",
+    "sin orden"
+   ]
+  },
+  {
+   "tema": "Uso de la fuerza y apoyo",
+   "libro": "Libro III",
+   "articulos": "166-171",
+   "palabras_clave": [
+    "uso de la fuerza",
+    "esposar",
+    "esposas",
+    "taser",
+    "gas pimienta",
+    "aprehension",
+    "apoyo urgente"
+   ]
+  },
+  {
+   "tema": "Medidas correctivas",
+   "libro": "Libro III",
+   "articulos": "172-179",
+   "palabras_clave": [
+    "medida*",
+    "correctiv*",
+    "sancion*",
+    "castigo*",
+    "amonestacion",
+    "actividad pedagogica",
+    "programa comunitario"
+   ]
+  },
+  {
+   "tema": "Tipos de multa",
+   "libro": "Libro III",
+   "articulos": "180-181",
+   "palabras_clave": [
+    "multa*",
+    "multen",
+    "multe",
+    "valor de la multa",
+    "cuanto cobran",
+    "smdlv",
+    "salario minimo",
+    "salarios minimos",
+    "multa general"
+   ]
+  },
+  {
+   "tema": "No pago de multas y recaudo",
+   "libro": "Libro III",
+   "articulos": "182-185C",
+   "palabras_clave": [
+    "no pago",
+    "no pagar",
+    "sin pagar",
+    "no pague",
+    "deuda*",
+    "mora",
+    "intereses",
+    "cobro coactivo",
+    "pronto pago",
+    "descuento"
+   ]
+  },
+  {
+   "tema": "Medidas correctivas sobre bienes y actividades",
+   "libro": "Libro III",
+   "articulos": "186-197",
+   "palabras_clave": [
+    "decomis*",
+    "destruccion del bien",
+    "cierre del establecimiento",
+    "suspension de la actividad",
+    "suspension temporal",
+    "demolicion",
+    "me quitaron",
+    "me quitan"
+   ]
+  },
+  {
+   "tema": "Autoridades de policía",
+   "libro": "Libro III",
+   "articulos": "198-212",
+   "palabras_clave": [
+    "autoridad*",
+    "alcalde*",
+    "alcaldia*",
+    "gobernador*",
+    "inspector*",
+    "inspeccion de policia",
+    "comandante*",
+    "corregidor*"
+   ]
+  },
+  {
+   "tema": "Proceso único de policía",
+   "libro": "Libro III",
+   "articulos": "213-217, 220-221, 224-230",
+   "palabras_clave": [
+    "proceso unico",
+    "querella*",
+    "queja*",
+    "denunciar",
+    "audiencia publica",
+    "pruebas"
+   ]
+  },
+  {
+   "tema": "Comparendo",
+   "libro": "Libro III",
+   "articulos": "218-219, 223A",
+   "palabras_clave": [
+    "comparendo*",
+    "orden de comparendo",
+    "boleta",
+    "papeleta*",
+    "infraccion*",
+    "infractor*"
+   ]
+  },
+  {
+   "tema": "Proceso verbal inmediato y abreviado",
+   "libro": "Libro III",
+   "articulos": "222-223",
+   "palabras_clave": [
+    "proceso verbal",
+    "verbal inmediato",
+    "verbal abreviado",
+    "audiencia*",
+    "descargos",
+    "apelacion",
+    "apelar",
+    "recurso*",
+    "reclamar",
+    "reclamo",
+    "impugnar",
+    "objetar"
+   ]
+  },
+  {
+   "tema": "Mecanismos alternativos de solución de conflictos",
+   "libro": "Libro III",
+   "articulos": "231-234A",
+   "palabras_clave": [
+    "conciliacion",
+    "conciliar",
+    "mediacion",
+    "mediador*",
+    "arreglo amistoso",
+    "acuerdo con el vecino"
+   ]
+  },
+  {
+   "tema": "Disposiciones finales",
+   "libro": "Libro III",
+   "articulos": "235-243",
+   "palabras_clave": [
+    "vigencia del codigo",
+    "derogatoria*",
+    "entrada en vigencia",
+    "transitorio*"
+   ]
+  }
+ ]
 }

@@ -182,7 +182,18 @@ def _guardar(version: search.Version, carpeta: Path) -> None:
     guardar_indice(version.indice, carpeta / "index.faiss")
     if version.datos_bm25 is not None:
         (carpeta / "bm25_tokens.json").write_text(json.dumps(version.datos_bm25, ensure_ascii=False), encoding="utf-8")
-    (carpeta / "metadatos.json").write_text(json.dumps(version.meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    # En disco va el tema del corpus, no el de TEMAS_PROPUESTA (ese se aplica al leer: temas_articulos).
+    meta = dict(version.meta)
+    meta["fragmentos"] = [_tema_original(f) for f in version.meta["fragmentos"]]
+    (carpeta / "metadatos.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _tema_original(f: dict) -> dict:
+    if "tema_corpus" not in f:
+        return f
+    f = dict(f)
+    f["tema"] = f.pop("tema_corpus")
+    return f
 
 
 def _apartar(carpeta: Path) -> None:

@@ -1,0 +1,96 @@
+RRF k = 60 | empuje por modo = {'semantico': 0.02, 'lexico': 0.333, 'hibrido': 0.002}
+
+POSICIÓN DEL ARTÍCULO ESPERADO, con clasificador (1 = primero, 0 = no aparece)
+#   Esper.   sem  lex  híb  Tipo                    Pregunta
+p01 140        1    1    1   original                ¿Quién decide en qué zonas de la ciudad no se pue…
+p02 124        2    2    2   original                Aparte de este código, ¿hay otra ley que castigue…
+p03 180        1    1    1   original                Si pago rápido el comparendo, ¿me rebajan algo de…
+p04 139        1    2    1 * original                ¿Se considera de todos el agua de los ríos y los …
+p05 163        1    1    1   original                Hay un incendio en mi edificio, ¿puede la policía…
+p06 173        3    0    0 * original                ¿Qué otras sanciones, además de la multa, me pued…
+p07 183        1    1    1   original                Tengo una multa sin pagar desde hace un año, ¿qué…
+p08 198        1    4    5 * original                ¿Quiénes tienen la autoridad para resolver los co…
+p09 218        0    4    0 * original                ¿Qué es el documento que me entrega el policía cu…
+p10 222        2    6    2 * original                ¿Cómo es el trámite cuando el policía resuelve el…
+p11 163        1    1    1   articulo_por_numero     ¿Qué dice el artículo 163?
+p12 124        1    1    1   ambigua_entre_dos_temas ¿Cuánto me cobran si dejo a mi perro suelto en el…
+p13 222        0    0    0   sin_tema_claro          ¿Qué pasa si no hago caso cuando un agente me da …
+p14 180        1    1    1   sigla_o_termino_tecnico ¿Cuántos smdlv cuesta una multa tipo 4?
+p15 222        1    1    1   porcentaje_o_plazo      ¿Qué debe ocurrir en 24 horas con una apelación c…
+p16 140        5    2    2 * termino_legal_especifico¿Qué tiene que ver la Ley 1566 de 2012 con las me…
+
+RESUMEN (todos con clasificador)
+
+16 preguntas
+modo        Acierto@1  Acierto@3     MRR  ms/búsqueda
+semantico        0.62       0.81   0.721        254.9
+lexico           0.50       0.69   0.635          8.3
+hibrido          0.56       0.75   0.669        229.0
+
+13 de la evaluación anterior
+modo        Acierto@1  Acierto@3     MRR  ms/búsqueda
+semantico        0.62       0.85   0.718        254.9
+lexico           0.46       0.62   0.590          8.3
+hibrido          0.54       0.69   0.631        229.0
+
+3 con términos exactos (p14-p16)
+modo        Acierto@1  Acierto@3     MRR  ms/búsqueda
+semantico        0.67       0.67   0.733        254.9
+lexico           0.67       1.00   0.833          8.3
+hibrido          0.67       1.00   0.833        229.0
+
+INFORMATIVO: 16 preguntas SIN clasificador
+modo        Acierto@1  Acierto@3     MRR
+semantico        0.56       0.69   0.643
+lexico           0.25       0.62   0.450
+hibrido          0.50       0.62   0.587
+
+EN QUÉ PREGUNTAS CAMBIÓ EL RESULTADO Y POR QUÉ
+
+p04 (original): ¿Se considera de todos el agua de los ríos y los caminos públicos?
+  esperado art-139: semantico 1 | lexico 2 | hibrido 1
+  palabras de la pregunta (preparadas): ['agu', 'camin', 'consider', 'public', 'rios']
+  de ellas, aparecen en el artículo esperado: ['agu', 'camin', 'public']
+  semantico  primeros 3: [('139', 0.8097), ('54', 0.7995), ('99', 0.7938)]
+  lexico     primeros 3: [('100', 1.333), ('139', 0.8019), ('106', 0.64)]
+  hibrido    primeros 3: [('139', 0.032), ('140', 0.0305), ('100', 0.0302)]
+
+p06 (original): ¿Qué otras sanciones, además de la multa, me puede imponer la policía?
+  esperado art-173: semantico 3 | lexico 0 | hibrido 0
+  palabras de la pregunta (preparadas): ['ademas', 'impon', 'mult', 'polic', 'pued', 'sancion']
+  de ellas, aparecen en el artículo esperado: ['mult', 'polic']
+  semantico  primeros 3: [('180', 0.8536), ('181', 0.8525), ('173', 0.8441)]
+  lexico     primeros 3: [('181', 1.1202), ('223A', 1.0), ('234', 0.9851)]
+  hibrido    primeros 3: [('223A', 0.0323), ('110', 0.029), ('181', 0.0282)]
+
+p08 (original): ¿Quiénes tienen la autoridad para resolver los conflictos de convivencia, aparte de los agentes?
+  esperado art-198: semantico 1 | lexico 4 | hibrido 5
+  palabras de la pregunta (preparadas): ['agent', 'apart', 'autor', 'conflict', 'convivent', 'resolv']
+  de ellas, aparecen en el artículo esperado: ['autor', 'conflict', 'convivent']
+  semantico  primeros 3: [('198', 0.8655), ('205', 0.8455), ('232', 0.8446)]
+  lexico     primeros 3: [('215', 1.0), ('205', 0.8154), ('231', 0.7096)]
+  hibrido    primeros 3: [('231', 0.0315), ('234A', 0.0315), ('215', 0.0311)]
+
+p09 (original): ¿Qué es el documento que me entrega el policía cuando me sorprende cometiendo una falta?
+  esperado art-218: semantico 0 | lexico 4 | hibrido 0
+  palabras de la pregunta (preparadas): ['comet', 'document', 'entreg', 'falt', 'polic', 'sorprend']
+  de ellas, aparecen en el artículo esperado: ['document', 'entreg', 'polic']
+  semantico  primeros 3: [('163', 0.8355), ('227', 0.8283), ('35', 0.8271)]
+  lexico     primeros 3: [('211', 1.0), ('227', 0.9358), ('168', 0.9332)]
+  hibrido    primeros 3: [('227', 0.0323), ('155', 0.0286), ('222', 0.0264)]
+
+p10 (original): ¿Cómo es el trámite cuando el policía resuelve el problema ahí mismo en la calle, sin audiencia?
+  esperado art-222: semantico 2 | lexico 6 | hibrido 2
+  palabras de la pregunta (preparadas): ['ahi', 'audienci', 'call', 'mism', 'polic', 'problem', 'resuelv', 'sin', 'tramit']
+  de ellas, aparecen en el artículo esperado: ['polic', 'tramit']
+  semantico  primeros 3: [('223', 0.863), ('222', 0.8513), ('168', 0.844)]
+  lexico     primeros 3: [('223', 1.1665), ('234A', 0.9172), ('228', 0.7781)]
+  hibrido    primeros 3: [('223', 0.0338), ('222', 0.0293), ('79', 0.0286)]
+
+p16 (termino_legal_especifico): ¿Qué tiene que ver la Ley 1566 de 2012 con las medidas correctivas?
+  esperado art-140: semantico 5 | lexico 2 | hibrido 2
+  palabras de la pregunta (preparadas): ['1566', '2012', 'correct', 'ley', 'med', 'ver']
+  de ellas, aparecen en el artículo esperado: ['1566', '2012', 'correct', 'ley', 'med', 'ver']
+  semantico  primeros 3: [('173', 0.8687), ('172', 0.8612), ('184', 0.8247)]
+  lexico     primeros 3: [('59', 1.0), ('140', 0.8416), ('38', 0.619)]
+  hibrido    primeros 3: [('59', 0.0318), ('140', 0.0313), ('38', 0.0301)]

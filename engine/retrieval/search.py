@@ -33,7 +33,7 @@ from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # carpeta engine/
-from indexing import normas  # noqa: E402
+from indexing import normas, temas_articulos  # noqa: E402
 from indexing.embeddings import PREGUNTAS_DEMO, cargar_corpus_completo, cargar_modelo, embeddings_preguntas  # noqa: E402
 from preprocess.texto_bm25 import descripcion_metodo, metodo_disponible  # noqa: E402
 from retrieval.expansion import tokens_consulta_lexica  # noqa: E402
@@ -87,6 +87,9 @@ class Version:
         # El reprocesamiento los pasa ya armados (`articulos`), para no leer archivos que aún no confirmó.
         self.articulos = articulos if articulos is not None else {
             a["id"]: a for a in cargar_corpus_completo(Path(meta["corpus"]), meta.get("corpus_adicionales", []))}
+        # Tema por rangos de artículos (TEMAS_PROPUESTA): también sobre índices construidos antes.
+        temas_articulos.aplicar(meta["fragmentos"])
+        temas_articulos.aplicar(self.articulos.values())
 
     def bm25(self):
         """(BM25Okapi, método de preparación del texto); se arma la primera vez que se pide."""
@@ -219,20 +222,52 @@ def articulo_completo(id_fragmento: str, estrategia: str = "fragmentos", version
 MAX_CARACTERES_CONTEXTO = 12000  # el artículo más largo de la Ley 1801 tiene ~9.000; la Ley 769 tiene uno de 28.000
 
 
+def _trozos_mas_parecidos(pregunta: str, id_fragmento: str, v: Version, max_caracteres: int) -> Optional[str]:
+    """Los trozos de UN artículo más parecidos a la pregunta, hasta `max_caracteres`, en su orden original.
+
+    Usa los vectores que ya están en el índice (no calcula embeddings nuevos de los trozos): solo la
+    pregunta. El trozo que encontró la búsqueda va siempre.
+    """
+    base = id_articulo(id_fragmento)
+    posiciones = [i for i, f in enumerate(v.meta["fragmentos"]) if id_articulo(f["id"]) == base]
+    if not posiciones:
+        return None
+    consulta = embeddings_preguntas([pregunta], _modelo()).astype("float32")[0]
+    vectores = np.vstack([v.indice.reconstruct(i) for i in posiciones])
+    orden = [posiciones[j] for j in np.argsort(-(vectores @ consulta), kind="stable")]
+    frs = v.meta["fragmentos"]
+    elegidos, total = [], 0
+    for i in [p for p in posiciones if frs[p]["id"] == id_fragmento] + orden:
+        if i in elegidos:
+            continue
+        largo = len(frs[i]["texto"]) + 7
+        if elegidos and total + largo > max_caracteres:
+            break
+        elegidos.append(i)
+        total += largo
+    return "\n[...]\n".join(frs[i]["texto"] for i in sorted(elegidos))
+
+
 def articulo_para_contexto(id_fragmento: str, estrategia: str = "fragmentos", version: Optional[Version] = None,
-                           max_caracteres: int = MAX_CARACTERES_CONTEXTO) -> dict:
+                           max_caracteres: int = MAX_CARACTERES_CONTEXTO, pregunta: Optional[str] = None) -> dict:
     """Small-to-big con tope: el artículo completo, salvo que sea enorme.
 
     Si el artículo pasa de `max_caracteres` (p. ej. el art. 131 de la Ley 769, con todas las multas),
-    se manda al modelo solo el trozo encontrado y sus vecinos, avisando que es un extracto. Así el
-    prompt no se dispara de tamaño (los planes gratuitos limitan los tokens por minuto).
+    se manda al modelo un extracto, avisando que lo es. Así el prompt no se dispara de tamaño (los
+    planes gratuitos limitan los tokens por minuto). Con `pregunta`, el extracto son los trozos de ese
+    artículo más parecidos a la pregunta (19/11: con solo el trozo encontrado y sus vecinos, en la
+    pregunta de la moto el modelo veía «conducir motocicleta» pero no la parte de embriaguez); sin
+    `pregunta`, el trozo encontrado y sus vecinos.
     """
     v = version or _version(estrategia)
     a = articulo_completo(id_fragmento, estrategia, v)
     if len(a["texto"]) <= max_caracteres:
         return a
     m = re.search(r"-f(\d+)$", id_fragmento)
-    if m:
+    texto = _trozos_mas_parecidos(pregunta, id_fragmento, v, max_caracteres) if (pregunta and m) else None
+    if texto:
+        pass
+    elif m:
         n, base = int(m.group(1)), id_articulo(id_fragmento)
         por_id = {f["id"]: f["texto"] for f in v.meta["fragmentos"] if id_articulo(f["id"]) == base}
         trozos = [por_id[f"{base}-f{i}"] for i in (n - 1, n, n + 1) if f"{base}-f{i}" in por_id]

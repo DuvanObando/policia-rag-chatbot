@@ -131,19 +131,28 @@ cd backend && npm install
 
 ## Ejecución
 
+**Todo con un clic (Windows):** `iniciar_todo.bat` abre el motor, el backend y el frontend y el navegador en <http://localhost:5173>; `detener_todo.bat` lo apaga. Instalación paso a paso en otro PC, guion de la demo y problemas frecuentes: [docs/guia-companeros/traspaso-santiago-castro.md](docs/guia-companeros/traspaso-santiago-castro.md).
+
+A mano, en tres terminales:
+
 ```bash
 # Motor (puerto 8000); ver la sección "Motor RAG (engine/)"
-cd engine && uvicorn api:app --port 8000
+cd engine && .venv\Scripts\uvicorn api:app --port 8000
 ```
 
 ```bash
 # Backend (puerto PORT, por defecto 4000)
-cd backend && npm run dev
+cd backend && npm run start
 ```
 
 ```bash
-# Evaluación
-python eval/run_eval.py
+# Frontend (http://localhost:5173)
+cd frontend && npm run dev
+```
+
+```bash
+# Evaluación formal (Precisión@k, Recall@k, MRR, fuera de dominio y cita) -> eval/reporte.md
+engine\.venv\Scripts\python eval/run_eval.py --indirectas --pausa 20
 ```
 
 ## Reparto de responsabilidades

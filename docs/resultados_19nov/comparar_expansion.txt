@@ -1,0 +1,103 @@
+Glosario: 49 entradas | método de preparación del índice BM25: snowball
+
+POSICIÓN DEL ARTÍCULO ESPERADO en modo híbrido (1 = primero, 0 = no aparece)
+#   Esper.  sin  con   Pregunta
+p01 140       1    1   ¿Quién decide en qué zonas de la ciudad no se puede consumir …
+p02 124       2    2   Aparte de este código, ¿hay otra ley que castigue el maltrato…
+p03 180       1    1   Si pago rápido el comparendo, ¿me rebajan algo del valor?
+p04 139       1    1   ¿Se considera de todos el agua de los ríos y los caminos públ…
+p05 163       1    1   Hay un incendio en mi edificio, ¿puede la policía entrar a mi…
+p06 173       0    0   ¿Qué otras sanciones, además de la multa, me puede imponer la…
+p07 183       1    1   Tengo una multa sin pagar desde hace un año, ¿qué trámites no…
+p08 198       5    5   ¿Quiénes tienen la autoridad para resolver los conflictos de …
+p09 218       0    0   ¿Qué es el documento que me entrega el policía cuando me sorp…
+p10 222       2    2   ¿Cómo es el trámite cuando el policía resuelve el problema ah…
+p11 163       1    1   ¿Qué dice el artículo 163?
+p12 124       1    2 ↓ ¿Cuánto me cobran si dejo a mi perro suelto en el parque?
+p13 222       0    0   ¿Qué pasa si no hago caso cuando un agente me da una indicaci…
+p14 180       1    1   ¿Cuántos smdlv cuesta una multa tipo 4?
+p15 222       1    1   ¿Qué debe ocurrir en 24 horas con una apelación contra la ord…
+p16 140       2    2   ¿Qué tiene que ver la Ley 1566 de 2012 con las medidas correc…
+p17 140       4    2 ↑ ¿Me ponen boleta si me cogen tomando guaro en el parque?
+p18 124       5    6 ↓ Mi perro es un pitbull y se me escapó a la calle, ¿me cobran …
+p19 163       2    1 ↑ Los tombos se metieron a mi apartamento sin papel, ¿eso se pu…
+
+MODO HÍBRIDO
+
+19 preguntas
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.47       0.68   0.613
+con expansión               0.47       0.74   0.625
+
+16 de la evaluación anterior
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.56       0.75   0.669
+con expansión               0.50       0.75   0.637
+
+3 muy coloquiales (p17-p19)
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.00       0.33   0.317
+con expansión               0.33       0.67   0.556
+
+INFORMATIVO: MODO LÉXICO
+
+19 preguntas
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.42       0.58   0.548
+con expansión               0.42       0.68   0.593
+
+16 de la evaluación anterior
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.50       0.69   0.635
+con expansión               0.44       0.69   0.604
+
+3 muy coloquiales (p17-p19)
+                       Acierto@1  Acierto@3     MRR
+sin expansión               0.00       0.00   0.085
+con expansión               0.33       0.67   0.533
+
+EN QUÉ PREGUNTAS CAMBIÓ EL RESULTADO (modo híbrido) Y POR QUÉ
+
+p12 (ambigua_entre_dos_temas): ¿Cuánto me cobran si dejo a mi perro suelto en el parque?
+  esperado art-124: posición 1 -> 2
+  coloquial 'me cobran' -> legal 'multa': agrega ['mult']
+  coloquial 'parque' -> legal 'espacio público': agrega ['espaci', 'public']
+  coloquial 'perro' -> legal 'canino': agrega ['canin']
+  sin expansión, primeros 3: [('124', 0.0318), ('118', 0.0288), ('122', 0.0282)]
+  con expansión, primeros 3: [('118', 0.0316), ('124', 0.0316), ('122', 0.0294)]
+
+p17 (muy_coloquial): ¿Me ponen boleta si me cogen tomando guaro en el parque?
+  esperado art-140: posición 4 -> 2
+  coloquial 'me ponen boleta' -> legal 'orden de comparendo': agrega ['orden', 'comparend']
+  coloquial 'guaro' -> legal 'bebidas alcohólicas': agrega ['beb', 'alcohol']
+  coloquial 'parque' -> legal 'espacio público': agrega ['espaci', 'public']
+  sin expansión, primeros 3: [('103', 0.0305), ('73', 0.0292), ('52', 0.0275)]
+  con expansión, primeros 3: [('49', 0.0303), ('140', 0.0301), ('73', 0.0287)]
+
+p18 (muy_coloquial): Mi perro es un pitbull y se me escapó a la calle, ¿me cobran mucho?
+  esperado art-124: posición 5 -> 6
+  coloquial 'me cobran' -> legal 'multa': agrega ['mult']
+  coloquial 'perro' -> legal 'canino': agrega ['canin']
+  coloquial 'pitbull' -> legal 'caninos potencialmente peligrosos': agrega ['potencial', 'peligr']
+  sin expansión, primeros 3: [('133', 0.0304), ('118', 0.0298), ('128', 0.0292)]
+  con expansión, primeros 3: [('118', 0.031), ('134', 0.0309), ('133', 0.0304)]
+
+p19 (muy_coloquial): Los tombos se metieron a mi apartamento sin papel, ¿eso se puede?
+  esperado art-163: posición 2 -> 1
+  coloquial 'tombos' -> legal 'autoridades de policía': agrega ['autor', 'polic']
+  coloquial 'mi apartamento' -> legal 'domicilio': agrega ['domicili']
+  sin expansión, primeros 3: [('135', 0.0302), ('163', 0.0274), ('162', 0.0257)]
+  con expansión, primeros 3: [('163', 0.034), ('162', 0.0304), ('135', 0.0282)]
+
+PREGUNTAS EN LAS QUE LA EXPANSIÓN AGREGÓ PALABRAS (aunque no cambiara la posición)
+  p01: 'drogas'→'sustancias psicoactivas'
+  p03: 'comparendo'→'orden de comparendo'; 'me rebajan'→'descuento por pronto pago'
+  p05: 'mi apartamento'→'domicilio'
+  p06: 'sanciones'→'medidas correctivas'
+  p07: 'multa sin pagar'→'consecuencias por el no pago de multas'
+  p10: 'en la calle'→'espacio público'
+  p12: 'me cobran'→'multa'; 'parque'→'espacio público'; 'perro'→'canino'
+  p14: 'smdlv'→'salarios mínimos diarios legales vigentes'
+  p17: 'me ponen boleta'→'orden de comparendo'; 'guaro'→'bebidas alcohólicas'; 'parque'→'espacio público'
+  p18: 'me cobran'→'multa'; 'perro'→'canino'; 'pitbull'→'caninos potencialmente peligrosos'
+  p19: 'tombos'→'autoridades de policía'; 'mi apartamento'→'domicilio'

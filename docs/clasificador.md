@@ -146,3 +146,24 @@ python eval/comparar_clasificador.py
 python engine/retrieval/search.py "¿Qué dice el artículo 163?"                    # con clasificador
 python engine/retrieval/search.py --sin-clasificador "¿Qué dice el artículo 163?" # sin clasificador
 ```
+
+## Actualización 19/11: los 32 temas de Santiago Castro
+
+**Problema.** Con el corpus real el empuje por tema no actuaba: el campo `tema` vale «texto fuente Ley 1801» en los 249 artículos y ninguno coincidía con los 10 temas de `temas.json` (medido el 12/11, ver arriba). Una consecuencia concreta, detectada el 19/11 con las preguntas indirectas que reportó Santiago Bulla: «Un policía me pidió la cédula, ¿estoy obligado a mostrarla?» salía **fuera de dominio**, porque el art. 35 (num. 3: resistirse al procedimiento de identificación) quedaba en el puesto 30 de la búsqueda semántica. Los scores de E5 están muy juntos (0,829 el primero, 0,809 el mejor trozo del art. 35), así que un empuje de 0,02 basta para subirlo, si el art. 35 tuviera tema.
+
+**Solución, sin editar el corpus de Wilder.** Santiago Castro propuso 32 temas por rangos de artículos según los capítulos y epígrafes de la ley ([`docs/analisis/propuesta_temas.json`](analisis/propuesta_temas.json)). Se aplican así:
+
+- [`engine/retrieval/temas_por_articulo.json`](../engine/retrieval/temas_por_articulo.json): id → tema, generado de la propuesta (está en `engine/` porque el Docker solo monta `engine/` y `corpus/`).
+- [`engine/indexing/temas_articulos.py`](../engine/indexing/temas_articulos.py): reemplaza el tema **al cargar** el corpus (`cargador_corpus.cargar`) y **al leer un índice** ya construido (`search.Version`), así que no hace falta reconstruir los índices. En disco queda el tema del corpus. Se activa con `TEMAS_PROPUESTA=1` (por defecto) y solo toca los artículos de la Ley 1801.
+- [`engine/retrieval/temas.json`](../engine/retrieval/temas.json): los 32 temas con sus palabras clave (escritas por Duvan reutilizando las 10 anteriores; la versión anterior queda en [`eval/temas_anterior.json`](../eval/temas_anterior.json)).
+- Empuje en modo semántico: **0,02** (antes 0,03); léxico e híbrido escalados en la misma proporción.
+
+**Resultado** ([`docs/resultados_temas.md`](resultados_temas.md), `eval/comparar_temas.py`; 68 preguntas: las 19 de las evaluaciones anteriores, 9 indirectas y 40 del banco de Wilder; solo recuperación, modo semántico):
+
+| | Acierto@1 | Acierto@3 | MRR |
+|---|---|---|---|
+| Sin clasificador | 0,69 | 0,87 | 0,791 |
+| Clasificador anterior (solo actúa el artículo por número) | 0,71 | 0,88 | 0,805 |
+| **Temas de Castro, empuje 0,02** | **0,79** | **0,91** | **0,863** |
+
+Por grupo, con los temas de Castro ninguno empeora frente al clasificador anterior: evaluaciones anteriores 0,686 → 0,725; indirectas 0,648 → 0,944 (la de la cédula pasa de no aparecer al puesto 1); banco de Wilder 0,897 → 0,909. Con empuje 0,03 el banco de Wilder bajaba a 0,872, por eso se dejó 0,02. **Aviso:** el empuje se eligió mirando estas mismas preguntas (no hay un conjunto aparte para validarlo); el banco formal de Wilder, cuando llegue, sirve para confirmarlo.
