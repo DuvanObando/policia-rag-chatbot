@@ -34,6 +34,8 @@ def _oficial() -> list:
     if not BANCO_OFICIAL.exists():
         return []
     datos = json.loads(BANCO_OFICIAL.read_text(encoding="utf-8") or "[]")
+    if datos and "question" in datos[0]:  # formato de Wilder (question, answer, source, expected_behavior)
+        return _adaptar(datos, "eval/banco_preguntas.json (formato de Wilder, adaptado)")
     salida = []
     for i, p in enumerate(datos, 1):
         salida.append({
@@ -49,28 +51,49 @@ def _oficial() -> list:
 
 
 _ART_1801 = re.compile(r"art[íi]culos?\s+(\d+[A-Z]?)\b(?:(?!;).)*?Ley\s+1801", re.IGNORECASE)
+# Fuentes de la Ley 769: «Ley 769 de 2002, artículos 110 y 115, ...; artículo 131, literal D, ...».
+# En cada tramo (separado por ';') cuenta el artículo con el que empieza, no los de las leyes que lo modifican.
+_ART_769 = re.compile(r"^\s*(?:Ley\s+769\s+de\s+2002,\s*)?art[íi]culos?\s+(\d+[A-Z]?)(?:\s+y\s+(\d+[A-Z]?))?", re.IGNORECASE)
 
 
-def _wilder() -> list:
-    datos = json.loads(BANCO_WILDER.read_text(encoding="utf-8"))
+def _esperados(fuente: str) -> tuple:
+    """(ids de artículos esperados, norma adicional que hay que tener cargada o None)."""
+    if fuente.lstrip().startswith("Ley 769"):
+        arts = []
+        for tramo in fuente.split(";"):
+            m = _ART_769.match(tramo)
+            for n in (m.groups() if m else ()):
+                if n and f"ley769-art-{n}" not in arts:
+                    arts.append(f"ley769-art-{n}")
+        return arts, "Ley 769 de 2002"
+    arts = []
+    for n in _ART_1801.findall(fuente):
+        a = normalizar_articulo(n)
+        if a not in arts:
+            arts.append(a)
+    return arts, None
+
+
+def _adaptar(datos: list, origen: str) -> list:
     salida = []
     for p in datos:
         fuera = p.get("expected_behavior", "").startswith("abstenerse")
-        arts = []
-        for n in _ART_1801.findall(p.get("source") or ""):
-            a = normalizar_articulo(n)
-            if a not in arts:
-                arts.append(a)
+        arts, norma = _esperados(p.get("source") or "")
         salida.append({
             "id": p["id"],
             "pregunta": p["question"],
             "articulos_esperados": arts,
             "fuera_de_dominio": fuera,
             "respuesta_referencia": p.get("answer"),
-            "tipo": "fuera_de_dominio" if fuera else "norma_modificatoria",
-            "origen": "corpus/preguntas_ley_1801.json (adaptado)",
+            "tipo": "fuera_de_dominio" if fuera else ("transito" if norma else "norma_modificatoria"),
+            "requiere_norma": norma,
+            "origen": origen,
         })
     return salida
+
+
+def _wilder() -> list:
+    return _adaptar(json.loads(BANCO_WILDER.read_text(encoding="utf-8")), "corpus/preguntas_ley_1801.json (adaptado)")
 
 
 def banco() -> tuple:

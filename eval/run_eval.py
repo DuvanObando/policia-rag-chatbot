@@ -28,6 +28,7 @@ Métricas (k = número de artículos distintos que el motor le entrega al LLM, 3
 """
 import argparse
 import json
+import re
 import sys
 import time
 from collections import defaultdict
@@ -48,7 +49,8 @@ def articulos_de(citados) -> list:
     salida = []
     for c in citados or []:
         if "," in c and "Ley" in c.split(",")[0] and "1801" not in c.split(",")[0]:
-            salida.append("otra-norma:" + c)  # cita de otra norma: nunca es un esperado de la Ley 1801
+            m = re.match(r"Ley (\d+) de \d{4}, Artículo (\w+)", c)  # «Ley 769 de 2002, Artículo 131»
+            salida.append(f"ley{m.group(1)}-art-{m.group(2)}" if m else "otra-norma:" + c)
         else:
             salida.append(bancos.normalizar_articulo(c))
     return salida
@@ -186,9 +188,15 @@ def main():
 
     from generation.llm import ErrorLLM, orden_proveedores
     from generation.responder import responder
-    from retrieval.search import modo_por_defecto, precargar
+    from retrieval.search import modo_por_defecto, normas_cargadas, precargar
     from indexing import temas_articulos
     precargar("fragmentos")
+    # Preguntas que solo tienen sentido con otra norma cargada (p. ej. la Ley 769): se omiten si no está.
+    cargadas = {n["norma"] for n in normas_cargadas("fragmentos")}
+    omitidas = [p for p in preguntas if p.get("requiere_norma") and p["requiere_norma"] not in cargadas]
+    if omitidas:
+        preguntas = [p for p in preguntas if p not in omitidas]
+        nombre += f" · {len(omitidas)} omitidas porque su norma no está cargada"
     config = (f"modo de búsqueda `{modo_por_defecto()}`, LLM en orden {orden_proveedores()}, "
               f"temas de Castro {'activos' if temas_articulos.activa() else 'desactivados'} (TEMAS_PROPUESTA)")
     print(f"{len(preguntas)} preguntas | {nombre}\n{config}", flush=True)

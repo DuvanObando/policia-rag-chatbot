@@ -31,7 +31,8 @@ K = 10
 def conjunto():
     preguntas = bancos.recuperacion_existente()
     preguntas += [p for p in bancos.indirectas() if p["articulos_esperados"]]
-    preguntas += [p for p in bancos.banco()[0] if p["articulos_esperados"] and not p["fuera_de_dominio"]]
+    preguntas += [p for p in bancos.banco()[0]
+                  if p["articulos_esperados"] and not p["fuera_de_dominio"] and not p.get("requiere_norma")]
     return preguntas
 
 
@@ -92,7 +93,7 @@ def main():
         "todas": None,
         "evaluaciones anteriores": {p["id"] for p in preguntas if p["origen"].startswith("eval/preguntas_") and "indirectas" not in p["origen"]},
         "indirectas (19/11)": {p["id"] for p in preguntas if "indirectas" in p["origen"]},
-        "banco de Wilder": {p["id"] for p in preguntas if "1801" in p["origen"]},
+        "banco de Wilder": {p["id"] for p in preguntas if "adaptado" in p["origen"]},
     }
     l = ["# Clasificador temático: con y sin la propuesta de temas de Santiago Castro", "",
          f"Generado por `eval/comparar_temas.py`. Solo recuperación (sin LLM), modo semántico, fragmentos, k={K}. "

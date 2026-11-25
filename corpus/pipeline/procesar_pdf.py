@@ -37,8 +37,8 @@ Prueba rápida, desde la raíz del repo:
 Qué hace esta versión básica:
   - extrae el texto página por página con PyMuPDF (o pypdf si no está instalado);
   - quita las líneas que se repiten en más de la mitad de las páginas (encabezados y pies);
-  - parte por líneas que empiezan con «ARTÍCULO N» (acepta 1o., 2°, 131A...), solo si el número es
-    mayor que el del artículo anterior: así no se confunden con artículos citados dentro del texto;
+  - parte por líneas que empiezan con «ARTÍCULO N» (acepta 1o., 2°, 131A...), sin confundir
+    menciones en minúscula dentro del texto con encabezados;
   - toma como epígrafe lo que sigue a «ARTÍCULO N.» hasta el primer punto, si es corto;
   - lleva la cuenta de LIBRO / TÍTULO / CAPÍTULO cuando aparecen como encabezados;
   - marca todo con vigencia "no_verificada" (nadie la ha revisado).
@@ -55,11 +55,24 @@ sys.path.insert(0, str(RAIZ / "engine"))
 from indexing import pdf_texto  # noqa: E402
 from indexing.normas import id_articulo  # noqa: E402
 
-_ARTICULO = re.compile(
-    r"^\s*ART[ÍI]CULO\s+(\d{1,4})\s*([A-Za-z])?(?![\w])\s*(?:[oº°]\s*)?[\.\-:–—]?\s*(.*)$", re.IGNORECASE)
+_ARTICULO_MARCA = re.compile(
+    r"\bART[ÍI]CULO\s*(\d{1,4})"
+    r"(?:\s*(?:[oOº°]|([A-Z])(?=\s*[.\-:–—])))?"
+    r"\s*[.\-:–—]?",
+    re.IGNORECASE,
+)
+_ARTICULO_LINEA = re.compile(
+    r"^\s*ART[ÍI]CULO\s*(\d{1,4})"
+    r"(?:\s*(?:[oOº°]|([A-Z])(?=\s*[.\-:–—])))?"
+    r"\s*[.\-:–—]?\s*(.*)$",
+    re.IGNORECASE,
+)
 _LIBRO = re.compile(r"^\s*LIBRO\s+([A-ZÁÉÍÓÚ]+|[IVXLC]+|\d+)\b\.?\s*(.*)$")
 _TITULO = re.compile(r"^\s*T[ÍI]TULO\s+([IVXLC]+|\d+|[ÚU]NICO|PRELIMINAR)\b\.?\s*(.*)$")
 _CAPITULO = re.compile(r"^\s*CAP[ÍI]TULO\s+([IVXLC]+|\d+|[ÚU]NICO)\b\.?\s*(.*)$")
+_SUBSECCION_131 = re.compile(
+    r"(?<=\S)[ \t]+(?=(?:[A-F]\.\s+|[A-F]\.\d{1,2}\.\s+)[A-ZÁÉÍÓÚÜÑ])"
+)
 
 
 def _paginas(ruta_pdf: Path):
@@ -91,6 +104,73 @@ def _epigrafe(resto: str, numero: str) -> str:
     return f"Artículo {numero}"
 
 
+def _numero_natural(numero: str, sufijo: str) -> tuple:
+    """Clave estable para comparar artículos con ordinal o literal."""
+    return int(numero), (sufijo or "").upper()
+
+
+def _es_encabezado_articulo(texto: str, coincidencia) -> bool:
+    """Acepta encabezados en una línea o separados por texto, sin tomar referencias minúsculas."""
+    inicio = coincidencia.start()
+    if inicio and texto[inicio - 1] not in "\r\n\t ":
+        return False
+    linea_inicio = texto.rfind("\n", 0, inicio) + 1
+    prefijo = texto[linea_inicio:inicio].strip()
+    if prefijo:
+        return False
+    # Se saltan también los saltos de línea: algunos encabezados vienen solos («ARTÍCULO 76.») y el
+    # título en la línea siguiente.
+    resto = texto[coincidencia.end():coincidencia.end() + 160].lstrip(" \t\r\n.-:–—")
+    if not resto:
+        return False
+    return resto[0].isupper() or resto[0].isdigit()
+
+
+def _texto_completo(lineas_por_pagina):
+    partes = []
+    rangos = []
+    cursor = 0
+    for pagina, lineas in enumerate(lineas_por_pagina, start=1):
+        texto = "\n".join(linea.strip() for linea in lineas if linea.strip())
+        if texto:
+            inicio = cursor
+            fin = inicio + len(texto)
+            rangos.append((inicio, fin, pagina))
+            partes.append(texto)
+            cursor = fin + 2
+    return "\n\n".join(partes), rangos
+
+
+def _pagina_offset(rangos, offset):
+    for inicio, fin, pagina in rangos:
+        if inicio <= offset < fin:
+            return pagina
+    return rangos[-1][2] if rangos else 1
+
+
+def _ubicacion_en_offset(texto: str, offset: int) -> dict:
+    ubicacion = {"libro": None, "titulo": None, "capitulo": None}
+    prefijo = texto[:offset]
+    for linea in prefijo.splitlines():
+        limpia = linea.strip()
+        if not limpia:
+            continue
+        for patron, campo in ((_LIBRO, "libro"), (_TITULO, "titulo"), (_CAPITULO, "capitulo")):
+            coincidencia = patron.match(limpia)
+            if coincidencia and limpia.isupper():
+                ubicacion[campo] = limpia.title()
+                if campo == "libro":
+                    ubicacion.update(titulo=None, capitulo=None)
+                elif campo == "titulo":
+                    ubicacion["capitulo"] = None
+    return ubicacion
+
+
+def _separar_subsecciones_131(texto: str) -> str:
+    """Conserva el artículo 131 como un registro y separa sus literales/numerales en líneas."""
+    return _SUBSECCION_131.sub("\n", texto)
+
+
 def procesar_pdf(ruta_pdf, norma, fuente_url=None) -> list:
     """Registros del corpus (uno por artículo) a partir del PDF de una norma. Ver el docstring del módulo."""
     ruta_pdf = Path(ruta_pdf)
@@ -98,43 +178,62 @@ def procesar_pdf(ruta_pdf, norma, fuente_url=None) -> list:
     if not any(l.strip() for p in lineas_por_pagina for l in p):
         raise ValueError("El PDF no tiene texto que se pueda extraer (¿es un documento escaneado?).")
 
-    ubicacion = {"libro": None, "titulo": None, "capitulo": None}
-    registros, actual, ultimo = [], None, 0
-    for n_pagina, lineas in enumerate(lineas_por_pagina, start=1):
-        for linea in lineas:
-            limpia = linea.strip()
-            if not limpia:
-                continue
-            for patron, campo in ((_LIBRO, "libro"), (_TITULO, "titulo"), (_CAPITULO, "capitulo")):
-                m = patron.match(limpia)
-                if m and limpia.isupper():  # encabezado en mayúsculas, no una mención dentro del texto
-                    ubicacion[campo] = limpia.title()
-                    if campo == "libro":
-                        ubicacion.update(titulo=None, capitulo=None)
-                    elif campo == "titulo":
-                        ubicacion["capitulo"] = None
-            m = _ARTICULO.match(limpia)
-            if m and int(m.group(1)) > ultimo:
-                ultimo = int(m.group(1))
-                numero = m.group(1) + (m.group(2) or "").upper()
-                actual = {
-                    "id": id_articulo(norma, numero),
-                    "norma": norma,
-                    "ubicacion": {**ubicacion, "articulo": f"Artículo {numero}"},
-                    "epigrafe": _epigrafe(m.group(3), numero),
-                    "lineas": [limpia],
-                    "vigencia": "no_verificada",
-                    "tema": f"texto fuente {norma}",
-                    "pdf": ruta_pdf.name,
-                    "pagina": n_pagina,
-                    "fuente_url": fuente_url,
-                }
-                registros.append(actual)
-            elif actual is not None:
-                actual["lineas"].append(limpia)
+    texto, rangos = _texto_completo(lineas_por_pagina)
+    encabezados = []
+    for coincidencia in _ARTICULO_MARCA.finditer(texto):
+        if not _es_encabezado_articulo(texto, coincidencia):
+            continue
+        sufijo = coincidencia.group(2) or ""
+        numero = coincidencia.group(1) + sufijo.upper()
+        clave = _numero_natural(coincidencia.group(1), sufijo)
+        encabezados.append((coincidencia, clave, numero))
 
-    for r in registros:
-        r["texto"] = "\n".join(r.pop("lineas")).strip()
+    # Conserva el orden real y elimina duplicados del mismo encabezado.
+    encabezados_unicos = []
+    ultimo_encabezado = None
+    for encabezado in encabezados:
+        coincidencia, clave, numero = encabezado
+        if ultimo_encabezado is not None and coincidencia.start() == ultimo_encabezado:
+            continue
+        encabezados_unicos.append(encabezado)
+        ultimo_encabezado = coincidencia.start()
+
+    registros = []
+    ultimo_clave = (0, "")
+    for indice, (coincidencia, clave, numero) in enumerate(encabezados_unicos):
+        if clave <= ultimo_clave:
+            continue
+        ultimo_clave = clave
+        inicio = coincidencia.start()
+        fin = encabezados_unicos[indice + 1][0].start() if indice + 1 < len(encabezados_unicos) else len(texto)
+        linea_encabezado_fin = texto.find("\n", coincidencia.end())
+        if linea_encabezado_fin >= 0 and linea_encabezado_fin < fin:
+            resto_offset = linea_encabezado_fin + 1
+        else:
+            resto_offset = coincidencia.end()
+        resto = texto[resto_offset:fin].strip()
+        encabezado_linea = texto[inicio: texto.find("\n", inicio) if texto.find("\n", inicio) >= 0 else fin].strip()
+        cuerpo = "\n".join(parte for parte in (encabezado_linea, resto) if parte).strip()
+        if r"\n" in cuerpo:
+            cuerpo = cuerpo.replace(r"\n", "\n")
+        texto_cuerpo = cuerpo
+        if numero.upper().startswith("131"):
+            texto_cuerpo = _separar_subsecciones_131(texto_cuerpo)
+        coincidencia_linea = _ARTICULO_LINEA.match(encabezado_linea)
+        resto_epigrafe = coincidencia_linea.group(3) if coincidencia_linea else ""
+        registro = {
+            "id": id_articulo(norma, numero),
+            "norma": norma,
+            "ubicacion": {**_ubicacion_en_offset(texto, inicio), "articulo": f"Artículo {numero}"},
+            "epigrafe": _epigrafe(resto_epigrafe or resto, numero),
+            "texto": texto_cuerpo,
+            "vigencia": "no_verificada",
+            "tema": f"texto fuente {norma}",
+            "pdf": ruta_pdf.name,
+            "pagina": _pagina_offset(rangos, inicio),
+            "fuente_url": fuente_url,
+        }
+        registros.append(registro)
     if not registros:
         raise ValueError("No se encontró ningún «ARTÍCULO N» en el PDF.")
     return registros
