@@ -1,1 +1,352 @@
-[]
+[
+  {
+    "id": "pregunta_01",
+    "question": "¿Qué comportamientos se consideran peligrosos porque pueden terminar en una pelea o agresión física?",
+    "answer": "El artículo 27 incluye reñir, provocar confrontaciones violentas, lanzar objetos peligrosos, agredir y amenazar con causar daño físico. La versión corregida de ese artículo está en el **artículo 1 del Decreto 555 de 2017**, que corrige el **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Decreto 555 de 2017, artículo 1; corrige el artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_02",
+    "question": "¿Puedo llevar un cuchillo en la calle si lo uso como herramienta de mi trabajo?",
+    "answer": "El artículo 27 contempla la excepción para quien demuestre que el elemento cortante es una herramienta de su actividad deportiva, oficio, profesión o estudio. La redacción corregida está en el **artículo 1 del Decreto 555 de 2017**, sobre el **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Decreto 555 de 2017, artículo 1; corrige el artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_03",
+    "question": "¿La Policía puede apagar temporalmente el equipo que está haciendo mucho ruido en mi casa o barrio?",
+    "answer": "La disposición sobre ruidos permite que la autoridad desactive temporalmente la fuente cuando se cumplen las condiciones previstas en el artículo. La redacción corregida se encuentra en el **artículo 2 del Decreto 555 de 2017**, que corrige el **artículo 33 de la Ley 1801 de 2016**. Para responder sobre el régimen actual del ruido también debe revisarse la modificación posterior de la Ley 2450 de 2025.",
+    "source": "Decreto 555 de 2017, artículo 2; corrige el artículo 33 de la Ley 1801 de 2016. Modificación posterior: Ley 2450 de 2025, artículo 18.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_04",
+    "question": "¿Dar un beso en un parque se considera automáticamente un acto sexual o de exhibicionismo?",
+    "answer": "No. El parágrafo 2 del artículo 33 aclara que los besos y caricias como expresiones de cariño no constituyen por sí mismos actos sexuales o de exhibicionismo. Esa precisión aparece en el **artículo 2 del Decreto 555 de 2017**, que corrigió el **artículo 33 de la Ley 1801 de 2016**. La redacción vigente debe leerse con la modificación posterior de la Ley 2450 de 2025.",
+    "source": "Decreto 555 de 2017, artículo 2; corrige el artículo 33 de la Ley 1801 de 2016. Modificación posterior: Ley 2450 de 2025, artículo 18.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_05",
+    "question": "¿Está prohibido consumir alcohol dentro de un colegio?",
+    "answer": "El artículo 34 contempla como comportamiento contrario a la convivencia consumir bebidas alcohólicas, drogas o sustancias prohibidas dentro de una institución educativa. Su texto fue corregido por el **artículo 3 del Decreto 555 de 2017**, que corrige el **artículo 34 de la Ley 1801 de 2016**; posteriormente, la **Ley 2000 de 2019, artículo 2**, modificó apartes y añadió disposiciones a ese mismo artículo.",
+    "source": "Decreto 555 de 2017, artículo 3; corrige el artículo 34 de la Ley 1801 de 2016. Ley 2000 de 2019, artículo 2; modifica y adiciona el artículo 34.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_06",
+    "question": "¿Puede un adulto facilitar sustancias psicoactivas cerca de un colegio?",
+    "answer": "La Ley 2000 de 2019 añadió al artículo 34 el numeral 6, que contempla facilitar o distribuir sustancias psicoactivas —incluso la dosis personal— en el área circundante a instituciones educativas, conforme al perímetro y reglamentación aplicables. La fuente es el **artículo 2 de la Ley 2000 de 2019**, que modifica y adiciona el **artículo 34 de la Ley 1801 de 2016**.",
+    "source": "Ley 2000 de 2019, artículo 2; modifica y adiciona el artículo 34 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_07",
+    "question": "¿Quién define el perímetro alrededor de un colegio donde se restringe el consumo de sustancias psicoactivas?",
+    "answer": "La Ley 2000 de 2019 agregó que corresponde a los alcaldes establecer esos perímetros y que la delimitación debe ser clara y visible para la ciudadanía. Está en el **parágrafo 3 añadido por el artículo 2 de la Ley 2000 de 2019** al **artículo 34 de la Ley 1801 de 2016**.",
+    "source": "Ley 2000 de 2019, artículo 2; adiciona el parágrafo 3 al artículo 34 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_08",
+    "question": "¿Qué pasa si un establecimiento permite vender o distribuir sustancias psicoactivas en zonas escolares?",
+    "answer": "El artículo 34 contempla comportamientos relacionados con facilitar o distribuir sustancias psicoactivas en el área circundante a centros educativos y prevé medidas correctivas. La modificación se encuentra en el **artículo 2 de la Ley 2000 de 2019**, que modificó y adicionó el **artículo 34 de la Ley 1801 de 2016**.",
+    "source": "Ley 2000 de 2019, artículo 2; modifica y adiciona el artículo 34 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_09",
+    "question": "¿Se puede consumir o vender sustancias psicoactivas en un parque aunque sea la dosis personal?",
+    "answer": "La Ley 2000 de 2019 añadió los numerales 13 y 14 al artículo 140. Estos contemplan comportamientos relacionados con sustancias psicoactivas en parques, perímetros de centros educativos y ciertas zonas del espacio público definidas por el alcalde. La fuente es el **artículo 3 de la Ley 2000 de 2019**, que adiciona el **artículo 140 de la Ley 1801 de 2016**. Su aplicación debe considerar los pronunciamientos constitucionales y las reglas vigentes sobre delimitación.",
+    "source": "Ley 2000 de 2019, artículo 3; adiciona los numerales 13 y 14 al artículo 140 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_10",
+    "question": "¿Un alcalde puede definir zonas específicas del espacio público donde se restringe el consumo de sustancias psicoactivas?",
+    "answer": "Sí, el numeral 14 añadido al artículo 140 contempla áreas o zonas del espacio público definidas por el alcalde por motivos de interés público, con delimitación razonable y proporcional. La adición está en el **artículo 3 de la Ley 2000 de 2019**, respecto del **artículo 140 de la Ley 1801 de 2016**.",
+    "source": "Ley 2000 de 2019, artículo 3; adiciona el numeral 14 al artículo 140 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_11",
+    "question": "¿Qué medida puede aplicarse por consumir sustancias psicoactivas en una de las zonas restringidas del artículo 140?",
+    "answer": "El texto añadido por la Ley 2000 de 2019 asocia los numerales 13 y 14 con multa general tipo 4 y destrucción del bien, sin perjuicio de la responsabilidad penal cuando corresponda. La regla se encuentra en el **artículo 3 de la Ley 2000 de 2019**, que adicionó esos numerales y modificó el parágrafo 2 del **artículo 140 de la Ley 1801 de 2016**.",
+    "source": "Ley 2000 de 2019, artículo 3; adiciona numerales y modifica el parágrafo 2 del artículo 140 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_12",
+    "question": "¿Un negocio puede ser suspendido automáticamente por cualquier incumplimiento de requisitos de funcionamiento?",
+    "answer": "La Ley 1955 de 2019 añadió una precisión: para aplicar el numeral 16 del artículo 92, los requisitos deben entenderse como los de apertura y funcionamiento del artículo 87; además, el parágrafo indica que no procede la suspensión temporal de actividades en ese supuesto. Está en el **artículo 134 de la Ley 1955 de 2019**, que adiciona el parágrafo 7 al **artículo 92 de la Ley 1801 de 2016**.",
+    "source": "Ley 1955 de 2019, artículo 134; adiciona el parágrafo 7 al artículo 92 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_13",
+    "question": "¿Quién controla el uso del suelo de un establecimiento cuando se revisa el cumplimiento de requisitos?",
+    "answer": "La precisión añadida por la Ley 1955 de 2019 señala que el control del uso reglamentado del suelo y de la ubicación, destinación o finalidad de la edificación corresponde exclusivamente a los inspectores de Policía, conforme al numeral 12 del artículo 92. La fuente es el **artículo 134 de la Ley 1955 de 2019**, que adicionó el parágrafo 7 al **artículo 92 de la Ley 1801 de 2016**.",
+    "source": "Ley 1955 de 2019, artículo 134; adiciona el parágrafo 7 al artículo 92 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_14",
+    "question": "¿Qué requisitos se deben mirar para aplicar la regla sobre un negocio que funciona sin cumplir los requisitos legales?",
+    "answer": "La regla añadida por la Ley 1955 de 2019 ordena interpretar el numeral 16 del artículo 92 teniendo en cuenta únicamente los requisitos de apertura y funcionamiento del artículo 87 de la Ley 1801. La modificación está en el **artículo 134 de la Ley 1955 de 2019**, que adiciona el parágrafo 7 al **artículo 92 de la Ley 1801 de 2016**.",
+    "source": "Ley 1955 de 2019, artículo 134; adiciona el parágrafo 7 al artículo 92 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_15",
+    "question": "¿Un conjunto residencial puede prohibir que los animales domésticos pasen por sus zonas comunes?",
+    "answer": "La modificación al artículo 117 establece que no podrán prohibirse el tránsito y la permanencia de animales domésticos o mascotas en las zonas comunes de propiedades horizontales o conjuntos residenciales. La regla fue incorporada por el **artículo 10 de la Ley 2054 de 2020**, que modifica el **artículo 117 de la Ley 1801 de 2016**.",
+    "source": "Ley 2054 de 2020, artículo 10; modifica el artículo 117 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_16",
+    "question": "¿Qué deben hacer los perros cuando transitan por zonas comunes de un conjunto residencial?",
+    "answer": "El artículo 117 modificado establece que los ejemplares caninos deben ir sujetos por medio de traílla y contempla requisitos adicionales para los perros de manejo especial. La modificación está en el **artículo 10 de la Ley 2054 de 2020**, que modifica el **artículo 117 de la Ley 1801 de 2016**. La terminología y los requisitos deben leerse junto con las demás normas posteriores aplicables.",
+    "source": "Ley 2054 de 2020, artículo 10; modifica el artículo 117 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_17",
+    "question": "¿Puede la administración de un conjunto ignorar una regla de su manual que contradiga lo que dice la ley sobre mascotas?",
+    "answer": "La modificación del artículo 117 autoriza a los administradores a no aplicar las normas de los manuales de convivencia que contradigan las disposiciones allí establecidas, y a solicitar su ajuste. La fuente es el **artículo 10 de la Ley 2054 de 2020**, que modifica el **artículo 117 de la Ley 1801 de 2016**.",
+    "source": "Ley 2054 de 2020, artículo 10; modifica el artículo 117 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_18",
+    "question": "¿La Policía puede trasladar a alguien para protegerlo si está en una situación de riesgo?",
+    "answer": "El artículo 155 regula el traslado por protección y contempla circunstancias como estar inmerso en una riña, deambular en estado de indefensión, presentar alteración de conciencia o realizar actividades peligrosas. La versión modificada está en el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_19",
+    "question": "¿La Policía puede llevar a una persona a una estación para hacer un traslado por protección?",
+    "answer": "No. El texto modificado del artículo 155 señala que el traslado por protección no se realizará en instalaciones de la Policía Nacional ni en sitios de reclusión de personas retenidas bajo el ordenamiento penal. La regla está en el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_20",
+    "question": "¿Cuánto tiempo puede durar como máximo un traslado por protección?",
+    "answer": "El artículo 155 modificado establece que el traslado puede terminar cuando desaparezcan sus causas y que no puede superar las 12 horas. La fuente es el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_21",
+    "question": "¿Qué debe hacer la Policía si traslada a una persona para protegerla?",
+    "answer": "El texto modificado exige informar de inmediato al superior jerárquico y documentar el traslado mediante un informe escrito con la identificación de la persona y las circunstancias de tiempo, modo y lugar. La regla está en el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_22",
+    "question": "¿La persona trasladada por protección puede avisarle a un familiar dónde está?",
+    "answer": "Sí. El parágrafo 7 del artículo 155 establece que la autoridad debe permitirle comunicarse con un allegado o con quien pueda asistirla e informarle el motivo y el lugar del traslado; si no tiene medios, la autoridad debe facilitárselos. Esto fue incorporado por el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_23",
+    "question": "¿Qué pasa si en mi municipio no existe un Centro de Traslado por Protección?",
+    "answer": "El artículo 155 modificado dispone que, donde no exista un centro idóneo que garantice los derechos fundamentales y la dignidad humana, no se ejecutará ese medio de Policía hasta que la entidad territorial disponga de un lugar adecuado. La fuente es el **artículo 40 de la Ley 2197 de 2022**, que modifica el **artículo 155 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 40; modifica el artículo 155 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_24",
+    "question": "¿Qué nuevas conductas relacionadas con armas menos letales se añadieron a las reglas de convivencia?",
+    "answer": "La Ley 2197 de 2022 añadió al artículo 27 conductas como portar armas, elementos o dispositivos menos letales modificados, portarlos sin permiso cuando se requiera, con permiso vencido o bajo efectos de alcohol o sustancias psicoactivas. La adición se encuentra en el **artículo 39 de la Ley 2197 de 2022**, que adiciona los numerales 8 a 11 al **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 39; adiciona los numerales 8 a 11 al artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_25",
+    "question": "¿Puedo llevar un arma menos letal modificada para que funcione de otra manera?",
+    "answer": "El numeral 8 añadido al artículo 27 contempla como comportamiento contrario a la convivencia portar armas, elementos y dispositivos menos letales que hayan sido modificados en sus características de fabricación, origen, diseño o propósito. La regla fue añadida por el **artículo 39 de la Ley 2197 de 2022** al **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 39; adiciona el numeral 8 al artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_26",
+    "question": "¿Puedo portar un arma menos letal si el permiso que necesitaba está vencido?",
+    "answer": "El numeral 10 añadido al artículo 27 contempla portar armas, elementos o dispositivos menos letales cuando el permiso respectivo haya perdido vigencia. La fuente es el **artículo 39 de la Ley 2197 de 2022**, que adiciona los numerales 8 a 11 al **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 39; adiciona el numeral 10 al artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_27",
+    "question": "¿Puedo portar un arma menos letal si estoy borracho?",
+    "answer": "El numeral 11 añadido al artículo 27 contempla portar armas, elementos o dispositivos menos letales bajo el influjo de sustancias psicoactivas ilícitas o prohibidas, o en estado de embriaguez. La adición está en el **artículo 39 de la Ley 2197 de 2022**, que modifica y adiciona el **artículo 27 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 39; adiciona el numeral 11 al artículo 27 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_28",
+    "question": "¿La alcaldía tiene responsabilidades especiales para tener un Centro de Traslado por Protección?",
+    "answer": "La modificación del artículo 205 asigna al alcalde atribuciones relacionadas con la implementación y dotación del Centro de Traslado por Protección, entre otras funciones añadidas. La fuente es el **artículo 41 de la Ley 2197 de 2022**, que modifica y adiciona numerales al **artículo 205 de la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 41; modifica y adiciona el artículo 205 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_29",
+    "question": "¿Qué sistema nacional se creó para organizar el recaudo de multas y comparendos?",
+    "answer": "La Ley 2197 de 2022 añadió disposiciones para el sistema de recaudo de multas y medidas correctivas, incluyendo el artículo 185A sobre un Sistema Único de Información de recaudo a nivel nacional. La adición se encuentra en el **artículo 44 de la Ley 2197 de 2022**, que adiciona el **artículo 185A a la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 44; adiciona el artículo 185A a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_30",
+    "question": "¿La Policía puede consultar cámaras de seguridad privadas para prevenir o investigar hechos?",
+    "answer": "El artículo 237B permite a la Policía Nacional acceder a circuitos cerrados de vigilancia y seguridad privada para acciones de prevención, identificación o judicialización. Fue añadido por el **artículo 48 de la Ley 2197 de 2022** a la **Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 48; adiciona el artículo 237B a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_31",
+    "question": "¿Si me ponen una multa de convivencia, puedo cambiar algunas multas pequeñas por participar en una actividad comunitaria?",
+    "answer": "El artículo 223A incorporado por la Ley 2197 de 2022 contempla que las multas tipo 1 y 2 pueden cambiarse por participación en programa comunitario o actividad pedagógica de convivencia, bajo las condiciones y plazos allí previstos. La norma se añadió mediante el **artículo 47 de la Ley 2197 de 2022**, que adiciona el **artículo 223A a la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 47; adiciona el artículo 223A a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_32",
+    "question": "¿Cuántos días tengo para objetar una orden de comparendo con multa general según el procedimiento especial?",
+    "answer": "El artículo 223A establece un término de tres días hábiles posteriores a la expedición de la orden para objetarla, en los términos allí descritos. Este procedimiento especial fue incorporado por el **artículo 47 de la Ley 2197 de 2022**, que adiciona el **artículo 223A a la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 47; adiciona el artículo 223A a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_33",
+    "question": "¿Puedo hacer el programa comunitario de convivencia en un municipio diferente al lugar donde ocurrió el problema?",
+    "answer": "El artículo 223A dispone que la participación en el programa comunitario o actividad pedagógica puede realizarse en municipios o distritos diferentes al lugar donde ocurrió el comportamiento, y que los certificados tienen validez nacional. La regla está en el **artículo 47 de la Ley 2197 de 2022**, que adiciona el **artículo 223A a la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 47; adiciona el artículo 223A a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_34",
+    "question": "¿Qué pasa si una persona repite un comportamiento contrario a la convivencia por el que ya le impusieron una multa?",
+    "answer": "El artículo 223A añadido por la Ley 2197 de 2022 establece reglas de incremento de la multa en casos de reiteración, con porcentajes y condiciones específicos. La fuente es el **artículo 47 de la Ley 2197 de 2022**, que adiciona el **artículo 223A a la Ley 1801 de 2016**.",
+    "source": "Ley 2197 de 2022, artículo 47; adiciona el artículo 223A a la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta_35",
+    "question": "¿Qué mecanismo puede usar la Policía para ayudar a dos vecinos a resolver un problema sin pelear?",
+    "answer": "La mediación policial fue redefinida como un instrumento en el que la autoridad sirve de canal para que las personas decidan voluntariamente resolver sus desacuerdos. La redacción está en el **artículo 72 de la Ley 2220 de 2022**, que modifica el **artículo 154 de la Ley 1801 de 2016**.",
+    "source": "Ley 2220 de 2022, artículo 72; modifica el artículo 154 de la Ley 1801 de 2016.",
+    "expected_behavior": "responder_identificando_norma_modificatoria_y_articulo_objeto"
+  },
+  {
+    "id": "pregunta36",
+    "question": "Una empresa está usando mis datos personales para enviarme publicidad sin que yo lo haya autorizado. ¿Cómo puedo pedir que deje de hacerlo?",
+    "answer": null,
+    "source": null,
+    "expected_behavior": "abstenerse_por_tratarse_de_un_tema_fuera_del_corpus"
+  },
+  {
+    "id": "pregunta_37",
+    "question": "Estoy arrendando un apartamento y el propietario quiere sacarme de un día para otro. ¿Puede hacerlo sin darme ningún plazo?",
+    "answer": null,
+    "source": null,
+    "expected_behavior": "abstenerse_por_tratarse_de_un_tema_fuera_del_corpus"
+  },
+  {
+    "id": "pregunta_38",
+    "question": "Mi vecino construyó una pared que invade parte de mi lote. ¿Qué procedimiento puedo iniciar para recuperar ese espacio?",
+    "answer": null,
+    "source": null,
+    "expected_behavior": "abstenerse_por_tratarse_de_un_tema_fuera_del_corpus"
+  },
+  {
+    "id": "pregunta_39",
+    "question": "Compré un celular por internet y llegó con una característica diferente a la que ofrecía la publicación. ¿Puedo exigir que me devuelvan el dinero?",
+    "answer": null,
+    "source": null,
+    "expected_behavior": "abstenerse_por_tratarse_de_un_tema_fuera_del_corpus"
+  },
+  {
+    "id": "pregunta_40",
+    "question": "Mi empleador lleva dos meses sin pagarme el salario. ¿Qué puedo hacer para reclamar ese dinero?",
+    "answer": null,
+    "source": null,
+    "expected_behavior": "abstenerse_por_tratarse_de_un_tema_fuera_del_corpus"
+  },
+  {
+    "id": "pregunta_41",
+    "question": "Tengo 16 años y quiero sacar la licencia para manejar una moto particular. ¿Ya puedo hacerlo o debo esperar a cumplir 18?",
+    "answer": "Sí. Para obtener licencia de conducción de vehículos particulares se exige tener cumplidos 16 años, además de acreditar los demás requisitos: saber leer y escribir, aprobar los exámenes correspondientes, contar con certificado de aptitud en conducción y acreditar aptitud física, mental y de coordinación motriz. Para conducir vehículos de servicio público la edad mínima es de 18 años. La categoría de la licencia debe corresponder al tipo de motocicleta que se va a conducir.",
+    "source": "Ley 769 de 2002, artículo 19, modificado, entre otras disposiciones, por el artículo 119 del Decreto Ley 2106 de 2019. Requisitos diferenciados para vehículos particulares y de servicio público.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_42",
+    "question": "Voy a salir en moto con un acompañante. ¿Los dos tenemos que llevar casco o solo quien conduce?",
+    "answer": "El conductor y el acompañante de una motocicleta deben usar siempre casco de seguridad, conforme a la reglamentación del Ministerio de Transporte. La obligación está prevista para ambos ocupantes; además, el acompañante debe utilizar la prenda reflectiva exigida cuando corresponda.",
+    "source": "Ley 769 de 2002, artículo 96, numeral 5, modificado por el artículo 9 de la Ley 2251 de 2022; artículo 96, numeral 2, sobre el acompañante y la prenda reflectiva. También debe tenerse en cuenta el artículo 94 para las reglas generales.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_43",
+    "question": "Si manejo el carro de un familiar sin haber sacado nunca una licencia, ¿qué me puede pasar si me detiene un agente?",
+    "answer": "Conducir un vehículo automotor sin haber obtenido la licencia de conducción correspondiente constituye una infracción. Da lugar a una multa equivalente a 30 salarios mínimos legales diarios vigentes y a la inmovilización del vehículo hasta que sea retirado por una persona autorizada que sí tenga licencia.",
+    "source": "Ley 769 de 2002, artículo 131, literal D, numeral 1 (D.1), modificado por el artículo 21 de la Ley 1383 de 2010.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_44",
+    "question": "Cuando veo una señal octagonal que dice PARE, ¿basta con bajar la velocidad y mirar o tengo que detener completamente el vehículo?",
+    "answer": "La señal PARE exige detenerse, no simplemente disminuir la velocidad. El conductor debe respetar la señal y solo continuar cuando pueda hacerlo de manera segura, atendiendo a los demás usuarios de la vía. No detenerse ante una señal de PARE constituye una infracción.",
+    "source": "Ley 769 de 2002, artículos 110 y 115, sobre clasificación y reglamentación de las señales de tránsito; artículo 131, literal D, numeral 4 (D.4), sobre no detenerse ante una señal de PARE. La forma y características de la señal se desarrollan en el Manual de Señalización Vial vigente.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_45",
+    "question": "La calle está congestionada y veo que algunas motos se suben al andén para avanzar. ¿Eso está permitido si no hay peatones?",
+    "answer": "No. Los vehículos automotores no deben transitar por las aceras o andenes ni por las zonas destinadas al tránsito peatonal. La congestión no constituye una excepción. Conducir sobre aceras y vías peatonales está tipificado como infracción y puede dar lugar a sanción.",
+    "source": "Ley 769 de 2002, artículo 69, sobre retroceso en vías públicas y circulación por aceras; artículo 131, literal D, numeral 5 (D.5), modificado por el artículo 2 de la Ley 2435 de 2024.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_46",
+    "question": "Si paso un semáforo cuando está en rojo porque no viene ningún carro, ¿me pueden poner un comparendo?",
+    "answer": "Sí. La luz roja indica el deber de detenerse antes de la línea de detención o de la zona de cruce peatonal. No detenerse ante una luz roja o amarilla, o ante un semáforo intermitente en rojo, constituye una infracción sancionable. El giro a la derecha con luz roja solo puede realizarse en las condiciones permitidas y respetando la prelación peatonal; puede estar prohibido mediante señalización especial.",
+    "source": "Ley 769 de 2002, artículo 118, sobre simbología de las señales luminosas; artículo 131, literal D, numeral 4 (D.4), modificado por el artículo 2 de la Ley 2435 de 2024.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_47",
+    "question": "¿Puedo llevar a mi hijo de 9 años en el asiento de adelante si va con el cinturón puesto?",
+    "answer": "No. Los menores de diez años no pueden viajar en el asiento delantero. Además, los menores de dos años deben viajar en el asiento posterior, en una silla que garantice su seguridad y permita fijarla al vehículo, cuando viajen únicamente en compañía del conductor. El uso del cinturón también debe cumplir las reglas aplicables.",
+    "source": "Ley 769 de 2002, artículo 82, modificado por el artículo 2 de la Ley 2393 de 2024, sobre cinturón de seguridad y transporte de menores.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_48",
+    "question": "Me detuvieron y no tengo la licencia de conducción física porque la dejé en la casa. ¿Eso significa automáticamente que estoy cometiendo una infracción?",
+    "answer": "No necesariamente. La obligación de portar los documentos puede cumplirse mediante la consulta en los sistemas de información dispuestos por la autoridad de tránsito, sin que sea exigible presentarlos físicamente. La licencia también puede acreditarse mediante el mensaje de datos de la consulta en línea y en tiempo real en el RUNT. Esto no elimina la obligación de tener una licencia vigente y correspondiente a la categoría del vehículo.",
+    "source": "Ley 769 de 2002, artículo 17, parágrafo, modificado por el artículo 6 de la Ley 2251 de 2022; Circular Externa 20221010000601 del 3 de enero de 2022 del Ministerio de Transporte.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  },
+  {
+    "id": "pregunta_49",
+    "question": "Si me tomo unas cervezas y siento que estoy bien para manejar, ¿qué consecuencias puedo tener si me hacen una prueba de alcoholemia?",
+    "answer": "Conducir bajo el influjo del alcohol o de sustancias psicoactivas genera sanciones administrativas. La consecuencia depende del grado de alcoholemia y de si existe reincidencia; puede incluir multa, suspensión o cancelación de la licencia, acciones comunitarias e inmovilización del vehículo. En todos los casos de embriaguez o alcoholemia el vehículo es inmovilizado. No es seguro conducir después de consumir alcohol.",
+    "source": "Ley 769 de 2002, artículo 131, literal F, adicionado por el artículo 4 de la Ley 1696 de 2013; artículo 152, modificado por el artículo 5 de la Ley 1696 de 2013. También debe considerarse el artículo 3 de la Ley 1696 de 2013 respecto de la suspensión o cancelación de la licencia.",
+    "expected_behavior": "responder_con_fundamento_normativo_vige"
+  },
+  {
+    "id": "pregunta_50",
+    "question": "Llegué al mismo tiempo que otro carro a un cruce que no tiene semáforo ni señales. ¿Quién debe pasar primero?",
+    "answer": "En una intersección no señalizada, salvo en una glorieta, tiene prelación el vehículo que se encuentre a la derecha. También existen reglas especiales para otros escenarios: por ejemplo, en una glorieta tiene prelación el vehículo que ya está dentro y se encuentra en movimiento, frente a quienes pretenden ingresar.",
+    "source": "Ley 769 de 2002, artículo 70, sobre prelación en intersecciones o giros.",
+    "expected_behavior": "responder_con_fundamento_normativo_vigente"
+  }
+]
