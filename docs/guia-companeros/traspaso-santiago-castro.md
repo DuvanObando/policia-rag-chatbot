@@ -192,7 +192,7 @@ Lo que hace: construye una imagen con Python 3.11, PyTorch (CPU) y las dependenc
 
 | Quién | Pendiente |
 |---|---|
-| **Wilder** | No subió nada desde el 16/11: `procesar_pdf.py` mejorado (a la Ley 769 le faltan los art. 3, 18 y 128), `corpus/anotaciones_vigencia.json`, fecha de consulta del corpus en `corpus/README_corpus.md` y el banco oficial `eval/banco_preguntas.json` (hoy vacío: la evaluación usó su banco de `corpus/preguntas_ley_1801.json`, adaptado). Secciones «Corpus» y «Evaluación» del informe técnico |
+| **Wilder** | Entregó el 19/11 (integrado el 25/11): `procesar_pdf.py` mejorado, arts. 3, 18 y 128, banco de preguntas y fecha de consulta del corpus. Falta: completar `corpus/anotaciones_vigencia.json`, pasar el banco al formato de `eval/ejemplo_formato.json` (el motor ya lo lee como está) y sus secciones del informe técnico |
 | **Santiago Castro (tú)** | Correr el proyecto en tu PC (esta guía) y verificar Docker; abrir el PR de tu rama no hace falta: ya quedó integrada en `main` el 19/11. Tu sección del informe técnico ya está en [`docs/analisis/seccion_informe_tecnico.md`](../analisis/seccion_informe_tecnico.md) |
 | **Santiago Bulla** | Sección «Integración y despliegue» del informe técnico y el video de 5 minutos |
 | **Todos** | Ensayo de la sustentación: cada uno debe poder explicar el flujo completo |

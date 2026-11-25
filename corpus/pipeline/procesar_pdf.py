@@ -118,7 +118,9 @@ def _es_encabezado_articulo(texto: str, coincidencia) -> bool:
     prefijo = texto[linea_inicio:inicio].strip()
     if prefijo:
         return False
-    resto = texto[coincidencia.end():coincidencia.end() + 160].lstrip(" \t.-:–—")
+    # Se saltan también los saltos de línea: algunos encabezados vienen solos («ARTÍCULO 76.») y el
+    # título en la línea siguiente.
+    resto = texto[coincidencia.end():coincidencia.end() + 160].lstrip(" \t\r\n.-:–—")
     if not resto:
         return False
     return resto[0].isupper() or resto[0].isdigit()
@@ -223,7 +225,7 @@ def procesar_pdf(ruta_pdf, norma, fuente_url=None) -> list:
             "id": id_articulo(norma, numero),
             "norma": norma,
             "ubicacion": {**_ubicacion_en_offset(texto, inicio), "articulo": f"Artículo {numero}"},
-            "epigrafe": _epigrafe(resto_epigrafe, numero),
+            "epigrafe": _epigrafe(resto_epigrafe or resto, numero),
             "texto": texto_cuerpo,
             "vigencia": "no_verificada",
             "tema": f"texto fuente {norma}",

@@ -157,7 +157,7 @@ RF4 pide subir documentos **sin regenerar los embeddings**. Se cumple en dos pas
 ## Limitaciones
 
 - **Vigencia no verificada:** los artículos de normas nuevas quedan con `vigencia: "no_verificada"`. El PDF de la Función Pública trae las notas de modificación pegadas al texto, pero nadie las ha revisado. El frontend debería mostrarlo.
-- **Extracción básica:** a la Ley 769 le faltan los art. 3, 18 y 128, el art. 131 sale en un solo bloque de 28.000 caracteres y el libro no se detecta. Lo mejora Wilder en `procesar_pdf.py`.
+- **Extracción de normas nuevas (actualizado el 25/11 con el aporte de Wilder):** en la Ley 769 salen los 176 artículos (1 a 170 más 6 con letra), pero el art. 131 sigue siendo un solo registro de 28.000 caracteres (con sus literales en líneas separadas) y el libro no se detecta. Las cifras de las pruebas del 16 al 19/11 de este documento (167 artículos) son de la versión anterior.
 - **Sin PyMuPDF el motor funciona, pero lento:** si PyMuPDF no está instalado, se usa pypdf y este PDF tarda unos 52-63 s en subir y unos 77 s en extraer (las consultas se vuelven lentas, 11-15 s, porque comparten la CPU). Con PyMuPDF, 0,4 s. Está en `engine/requirements.txt` (y por tanto en la imagen de Docker); en un entorno viejo, `pip install pymupdf`. El backend de Santiago tiene timeout de 30 s: con PyMuPDF alcanza.
 - **PDF escaneados:** ni PyMuPDF ni pypdf hacen OCR; un PDF sin texto se rechaza con 422.
 - **Trabajos en memoria:** si el motor se reinicia, se pierde el estado de los trabajos (`404`); los índices ya cambiados sí persisten.
